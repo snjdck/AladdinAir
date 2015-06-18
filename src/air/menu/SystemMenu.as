@@ -26,9 +26,24 @@ package air.menu
 		private function __onSelect(evt:Event):void
 		{
 			var menuItem:NativeMenuItem = evt.target as NativeMenuItem;
+			
 			var handler:Function = handlerDict[menuItem.name];
 			if(null != handler){
 				handler(menuItem);
+				return;
+			}
+			
+			var testItem:NativeMenuItem = menuItem;
+			for(;;){
+				testItem = MenuUtil.FindParentItem(testItem);
+				if(null == testItem){
+					return;
+				}
+				handler = handlerDict[testItem.name];
+				if(null != handler){
+					handler(menuItem);
+					return;
+				}
 			}
 		}
 		
