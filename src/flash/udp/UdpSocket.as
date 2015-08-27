@@ -3,21 +3,24 @@ package flash.udp
 	import flash.events.DatagramSocketDataEvent;
 	import flash.net.DatagramSocket;
 	import flash.net.InterfaceAddress;
-	import flash.net.NetworkInfo;
-	import flash.net.NetworkInterface;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	import flash.utils.Endian;
 	
+	import air.net.getLocalAddress;
+	
 	final public class UdpSocket
 	{
-		static public const PORT:int = 2501;
+		static public var PORT:int = 2501;
 		
 		private var handlerDict:Object = new Dictionary();
 		private var socket:DatagramSocket;
+		private var localAddress:InterfaceAddress;
 		
 		public function UdpSocket()
 		{
+			localAddress = getLocalAddress();
+			
 			socket = new DatagramSocket();
 			socket.bind(PORT);
 			socket.addEventListener(DatagramSocketDataEvent.DATA, __onData);
@@ -39,7 +42,7 @@ package flash.udp
 		
 		public function sendToAll(data:Object):void
 		{
-			send(data, "192.168.0.255");
+			send(data, localAddress.broadcast);
 		}
 		
 		public function regHandler(msgId:int, handler:Function):void
@@ -51,7 +54,7 @@ package flash.udp
 		{
 			var address:String = evt.srcAddress;
 			
-			if(isLocal(address)){
+			if(address == localAddress.address){
 				return;
 			}
 			
@@ -74,33 +77,13 @@ package flash.udp
 			if(obj is ByteArray){
 				return obj as ByteArray;
 			}
-			var bytes:ByteArray = createBytes();
+			var bytes:ByteArray = new ByteArray();
 			if(obj is String){
 				bytes.writeUTF(obj as String);
 			}else{
 				bytes.writeObject(obj);
 			}
 			return bytes;
-		}
-		
-		static public function createBytes():ByteArray
-		{
-			var ba:ByteArray = new ByteArray();
-			ba.endian = Endian.LITTLE_ENDIAN;
-			return ba;
-		}
-		
-		static public function isLocal(address:String):Boolean
-		{
-			var interfaceList:Vector.<NetworkInterface> = NetworkInfo.networkInfo.findInterfaces();
-			for each(var netInterface:NetworkInterface in interfaceList){
-				for each(var netAddress:InterfaceAddress in netInterface.addresses){
-					if(netAddress.address == address){
-						return true;
-					}
-				}
-			}
-			return false;
 		}
 	}
 }
