@@ -11,16 +11,30 @@ package air.menu
 	{
 		private const handlerDict:Object = {};
 		private var menu:NativeMenu;
+		protected var defaultMenuCount:int;
 		
 		public function SystemMenu(stage:Stage, source:XML)
 		{
 			menu = MenuBuilder.BuildMenu(source);
 			if(NativeApplication.supportsMenu){
-				NativeApplication.nativeApplication.menu = menu;
+				defaultMenuCount = 1;
+				onAddAppMenu(menu);
 			}else if(NativeWindow.supportsMenu){
 				stage.nativeWindow.menu = menu;
 			}
 			menu.addEventListener(Event.SELECT, __onSelect);
+		}
+		
+		private function onAddAppMenu(menu:NativeMenu):void
+		{
+			var appMenu:NativeMenu = NativeApplication.nativeApplication.menu;
+			while(appMenu.numItems > defaultMenuCount){
+				appMenu.removeItemAt(appMenu.numItems-1);
+			}
+			while(menu.numItems > 0){
+				appMenu.addItem(menu.removeItemAt(0));
+			}
+			menu = appMenu;
 		}
 		
 		private function __onSelect(evt:Event):void
