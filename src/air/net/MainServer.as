@@ -6,6 +6,9 @@ package air.net
 	import flash.tcp.PacketSocket;
 	import flash.tcp.impl.BytePacket;
 	import flash.tcp.impl.JsonPacket;
+	import flash.utils.ByteArray;
+	
+	import alex.modules.net.m.NetProxy;
 
 	public class MainServer
 	{
@@ -44,15 +47,26 @@ package air.net
 		private function __onConnect(evt:ServerSocketConnectEvent):void
 		{
 			var sock:PacketSocket = new PacketSocket(new BytePacket(), evt.socket);
-			sock.regNotice(1, JsonPacket, [OnChat, sock]);
+			sock.regNotice(NetProxy.TCP_CHAT_SEND, JsonPacket, [OnChat, sock]);
+			
+			var bytes:ByteArray = TypeCast.CastJsonToBytes({"id":sockList.length});
+			for each(var other:PacketSocket in sockList){
+				other.sendRaw(NetProxy.TCP_CHAT_MEMBER_JOIN, bytes);
+			}
+			
 			sockList.push(sock);
+			var memList:Array = [];
+			for(var i:int=0; i<sockList.length; i++){
+				memList.push(i.toString());
+			}
+			sock.sendRaw(NetProxy.TCP_CHAT_MEMBER_LIST, TypeCast.CastJsonToBytes({"list":memList}));
 		}
 		
 		private function OnChat(packet:JsonPacket, from:PacketSocket):void
 		{
+			var bytes:ByteArray = TypeCast.CastJsonToBytes({"msg":packet.data.msg});
 			for each(var sock:PacketSocket in sockList){
-				sock.send(2, TypeCast.CastJsonToBytes({"msg":packet.data.msg}));
-				sock.flush();
+				sock.sendRaw(NetProxy.TCP_CHAT_RECV, bytes);
 			}
 		}
 	}
