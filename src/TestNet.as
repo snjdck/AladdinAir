@@ -6,17 +6,15 @@ package
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 	
-	import alex.AppEntry;
-	
 	[SWF(width=1000, height=600)]
-	public class TestNet extends Sprite//AppEntry
+	public class TestNet extends Sprite
 	{
 		private var rootDir:File;
 		
 		public function TestNet()
 		{
-			rootDir = new File("C:/Users/dell/Adobe Flash Builder 4.7/TestNet/TestNet");
-			replace(FileUtil.ReadBytes(rootDir.resolvePath("TestNet.exe")), genDllBytes(), onReplaceDll);
+			rootDir = new File("E:/release");
+			replace(FileUtil.ReadBytes(rootDir.resolvePath("test.exe")), genDllBytes(), onReplaceDll);
 		}
 		
 		private function onReplaceDll(ba:ByteArray):void
@@ -26,7 +24,7 @@ package
 			while(ba[ba.position] > 0){
 				ba.writeShort(0);
 			}
-			FileUtil.WriteBytes(rootDir.resolvePath("TestNet_new.exe"), ba);
+			FileUtil.WriteBytes(rootDir.resolvePath("testNew.exe"), ba);
 		}
 		
 		static private function replace(ba:ByteArray, bytesToFind:ByteArray, handler:Function):void
@@ -34,28 +32,55 @@ package
 			ba.endian = Endian.LITTLE_ENDIAN;
 			ba.position = 60;
 			ba.position = ba.readUnsignedInt() + 6;
-			var numSections:uint = ba.readUnsignedShort();
+			const numSections:uint = ba.readUnsignedShort();
 			ba.position += 12;
-			var sizeOfOptionalHeader:uint = ba.readUnsignedShort();
+			
+			const offsetOptionalHeader:uint = ba.position + 4;
+			const sizeOfOptionalHeader:uint = ba.readUnsignedShort();
 			ba.position += 2 + sizeOfOptionalHeader;
 			
+			var tailOffset:uint = 0;
 			for(var i:int=0; i<numSections; ++i){
 				var sectionName:String = ba.readUTFBytes(8);
 				var virtualSize:uint = ba.readUnsignedInt();
-				ba.position += 8;
+				ba.position += 4;
+				var sectionSize:uint = ba.readUnsignedInt();
 				var sectionOffset:uint = ba.readUnsignedInt();
 				ba.position += 16;
+				tailOffset = sectionOffset + sectionSize;
 				if(sectionName == ".rdata"){
-					ba.position = sectionOffset;
-					var offset:int = findBytes(ba, virtualSize, bytesToFind);
+					var prevPos:uint = ba.position;
+					var offset:int = findBytes(ba, sectionOffset, virtualSize, bytesToFind);
 					if(offset > 0){
 						trace(offset.toString(16));
 						ba.position = offset;
 						handler(ba);
 					}
-					break;
+					ba.position = prevPos;
 				}
 			}
+			if(tailOffset < ba.length){
+				ba.position = tailOffset;
+				var signSize:int = ba.readUnsignedShort();
+				ba.position = findBytes(ba, offsetOptionalHeader, sizeOfOptionalHeader, genSignBytes(tailOffset, signSize));
+				clearSignInfo(ba);
+				ba.length = tailOffset;
+			}
+		}
+		
+		static private function clearSignInfo(ba:ByteArray):void
+		{
+			ba.writeUnsignedInt(0);
+			ba.writeShort(0);
+		}
+		
+		static private function genSignBytes(tailOffset:uint, signSize:int):ByteArray
+		{
+			var signBytes:ByteArray = new ByteArray();
+			signBytes.endian = Endian.LITTLE_ENDIAN;
+			signBytes.writeUnsignedInt(tailOffset);
+			signBytes.writeShort(signSize);
+			return signBytes;
 		}
 		
 		static private function genDllBytes():ByteArray
@@ -68,14 +93,13 @@ package
 			return bytes;
 		}
 		
-		static private function findBytes(source:ByteArray, size:uint, toFind:ByteArray):int
+		static private function findBytes(source:ByteArray, from:uint, size:uint, toFind:ByteArray):int
 		{
-			var start:int = source.position;
 			var nj:int = toFind.length;
 			var ni:int = size - nj + 1;
 			loop:
 			for(var i:int=0; i<ni; ++i){
-				var offset:int = start + i;
+				var offset:int = from + i;
 				for(var j:int=0; j<nj; ++j){
 					if(toFind[j] != source[offset+j]){
 						continue loop;
