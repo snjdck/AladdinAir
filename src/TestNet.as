@@ -9,12 +9,24 @@ package
 	[SWF(width=1000, height=600)]
 	public class TestNet extends Sprite
 	{
+		static private var oldKey:String = "META-INF/AIR/application.xml";
+		static private var newKey:String = "application.xml";
+		
 		private var rootDir:File;
 		
 		public function TestNet()
 		{
 			rootDir = new File("E:/release");
 			replace(FileUtil.ReadBytes(rootDir.resolvePath("test.exe")), genDllBytes(), onReplaceDll);
+		}
+		
+		private function onReplaceXml(ba:ByteArray):void
+		{
+			var offset:uint = ba.position + oldKey.length;
+			ba.writeUTFBytes(newKey);
+			while(ba.position < offset){
+				ba.writeByte(0);
+			}
 		}
 		
 		private function onReplaceDll(ba:ByteArray):void
@@ -39,6 +51,7 @@ package
 			const sizeOfOptionalHeader:uint = ba.readUnsignedShort();
 			ba.position += 2 + sizeOfOptionalHeader;
 			
+			var rdataInfo:Array;
 			var tailOffset:uint = 0;
 			for(var i:int=0; i<numSections; ++i){
 				var sectionName:String = ba.readUTFBytes(8);
@@ -49,14 +62,7 @@ package
 				ba.position += 16;
 				tailOffset = sectionOffset + sectionSize;
 				if(sectionName == ".rdata"){
-					var prevPos:uint = ba.position;
-					var offset:int = findBytes(ba, sectionOffset, virtualSize, bytesToFind);
-					if(offset > 0){
-						trace(offset.toString(16));
-						ba.position = offset;
-						handler(ba);
-					}
-					ba.position = prevPos;
+					rdataInfo = [sectionOffset, virtualSize];
 				}
 			}
 			if(tailOffset < ba.length){
@@ -65,6 +71,12 @@ package
 				ba.position = findBytes(ba, offsetOptionalHeader, sizeOfOptionalHeader, genSignBytes(tailOffset, signSize));
 				clearSignInfo(ba);
 				ba.length = tailOffset;
+			}
+			var offset:int = findBytes(ba, rdataInfo[0], rdataInfo[1], bytesToFind);
+			if(offset > 0){
+				trace(offset.toString(16));
+				ba.position = offset;
+				handler(ba);
 			}
 		}
 		
