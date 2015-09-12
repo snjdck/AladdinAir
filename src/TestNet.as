@@ -23,7 +23,9 @@ package
 		{
 			ba.position += 4;//skip 00 00 and \\
 			ba.writeMultiByte("Adobe AIR.dll", "utf-16");
-			ba.writeShort(0);
+			while(ba[ba.position] > 0){
+				ba.writeShort(0);
+			}
 			FileUtil.WriteBytes(rootDir.resolvePath("TestNet_new.exe"), ba);
 		}
 		
@@ -70,8 +72,9 @@ package
 		{
 			var start:int = source.position;
 			var nj:int = toFind.length;
+			var ni:int = size - nj + 1;
 			loop:
-			for(var i:int=0; i<size; ++i){
+			for(var i:int=0; i<ni; ++i){
 				var offset:int = start + i;
 				for(var j:int=0; j<nj; ++j){
 					if(toFind[j] != source[offset+j]){
