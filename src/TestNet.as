@@ -9,37 +9,39 @@ package
 	[SWF(width=1000, height=600)]
 	public class TestNet extends Sprite
 	{
-		static private var oldKey:String = "META-INF/AIR/application.xml";
-		static private var newKey:String = "application.xml";
-		
-		private var rootDir:File;
-		
 		public function TestNet()
 		{
-			rootDir = new File("E:/release");
-			replace(FileUtil.ReadBytes(rootDir.resolvePath("test.exe")), genDllBytes(), onReplaceDll);
+			var rootDir:File = new File("E:/test");
+			
+			var exeBytes:ByteArray = FileUtil.ReadBytes(rootDir.resolvePath("Main.exe"));
+			var dllBytes:ByteArray = FileUtil.ReadBytes(rootDir.resolvePath("Adobe AIR/Versions/1.0/Adobe AIR.dll"));
+			
+			replace(exeBytes, genUtf_16("\\Adobe AIR\\Versions\\1.0\\Adobe AIR.dll"), "\\AdobeRuntime\\Adobe AIR.dll");
+			replace(dllBytes, genUtf_16("\\Resources"), "\\.");
+			replace(dllBytes, genUtf_8("META-INF/AIR/application.xml"), "AdobeRuntime/application.xml");
+			replace(dllBytes, genUtf_8("META-INF/AIR/extensions"), "AdobeRuntime/extensions");
+			
+			FileUtil.WriteBytes(rootDir.resolvePath("MainTest.exe"), exeBytes);
+			FileUtil.WriteBytes(rootDir.resolvePath("AdobeRuntime/Adobe AIR.dll"), dllBytes);
 		}
 		
-		private function onReplaceXml(ba:ByteArray):void
+		static private function onReplaceUtf_8(ba:ByteArray, endPos:int, replaceStr:String):void
 		{
-			var offset:uint = ba.position + oldKey.length;
-			ba.writeUTFBytes(newKey);
-			while(ba.position < offset){
+			ba.writeUTFBytes(replaceStr);
+			while(ba.position < endPos){
 				ba.writeByte(0);
 			}
 		}
 		
-		private function onReplaceDll(ba:ByteArray):void
+		static private function onReplaceUtf_16(ba:ByteArray, replaceStr:String):void
 		{
-			ba.position += 4;//skip 00 00 and \\
-			ba.writeMultiByte("Adobe AIR.dll", "utf-16");
+			ba.writeMultiByte(replaceStr, "utf-16");
 			while(ba[ba.position] > 0){
 				ba.writeShort(0);
 			}
-			FileUtil.WriteBytes(rootDir.resolvePath("testNew.exe"), ba);
 		}
 		
-		static private function replace(ba:ByteArray, bytesToFind:ByteArray, handler:Function):void
+		static private function replace(ba:ByteArray, bytesToFind:ByteArray, replaceStr:String):void
 		{
 			ba.endian = Endian.LITTLE_ENDIAN;
 			ba.position = 60;
@@ -72,11 +74,19 @@ package
 				clearSignInfo(ba);
 				ba.length = tailOffset;
 			}
-			var offset:int = findBytes(ba, rdataInfo[0], rdataInfo[1], bytesToFind);
-			if(offset > 0){
+			for(;;){
+				var offset:int = findBytes(ba, rdataInfo[0], rdataInfo[1], bytesToFind);
+				if(offset < 0){
+					break;
+				}
 				trace(offset.toString(16));
-				ba.position = offset;
-				handler(ba);
+				if(ba[offset] > 0){
+					ba.position = offset;
+					onReplaceUtf_8(ba, offset + bytesToFind.length, replaceStr);
+				}else{
+					ba.position = offset + 2;
+					onReplaceUtf_16(ba, replaceStr);
+				}
 			}
 		}
 		
@@ -95,12 +105,20 @@ package
 			return signBytes;
 		}
 		
-		static private function genDllBytes():ByteArray
+		static private function genUtf_8(str:String):ByteArray
+		{
+			var bytes:ByteArray = new ByteArray();
+			bytes.endian = Endian.LITTLE_ENDIAN;
+			bytes.writeUTFBytes(str);
+			return bytes;
+		}
+		
+		static private function genUtf_16(str:String):ByteArray
 		{
 			var bytes:ByteArray = new ByteArray();
 			bytes.endian = Endian.LITTLE_ENDIAN;
 			bytes.writeShort(0);
-			bytes.writeMultiByte("\\Adobe AIR\\Versions\\1.0\\Adobe AIR.dll", "utf-16");
+			bytes.writeMultiByte(str, "utf-16");
 			bytes.writeShort(0);
 			return bytes;
 		}
