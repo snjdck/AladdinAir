@@ -11,7 +11,7 @@ package
 	{
 		public function TestNet()
 		{
-			var rootDir:File = new File("E:/test");
+			var rootDir:File = new File("E:/testProject");
 			
 			var exeBytes:ByteArray = FileUtil.ReadBytes(rootDir.resolvePath("Main.exe"));
 			var dllBytes:ByteArray = FileUtil.ReadBytes(rootDir.resolvePath("Adobe AIR/Versions/1.0/Adobe AIR.dll"));
@@ -20,6 +20,9 @@ package
 			replace(dllBytes, genUtf_16("\\Resources"), "\\.");
 			replace(dllBytes, genUtf_8("META-INF/AIR/application.xml"), "AdobeRuntime/application.xml");
 			replace(dllBytes, genUtf_8("META-INF/AIR/extensions"), "AdobeRuntime/extensions");
+			replace(dllBytes, genUtf_8("/META-INF/ANE/extension.xml"), "/extension.xml");
+			replace(dllBytes, genUtf_8("META-INF", true), ".");
+			replace(dllBytes, genUtf_8("ANE", true), ".");
 			
 			FileUtil.WriteBytes(rootDir.resolvePath("MainTest.exe"), exeBytes);
 			FileUtil.WriteBytes(rootDir.resolvePath("AdobeRuntime/Adobe AIR.dll"), dllBytes);
@@ -105,11 +108,14 @@ package
 			return signBytes;
 		}
 		
-		static private function genUtf_8(str:String):ByteArray
+		static private function genUtf_8(str:String, withZero:Boolean=false):ByteArray
 		{
 			var bytes:ByteArray = new ByteArray();
 			bytes.endian = Endian.LITTLE_ENDIAN;
 			bytes.writeUTFBytes(str);
+			if(withZero){
+				bytes.writeByte(0);
+			}
 			return bytes;
 		}
 		
