@@ -1,5 +1,6 @@
 package blockly.design
 {
+	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 
 	public class BlockBase extends Sprite
@@ -9,12 +10,19 @@ package blockly.design
 		static public const INSERT_PT_SUB1:int = 3;
 		static public const INSERT_PT_SUB2:int = 4;
 		static public const INSERT_PT_WRAP:int = 5;
+		static public const INSERT_PT_CHILD:int = 6;
 		
 		public var isExpression:Boolean;
 		private var isSubBlock:Boolean;
 		
 		private var _nextBlock:BlockBase;
 		private var _prevBlock:BlockBase;
+		
+		private var _parentBlock:BlockBase;
+		
+		/** 语句参数 */
+		public const defaultArgBlockList:Array = [];
+		public const argBlockList:Array = [];
 		
 		public function BlockBase()
 		{
@@ -91,7 +99,20 @@ package blockly.design
 			lastBlock.nextBlock = value;
 		}
 		
-		public function relayout():void
+		public function layoutAfterInsertAbove():void
+		{
+			var nextBlock:BlockBase = this;
+			var block:BlockBase = prevBlock;
+			while(block != null){
+				block.x = nextBlock.x;
+				block.y = nextBlock.y - block.height;
+				
+				nextBlock = block;
+				block = block.prevBlock;
+			}
+		}
+		
+		public function layoutAfterInsertBelow():void
 		{
 			var prevBlock:BlockBase = this;
 			var block:BlockBase = nextBlock;
@@ -107,13 +128,79 @@ package blockly.design
 		public function calcInsertPt():Array
 		{
 			var result:Array = [];
-			result.push([this, INSERT_PT_ABOVE]);
+			result.push(new InsertPtInfo(this, INSERT_PT_ABOVE));
 			var block:BlockBase = this;
 			while(block != null){
-				result.push([block, INSERT_PT_BELOW]);
+				result.push(new InsertPtInfo(block, INSERT_PT_BELOW));
 				block = block.nextBlock;
 			}
 			return result;
+		}
+		
+		public function getTotalBlockHeight():int
+		{
+			var result:int = 0;
+			var block:BlockBase = this;
+			while(block != null){
+				result += block.getBlockHeight();
+				block = block.nextBlock;
+			}
+			return result;
+		}
+		
+		public function getBlockWidth():int
+		{
+			return width;
+		}
+		
+		public function getBlockHeight():int
+		{
+			return height;
+		}
+		
+		protected function drawBg(w:int, h:int):void
+		{
+		}
+		
+		public function setChildBlockAt(block:BlockBase, index:int):void
+		{
+			var oldBlock:BlockBase = argBlockList[index];
+			
+			if(oldBlock != null){
+				oldBlock._parentBlock = null;
+				oldBlock.x = x + 10;
+				oldBlock.y = y + 10;
+			}
+			
+			argBlockList[index] = block;
+			
+			if(block != null){
+				block._parentBlock = this;
+			}
+			
+			layoutChildren();
+		}
+		
+		public function layoutChildren():void
+		{
+			var offsetX:int = 2;
+			for(var i:int=0; i<numChildren; i++){
+				var obj:DisplayObject = getChildAt(i);
+				var index:int = defaultArgBlockList.indexOf(obj);
+				if(index >= 0 && argBlockList[index]){
+					obj.visible = false;
+					var argBlock:BlockBase = argBlockList[index];
+					argBlock.x = x + offsetX;
+					argBlock.y = y;
+					offsetX += argBlock.getBlockWidth();
+				}else{
+					obj.visible = true;
+					obj.x = offsetX;
+					offsetX += obj.width;
+				}
+			}
+			graphics.clear();
+			drawBg(offsetX, 20);
 		}
 	}
 }

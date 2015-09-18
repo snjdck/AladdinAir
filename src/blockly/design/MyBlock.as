@@ -3,6 +3,7 @@ package blockly.design
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.filters.BevelFilter;
 	import flash.filters.GlowFilter;
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
@@ -13,19 +14,23 @@ package blockly.design
 		
 		public var typeId:int;
 		
-		/** 语句参数 */
-		public const defaultArgBlock:Array = [];
-		public const argBlock:Array = [];
-		
 		/** if,while,for的子句,条件作为argBlock */
 		public var subBlock1:MyBlock;
 		public var subBlock2:MyBlock;
 		
+		private var filterList:Array;
+		
 		public function MyBlock()
 		{
 			addEventListener(MouseEvent.MOUSE_DOWN, __onMouseDown);
+			var f:BevelFilter = new BevelFilter(1);
+			f.blurX = f.blurY = 3;
+			f.highlightAlpha = 0.3;
+			f.shadowAlpha = 0.6;
+			filterList = [f];
+			filters = filterList;
 		}
-
+/*
 		private function getArgBlockAt(index:int):IBlockArg
 		{
 			if(argBlock[index] != null){
@@ -33,7 +38,7 @@ package blockly.design
 			}
 			return defaultArgBlock[index];
 		}
-		
+	*/	
 		private function __onMouseDown(evt:MouseEvent):void
 		{
 			if(evt.target != this){
@@ -48,7 +53,8 @@ package blockly.design
 		
 		private function __onMouseMove(evt:MouseEvent):void
 		{
-			relayout();
+			layoutAfterInsertBelow();
+			layoutChildren();
 		}
 		
 		private function __onMouseUp(evt:MouseEvent):void
@@ -63,10 +69,7 @@ package blockly.design
 		{
 		}
 		
-		protected function drawBg(w:int, h:int):void
-		{
-			
-		}
+		
 		
 		public function setSpec(spec:String):void
 		{
@@ -104,24 +107,24 @@ package blockly.design
 					var ui:BlockArg = new BlockArg(info);
 					addChild(ui);
 					ui.text = info[1];
-					defaultArgBlock.push(ui);
+					defaultArgBlockList.push(ui);
 				}
 			}
-			layout();
+			layoutChildren();
 		}
 		
 		private var dropArg:DisplayObject;
 		
-		public function tryAccept(other:MyBlock):Boolean
+		public function tryAccept(other:MyBlock):InsertPtInfo
 		{
 			dropArg = null;
-			var result:Boolean = false;
-			for(var i:int=0; i<defaultArgBlock.length; i++){
+			var result:InsertPtInfo;
+			for(var i:int=0; i<defaultArgBlockList.length; i++){
 				var arg:DisplayObject = getArgBlockAt(i) as DisplayObject;
 				if(arg.hitTestObject(other) && !result){
 					arg.filters = [new GlowFilter()];
-					result = true;
 					dropArg = arg;
+					result = new InsertPtInfo(this, BlockBase.INSERT_PT_CHILD, i);
 					//					break;
 				}else{
 					arg.filters = null;
@@ -129,7 +132,7 @@ package blockly.design
 			}
 			return result;
 		}
-		
+		/*
 		public function layout():void
 		{
 			var offsetX:int = gapX;
@@ -173,7 +176,16 @@ package blockly.design
 			layout();
 			dropArg = null;
 		}
+		*/
 		
+		private function getArgBlockAt(index:int):DisplayObject
+		{
+			if(argBlockList[index]){
+				return argBlockList[index];
+			}
+			return defaultArgBlockList[index];
+		}
+		/*
 		private function getArgIndex(obj:DisplayObject):int
 		{
 			var index:int;
@@ -183,17 +195,34 @@ package blockly.design
 			}
 			return defaultArgBlock.indexOf(obj);
 		}
-		
-		public function tryLink(dragTarget:MyBlock):Boolean
+		*/
+		public function tryLink(dragTarget:MyBlock):InsertPtInfo
 		{
-			return Math.abs(dragTarget.x-x) <= 10 && Math.abs(dragTarget.y-y-height) <= 6;
+			var ptList:Array = calcInsertPt();
+			for each(var ptInfo:InsertPtInfo in ptList){
+				var target:BlockBase = ptInfo.block;
+				switch(ptInfo.type){
+					case INSERT_PT_ABOVE:
+						if( Math.abs(dragTarget.x-target.x) <= 10 && Math.abs(dragTarget.y+dragTarget.getTotalBlockHeight()-target.y) <= 6){
+							return ptInfo;
+						}
+						break;
+					case INSERT_PT_BELOW:
+						if( Math.abs(dragTarget.x-target.x) <= 10 && Math.abs(dragTarget.y-target.y-target.getBlockHeight()) <= 6){
+							return ptInfo;
+						}
+						break;
+				}
+			}
+			return null;
 		}
-		
+		/*
 		public function acceptLink(dragTarget:MyBlock):void
 		{
 			dragTarget.addBlockToLast(nextBlock);
 			nextBlock = dragTarget;
 			relayout();
 		}
+		*/
 	}
 }

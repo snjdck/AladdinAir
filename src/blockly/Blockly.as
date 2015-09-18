@@ -8,6 +8,7 @@ package blockly
 	import flash.geom.Point;
 	import flash.utils.HexUtil;
 	
+	import blockly.design.InsertPtInfo;
 	import blockly.design.MyBlock;
 	import blockly.design.blocks.ExpressionBlock;
 	import blockly.design.blocks.StatementBlock;
@@ -25,9 +26,9 @@ package blockly
 //			a.block.innerInput.isStatement = true;
 //			a.block.inn
 //			a.draw(200, 200);
-			var exp:MyBlock = create("show face %d.port x:%n y:%n characters:%s", StatementBlock);
-			var exp:MyBlock = create("show face %d.port x:%n y:%n characters:%s", StatementBlock);
-			var exp:MyBlock = create("show face %d.port x:%n y:%n characters:%s", StatementBlock);
+			var exp:MyBlock = create("show face %d.port x:%1 y:%n characters:%s", StatementBlock);
+			var exp:MyBlock = create("show face %d.port x:%2 y:%n characters:%s", StatementBlock);
+			var exp:MyBlock = create("show face %d.port x:%3 y:%n characters:%s", StatementBlock);
 			
 			create("set motor%d.motorPort speed %d.motorvalue", ExpressionBlock);
 			create("%d + %d", ExpressionBlock);
@@ -47,7 +48,7 @@ package blockly
 		
 		private var blockList:Array = [];
 		private var dragTarget:MyBlock;
-		private var dropTarget:MyBlock;
+		private var dropTarget:InsertPtInfo;
 		
 		protected function __onDragBegin(event:Event):void
 		{
@@ -62,7 +63,7 @@ package blockly
 				dragTarget.prevBlock.nextBlock = null;
 				dragTarget.prevBlock = null;
 			}
-			setChildIndex(dragTarget, numChildren-1);
+//			setChildIndex(dragTarget, numChildren-1);
 			stage.addEventListener(MouseEvent.MOUSE_MOVE, __onMouseMove);
 		}
 		
@@ -70,11 +71,11 @@ package blockly
 		{
 			dragTarget.filters = null;
 			if(dropTarget != null){
-				if(dragTarget.isExpression){
-					dropTarget.acceptDrop(dragTarget);
-				}else{
-					dropTarget.acceptLink(dragTarget);
-				}
+//				if(dragTarget.isExpression){
+//					(dropTarget.block as MyBlock).acceptDrop(dragTarget);
+//				}else{
+//				}
+				dropTarget.insert(dragTarget);
 			}
 			
 			stage.removeEventListener(MouseEvent.MOUSE_MOVE, __onMouseMove);
@@ -94,13 +95,13 @@ package blockly
 					continue;
 				}
 				if(dragTarget.isExpression){
-					if(block.tryAccept(dragTarget)){
-						dropTarget = block;
+					dropTarget = block.tryAccept(dragTarget)
+					if(dropTarget != null){
 						break;
 					}
 				}else if(block.isTopBlock()){
-					if(block.tryLink(dragTarget)){
-						dropTarget = block;
+					dropTarget = block.tryLink(dragTarget);
+					if(dropTarget != null){
 						break;
 					}
 				}
