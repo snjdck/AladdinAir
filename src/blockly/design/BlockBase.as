@@ -24,8 +24,17 @@ package blockly.design
 		public const defaultArgBlockList:Array = [];
 		public const argBlockList:Array = [];
 		
+		/** if,while,for的子句,条件作为argBlock */
+		public var subBlock1:MyBlock;
+		public var subBlock2:MyBlock;
+		
 		public function BlockBase()
 		{
+		}
+		
+		public function get parentBlock():BlockBase
+		{
+			return _parentBlock;
 		}
 		
 		public function get prevBlock():BlockBase
@@ -104,9 +113,7 @@ package blockly.design
 			var nextBlock:BlockBase = this;
 			var block:BlockBase = prevBlock;
 			while(block != null){
-				block.x = nextBlock.x;
-				block.y = nextBlock.y - block.height;
-				
+				block.doLayout(nextBlock.x, nextBlock.y - block.height);
 				nextBlock = block;
 				block = block.prevBlock;
 			}
@@ -117,12 +124,17 @@ package blockly.design
 			var prevBlock:BlockBase = this;
 			var block:BlockBase = nextBlock;
 			while(block != null){
-				block.x = prevBlock.x;
-				block.y = prevBlock.y + prevBlock.height;
-				
+				block.doLayout(prevBlock.x, prevBlock.y + prevBlock.height);
 				prevBlock = block;
 				block = block.nextBlock;
 			}
+		}
+		
+		private function doLayout(px:Number, py:Number):void
+		{
+			x = px;
+			y = py;
+			layoutChildren();
 		}
 		
 		public function calcInsertPt():Array
@@ -164,12 +176,16 @@ package blockly.design
 		
 		public function setChildBlockAt(block:BlockBase, index:int):void
 		{
+			if(block == argBlockList[index]){
+				return;
+			}
+			
 			var oldBlock:BlockBase = argBlockList[index];
 			
 			if(oldBlock != null){
 				oldBlock._parentBlock = null;
-				oldBlock.x = x + 10;
-				oldBlock.y = y + 10;
+				oldBlock.x += 10;
+				oldBlock.y += 10;
 			}
 			
 			argBlockList[index] = block;
@@ -178,6 +194,31 @@ package blockly.design
 				block._parentBlock = this;
 			}
 			
+			layoutChildren();
+		}
+		
+		private function hasChildBlock(block:BlockBase):Boolean
+		{
+			return argBlockList.indexOf(block) >= 0;
+		}
+		
+		public function removeFromParentBlock():void
+		{
+			if(_parentBlock != null){
+				_parentBlock.removeChildBlock(this);
+			}
+		}
+		
+		public function removeChildBlock(block:BlockBase):void
+		{
+			var index:int = argBlockList.indexOf(block);
+			
+			if(index < 0){
+				return;
+			}
+			
+			argBlockList[index] = null;
+			block._parentBlock = null;
 			layoutChildren();
 		}
 		
@@ -190,8 +231,7 @@ package blockly.design
 				if(index >= 0 && argBlockList[index]){
 					obj.visible = false;
 					var argBlock:BlockBase = argBlockList[index];
-					argBlock.x = x + offsetX;
-					argBlock.y = y;
+					argBlock.doLayout(x + offsetX, y);
 					offsetX += argBlock.getBlockWidth();
 				}else{
 					obj.visible = true;

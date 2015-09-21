@@ -4,7 +4,6 @@ package blockly.design
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.filters.BevelFilter;
-	import flash.filters.GlowFilter;
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
 
@@ -14,11 +13,8 @@ package blockly.design
 		
 		public var typeId:int;
 		
-		/** if,while,for的子句,条件作为argBlock */
-		public var subBlock1:MyBlock;
-		public var subBlock2:MyBlock;
-		
 		private var filterList:Array;
+		private var spec:String;
 		
 		public function MyBlock()
 		{
@@ -30,15 +26,7 @@ package blockly.design
 			filterList = [f];
 			filters = filterList;
 		}
-/*
-		private function getArgBlockAt(index:int):IBlockArg
-		{
-			if(argBlock[index] != null){
-				return argBlock[index];
-			}
-			return defaultArgBlock[index];
-		}
-	*/	
+
 		private function __onMouseDown(evt:MouseEvent):void
 		{
 			if(evt.target != this){
@@ -73,6 +61,7 @@ package blockly.design
 		
 		public function setSpec(spec:String):void
 		{
+			this.spec = spec;
 			var regExp:RegExp = /%(\w)(?:\.(\w+)|)/g;
 			var nodeList:Array = [];
 			
@@ -113,70 +102,22 @@ package blockly.design
 			layoutChildren();
 		}
 		
-		private var dropArg:DisplayObject;
-		
 		public function tryAccept(other:MyBlock):InsertPtInfo
 		{
-			dropArg = null;
-			var result:InsertPtInfo;
 			for(var i:int=0; i<defaultArgBlockList.length; i++){
-				var arg:DisplayObject = getArgBlockAt(i) as DisplayObject;
-				if(arg.hitTestObject(other) && !result){
-					arg.filters = [new GlowFilter()];
-					dropArg = arg;
-					result = new InsertPtInfo(this, BlockBase.INSERT_PT_CHILD, i);
-					//					break;
-				}else{
-					arg.filters = null;
+				var argBlock:MyBlock = argBlockList[i];
+				if(argBlock != null){
+					var result:InsertPtInfo = argBlock.tryAccept(other)
+					if(result != null){
+						return result;
+					}
+				}
+				if(other.hitTestObject(getArgBlockAt(i))){
+					return new InsertPtInfo(this, BlockBase.INSERT_PT_CHILD, i);
 				}
 			}
-			return result;
+			return null;
 		}
-		/*
-		public function layout():void
-		{
-			var offsetX:int = gapX;
-			for(var i:int=0; i<numChildren; i++){
-				var obj:DisplayObject = getChildAt(i);
-				obj.x = offsetX;
-				offsetX += obj.width;
-			}
-			graphics.clear();
-			drawBg(width, 20);
-		}
-		
-		public function removeArg(other:MyBlock):void
-		{
-			var index:int = argBlock.indexOf(other);
-			argBlock[index] = null;
-			var defaultArg:DisplayObject = defaultArgBlock[index];
-			trace(getChildIndex(other));
-			addChildAt(defaultArg, getChildIndex(other));
-			removeChild(other);
-			layout();
-		}
-		
-		public function acceptDrop(other:MyBlock):void
-		{
-			if(null == dropArg){
-				return;
-			}
-			dropArg.filters = null;
-			var index:int = getArgIndex(dropArg);
-			trace(getChildIndex(dropArg))
-			addChildAt(other, getChildIndex(dropArg));
-			if(argBlock[index]){
-				parent.addChild(argBlock[index]);
-			}else{
-				removeChild(dropArg);
-			}
-			argBlock[index] = other;
-			
-			other.y = 0;
-			layout();
-			dropArg = null;
-		}
-		*/
 		
 		private function getArgBlockAt(index:int):DisplayObject
 		{
@@ -185,17 +126,7 @@ package blockly.design
 			}
 			return defaultArgBlockList[index];
 		}
-		/*
-		private function getArgIndex(obj:DisplayObject):int
-		{
-			var index:int;
-			index = argBlock.indexOf(obj);
-			if(index >= 0){
-				return index;
-			}
-			return defaultArgBlock.indexOf(obj);
-		}
-		*/
+		
 		public function tryLink(dragTarget:MyBlock):InsertPtInfo
 		{
 			var ptList:Array = calcInsertPt();
@@ -216,13 +147,5 @@ package blockly.design
 			}
 			return null;
 		}
-		/*
-		public function acceptLink(dragTarget:MyBlock):void
-		{
-			dragTarget.addBlockToLast(nextBlock);
-			nextBlock = dragTarget;
-			relayout();
-		}
-		*/
 	}
 }
