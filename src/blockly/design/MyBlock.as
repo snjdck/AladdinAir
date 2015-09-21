@@ -6,6 +6,8 @@ package blockly.design
 	import flash.filters.BevelFilter;
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
+	
+	import blockly.Spec;
 
 	public class MyBlock extends BlockBase implements IBlockArg
 	{
@@ -14,7 +16,7 @@ package blockly.design
 		public var typeId:int;
 		
 		private var filterList:Array;
-		private var spec:String;
+		private var spec:Spec;
 		
 		public function MyBlock()
 		{
@@ -57,29 +59,10 @@ package blockly.design
 		{
 		}
 		
-		
-		
-		public function setSpec(spec:String):void
+		public function setSpec(info:String):void
 		{
-			this.spec = spec;
-			var regExp:RegExp = /%(\w)(?:\.(\w+)|)/g;
-			var nodeList:Array = [];
-			
-			var offset:int = 0;
-			for(;;){
-				var list:Array = regExp.exec(spec);
-				if(null == list){
-					break;
-				}
-				nodeList.push(spec.slice(offset, list.index));
-				nodeList.push(list);
-				offset = list[0].length + list.index;
-			}
-			if(offset < spec.length){
-				nodeList.push(spec.slice(offset, -1));
-			}
-			trace(JSON.stringify(nodeList));
-			onSetSpec(nodeList);
+			this.spec = new Spec(info);
+			onSetSpec(spec.nodeList);
 		}
 		
 		private function onSetSpec(nodeList:Array):void

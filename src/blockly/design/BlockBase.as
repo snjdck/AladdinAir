@@ -28,6 +28,8 @@ package blockly.design
 		public var subBlock1:MyBlock;
 		public var subBlock2:MyBlock;
 		
+		public var cmd:String;
+		
 		public function BlockBase()
 		{
 		}
@@ -96,7 +98,7 @@ package blockly.design
 		public function isTopBlock():Boolean
 		{
 			if(isExpression){
-				
+				return false;
 			}else if(isSubBlock){
 				return false;
 			}
@@ -241,6 +243,41 @@ package blockly.design
 			}
 			graphics.clear();
 			drawBg(offsetX, 20);
+		}
+		
+		public function dragBegin():void
+		{
+			if(isExpression){
+				removeFromParentBlock();
+			}else{
+				prevBlock = null;
+			}
+		}
+		
+		public function getTotalCode():String
+		{
+			var block:BlockBase = this;
+			var result:Array = [];
+			while(block != null){
+				result.push(block.getSelfCode());
+				block = block.nextBlock;
+			}
+			return result.join("\n");
+		}
+		
+		public function getSelfCode():String
+		{
+			var result:String = cmd;
+			var argList:Array = [];
+			for(var i:int=0; i<defaultArgBlockList.length; ++i){
+				var argBlock:BlockBase = argBlockList[i];
+				if(argBlock != null){
+					argList[i] = argBlock.getSelfCode();
+				}else{
+					argList[i] = defaultArgBlockList[i].text;
+				}
+			}
+			return result + "(" + argList.join(", ") + ")";
 		}
 	}
 }

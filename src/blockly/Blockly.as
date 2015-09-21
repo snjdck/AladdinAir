@@ -15,19 +15,20 @@ package blockly
 		
 		public function Blockly()
 		{
-			create("show face %d.port x:%1 y:%n characters:%s", StatementBlock);
-			create("show face %d.port x:%2 y:%n characters:%s", StatementBlock);
-			create("show face %d.port x:%3 y:%n characters:%s", StatementBlock);
+			create("showFace", "show face %d.port x:%1 y:%n characters:%s", StatementBlock);
+			create("showFace", "show face %d.port x:%2 y:%n characters:%s", StatementBlock);
+			create("showFace", "show face %d.port x:%3 y:%n characters:%s", StatementBlock);
 			
-			create("set motor%d.motorPort speed %d.motorvalue", ExpressionBlock);
-			create("%d + %d", ExpressionBlock);
+			create("setMotor", "set motor%d.motorPort speed %d.motorvalue", ExpressionBlock);
+			create("add", "%d + %d", ExpressionBlock);
 		}
 		
-		private function create(spec:String, type:Class):MyBlock
+		private function create(cmd:String, spec:String, type:Class):MyBlock
 		{
 			var exp:MyBlock = new type();
 			exp.addEventListener("drag_begin", __onDragBegin);
 			exp.addEventListener("drag_end", __onDragEnd);
+			exp.cmd = cmd;
 			exp.setSpec(spec);
 			addChild(exp);
 			blockList.push(exp);
@@ -42,11 +43,7 @@ package blockly
 		protected function __onDragBegin(event:Event):void
 		{
 			dragTarget = event.currentTarget as MyBlock;
-			if(dragTarget.isExpression){
-				dragTarget.removeFromParentBlock();
-			}else{
-				dragTarget.prevBlock = null;
-			}
+			dragTarget.dragBegin();
 			stage.addEventListener(MouseEvent.MOUSE_MOVE, __onMouseMove);
 		}
 		
@@ -59,6 +56,7 @@ package blockly
 			stage.removeEventListener(MouseEvent.MOUSE_MOVE, __onMouseMove);
 			dragTarget = null;
 			dropTarget = null;
+			trace(findRunableBlocks());
 		}
 		
 		private function __onMouseMove(evt:MouseEvent):void
@@ -80,6 +78,18 @@ package blockly
 					break;
 				}
 			}
+		}
+		
+		private function findRunableBlocks():Array
+		{
+			var result:Array = [];
+			for each(var block:MyBlock in blockList){
+				if(block.isTopBlock()){
+					result.push(block);
+					trace(block.getTotalCode());
+				}
+			}
+			return result;
 		}
 	}
 }

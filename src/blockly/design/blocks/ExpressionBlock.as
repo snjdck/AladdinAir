@@ -15,7 +15,11 @@ package blockly.design.blocks
 			var g:Graphics = graphics;
 //			g.lineStyle(0);
 			g.beginFill(0xFF00);
-			g.drawRoundRect(gapX, 0, w + gapX * 2, h, h, h);
+			w += gapX * 2;
+			if(w < h){
+				w = h;
+			}
+			g.drawRoundRect(gapX, 0, w, h, h, h);
 			g.endFill();
 		}
 	}

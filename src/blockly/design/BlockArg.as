@@ -44,6 +44,11 @@ package blockly.design
 			tf.type = TextFieldType.DYNAMIC;
 		}
 		
+		public function get text():String
+		{
+			return tf.text;
+		}
+		
 		public function set text(value:String):void
 		{
 			tf.text = value;
@@ -72,6 +77,9 @@ package blockly.design
 			if(isString()){
 				g.drawRect(0, 2, w, tf.textHeight);
 			}else{
+				if(w < tf.textHeight){
+					w = tf.textHeight;
+				}
 				g.drawRoundRect(0, 2, w, tf.textHeight, tf.textHeight, tf.textHeight);
 			}
 			
