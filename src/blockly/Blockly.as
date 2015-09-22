@@ -7,9 +7,11 @@ package blockly
 	import blockly.design.InsertPtInfo;
 	import blockly.design.MyBlock;
 	import blockly.design.blocks.ExpressionBlock;
+	import blockly.design.blocks.ForBlock;
+	import blockly.design.blocks.IfBlock;
 	import blockly.design.blocks.StatementBlock;
 	
-	[SWF(frameRate="60")]
+	[SWF(frameRate="60", width="1000", height="600")]
 	public class Blockly extends Sprite
 	{
 		
@@ -21,6 +23,8 @@ package blockly
 			
 			create("setMotor", "set motor%d.motorPort speed %d.motorvalue", ExpressionBlock);
 			create("add", "%d + %d", ExpressionBlock);
+			create("for", "forever %d", ForBlock);
+			create("if", "if else you %d", IfBlock);
 		}
 		
 		private function create(cmd:String, spec:String, type:Class):MyBlock

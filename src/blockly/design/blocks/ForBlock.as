@@ -4,19 +4,18 @@ package blockly.design.blocks
 	
 	import blockly.design.BlockDrawer;
 	import blockly.design.MyBlock;
-
-	public class StatementBlock extends MyBlock
+	
+	public class ForBlock extends MyBlock
 	{
-		public function StatementBlock()
+		public function ForBlock()
 		{
-			isExpression = false;
 		}
 		
 		override protected function drawBg(w:int, h:int):void
 		{
 			var g:Graphics = graphics;
 			g.beginFill(0xFF00);
-			BlockDrawer.draw(graphics, w, h);
+			BlockDrawer.drawFor(graphics, w, h);
 			g.endFill();
 		}
 	}
