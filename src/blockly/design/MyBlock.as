@@ -43,8 +43,8 @@ package blockly.design
 		
 		private function __onMouseMove(evt:MouseEvent):void
 		{
+			relayout();
 			layoutAfterInsertBelow();
-			layoutChildren();
 		}
 		
 		private function __onMouseUp(evt:MouseEvent):void
@@ -117,18 +117,31 @@ package blockly.design
 				var target:BlockBase = ptInfo.block;
 				switch(ptInfo.type){
 					case INSERT_PT_ABOVE:
-						if( Math.abs(dragTarget.x-target.x) <= 10 && Math.abs(dragTarget.y+dragTarget.getTotalBlockHeight()-target.y) <= 6){
+						if(isNear(dragTarget, target.x, target.y-dragTarget.getTotalBlockHeight())){
 							return ptInfo;
 						}
 						break;
 					case INSERT_PT_BELOW:
-						if( Math.abs(dragTarget.x-target.x) <= 10 && Math.abs(dragTarget.y-target.y-target.getBlockHeight()) <= 6){
+						if(isNear(dragTarget, target.x, target.y+target.getBlockHeight())){
 							return ptInfo;
 						}
+						break;
+					case INSERT_PT_SUB1:
+						if(isNear(dragTarget, target.x, target.y+20)){
+							trace("bing");
+							return ptInfo;
+						}
+						break;
+					case INSERT_PT_SUB2:
 						break;
 				}
 			}
 			return null;
+		}
+		
+		private function isNear(target:DisplayObject, px:Number, py:Number):Boolean
+		{
+			return Math.abs(target.x - px) <= 10 && Math.abs(target.y - py) <= 6;
 		}
 	}
 }

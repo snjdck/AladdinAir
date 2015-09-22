@@ -2,6 +2,7 @@ package blockly.design.blocks
 {
 	import flash.display.Graphics;
 	
+	import blockly.design.BlockBase;
 	import blockly.design.BlockDrawer;
 	import blockly.design.MyBlock;
 	
@@ -9,6 +10,7 @@ package blockly.design.blocks
 	{
 		public function IfBlock()
 		{
+			type = BlockBase.BLOCK_TYPE_IF;
 		}
 		
 		override protected function drawBg(w:int, h:int):void

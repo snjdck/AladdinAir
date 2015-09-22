@@ -1,13 +1,15 @@
 package blockly.design.blocks
 {
 	import flash.display.Graphics;
+	
+	import blockly.design.BlockBase;
 	import blockly.design.MyBlock;
 
 	public class ExpressionBlock extends MyBlock
 	{
 		public function ExpressionBlock()
 		{
-			isExpression = true;
+			type = BlockBase.BLOCK_TYPE_EXPRESSION;
 		}
 		
 		override protected function drawBg(w:int, h:int):void

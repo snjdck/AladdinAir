@@ -2,6 +2,7 @@ package blockly.design.blocks
 {
 	import flash.display.Graphics;
 	
+	import blockly.design.BlockBase;
 	import blockly.design.BlockDrawer;
 	import blockly.design.MyBlock;
 
@@ -9,7 +10,7 @@ package blockly.design.blocks
 	{
 		public function StatementBlock()
 		{
-			isExpression = false;
+			type = BlockBase.BLOCK_TYPE_STATEMENT;
 		}
 		
 		override protected function drawBg(w:int, h:int):void

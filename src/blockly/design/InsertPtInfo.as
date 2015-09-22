@@ -15,7 +15,7 @@ package blockly.design
 		
 		public function insert(target:BlockBase):void
 		{
-			if(target.isExpression){
+			if(target.isExpression()){
 				insertExpression(target);
 			}else{
 				insertStatement(target);
@@ -40,6 +40,14 @@ package blockly.design
 					target.prevBlock = block.prevBlock;
 					target.addBlockToLast(block);
 					block.layoutAfterInsertAbove();
+					break;
+				case BlockBase.INSERT_PT_SUB1:
+					block.subBlock1 = target;
+					block.relayout();
+					break;
+				case BlockBase.INSERT_PT_SUB2:
+					block.subBlock2 = target;
+					block.relayout();
 					break;
 			}
 		}

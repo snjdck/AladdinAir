@@ -70,11 +70,11 @@ package blockly
 				if(block == dragTarget){
 					continue;
 				}
-				if(dragTarget.isExpression){
-					if(block.parentBlock){
+				if(dragTarget.isExpression()){
+					if(block.isExpression() && block.parentBlock){
 						continue;
 					}
-					dropTarget = block.tryAccept(dragTarget)
+					dropTarget = block.tryAccept(dragTarget);
 				}else if(block.isTopBlock()){
 					dropTarget = block.tryLink(dragTarget);
 				}

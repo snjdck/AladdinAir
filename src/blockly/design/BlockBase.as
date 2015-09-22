@@ -5,6 +5,11 @@ package blockly.design
 
 	public class BlockBase extends Sprite
 	{
+		static public const BLOCK_TYPE_EXPRESSION:int = 1;
+		static public const BLOCK_TYPE_STATEMENT:int = 2;
+		static public const BLOCK_TYPE_FOR:int = 3;
+		static public const BLOCK_TYPE_IF:int = 4;
+		
 		static public const INSERT_PT_BELOW:int = 1;
 		static public const INSERT_PT_ABOVE:int = 2;
 		static public const INSERT_PT_SUB1:int = 3;
@@ -12,7 +17,7 @@ package blockly.design
 		static public const INSERT_PT_WRAP:int = 5;
 		static public const INSERT_PT_CHILD:int = 6;
 		
-		public var isExpression:Boolean;
+		public var type:int;
 		private var isSubBlock:Boolean;
 		
 		private var _nextBlock:BlockBase;
@@ -24,9 +29,8 @@ package blockly.design
 		public const defaultArgBlockList:Array = [];
 		public const argBlockList:Array = [];
 		
-		/** if,while,for的子句,条件作为argBlock */
-		public var subBlock1:MyBlock;
-		public var subBlock2:MyBlock;
+		private var _subBlock1:BlockBase;
+		private var _subBlock2:BlockBase;
 		
 		public var cmd:String;
 		
@@ -34,6 +38,44 @@ package blockly.design
 		{
 		}
 		
+		public function get subBlock1():BlockBase
+		{
+			return _subBlock1;
+		}
+
+		public function set subBlock1(value:BlockBase):void
+		{
+			if(value == _subBlock1){
+				return;
+			}
+			if(_subBlock1 != null){
+				_subBlock1._parentBlock = null;
+			}
+			_subBlock1 = value;
+			if(_subBlock1 != null){
+				_subBlock1._parentBlock = this;
+			}
+		}
+		
+		public function get subBlock2():BlockBase
+		{
+			return _subBlock2;
+		}
+
+		public function set subBlock2(value:BlockBase):void
+		{
+			if(value == _subBlock2){
+				return;
+			}
+			if(_subBlock2 != null){
+				_subBlock2._parentBlock = null;
+			}
+			_subBlock2 = value;
+			if(_subBlock2 != null){
+				_subBlock2._parentBlock = this;
+			}
+		}
+
 		public function get parentBlock():BlockBase
 		{
 			return _parentBlock;
@@ -95,9 +137,14 @@ package blockly.design
 			return block;
 		}
 		
+		public function isExpression():Boolean
+		{
+			return type == BLOCK_TYPE_EXPRESSION;
+		}
+		
 		public function isTopBlock():Boolean
 		{
-			if(isExpression){
+			if(isExpression()){
 				return false;
 			}else if(isSubBlock){
 				return false;
@@ -136,6 +183,15 @@ package blockly.design
 		{
 			x = px;
 			y = py;
+			relayout();
+		}
+		
+		public function relayout():void
+		{
+			if(subBlock1 != null){
+				subBlock1.doLayout(x + 5, y + 15);
+				subBlock1.layoutAfterInsertBelow();
+			}
 			layoutChildren();
 		}
 		
@@ -145,6 +201,12 @@ package blockly.design
 			result.push(new InsertPtInfo(this, INSERT_PT_ABOVE));
 			var block:BlockBase = this;
 			while(block != null){
+				if(block.type == BLOCK_TYPE_FOR){
+					result.push(new InsertPtInfo(block, INSERT_PT_SUB1));
+				}else if(block.type == BLOCK_TYPE_IF){
+					result.push(new InsertPtInfo(block, INSERT_PT_SUB1));
+					result.push(new InsertPtInfo(block, INSERT_PT_SUB2));
+				}
 				result.push(new InsertPtInfo(block, INSERT_PT_BELOW));
 				block = block.nextBlock;
 			}
@@ -247,10 +309,21 @@ package blockly.design
 		
 		public function dragBegin():void
 		{
-			if(isExpression){
+			if(isExpression()){
 				removeFromParentBlock();
 			}else{
 				prevBlock = null;
+				if(null == parentBlock){
+					return;
+				}
+				switch(this){
+					case parentBlock.subBlock1:
+						parentBlock.subBlock1 = null;
+						break;
+					case parentBlock.subBlock2:
+						parentBlock.subBlock2 = null;
+						break;
+				}
 			}
 		}
 		
