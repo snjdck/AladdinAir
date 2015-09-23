@@ -48,14 +48,24 @@ package blockly.design
 				case BlockBase.INSERT_PT_SUB1:
 					target.addBlockToLast(block.subBlock1);
 					block.subBlock1 = target;
-					block.relayout();
 					block.redrawControlBlock();
 					break;
 				case BlockBase.INSERT_PT_SUB2:
 					target.addBlockToLast(block.subBlock2);
 					block.subBlock2 = target;
-					block.relayout();
 					block.redrawControlBlock();
+					break;
+				case BlockBase.INSERT_PT_WRAP:
+					if(0 == index){
+						target.subBlock1 = block;
+						target.setPositionBySub1(block);
+					}else{
+						target.subBlock2 = block;
+						target.setPositionBySub2(block);
+					}
+					target.layoutChildren();
+					target.drawBg();
+					target.layoutAfterInsertBelow();
 					break;
 			}
 		}

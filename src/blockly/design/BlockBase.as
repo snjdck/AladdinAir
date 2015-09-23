@@ -138,6 +138,11 @@ package blockly.design
 			return block;
 		}
 		
+		public function hasSubBlock2():Boolean
+		{
+			return type == BLOCK_TYPE_IF;
+		}
+		
 		public function isExpression():Boolean
 		{
 			return type == BLOCK_TYPE_EXPRESSION;
@@ -151,6 +156,16 @@ package blockly.design
 			switch(this){
 				case _parentBlock._subBlock1:
 				case _parentBlock._subBlock2:
+					return true;
+			}
+			return false;
+		}
+		
+		public function isControlBlock():Boolean
+		{
+			switch(type){
+				case BLOCK_TYPE_FOR:
+				case BLOCK_TYPE_IF:
 					return true;
 			}
 			return false;
@@ -207,7 +222,6 @@ package blockly.design
 		public function calcInsertPt():Array
 		{
 			var result:Array = [];
-			result.push(new InsertPtInfo(this, INSERT_PT_ABOVE));
 			collectInsertPt(this, result);
 			return result;
 		}
@@ -250,19 +264,14 @@ package blockly.design
 			return height;
 		}
 		
-		public function getPositionBottom():Number
-		{
-			return y + getBlockHeight();
-		}
-		
 		public function getPositionSub1():Number
 		{
-			return y + 20;
+			return 20;
 		}
 		
 		public function getPositionSub2():Number
 		{
-			return y + 30 + getSub1Height();
+			return 30 + getSub1Height();
 		}
 		
 		private function getSub1Height():int
@@ -363,14 +372,26 @@ package blockly.design
 			}
 		}
 		
+		public function setPositionBySub1(child:BlockBase):void
+		{
+			x = child.x - BlockDrawer.armW;
+			y = child.y - getPositionSub1();
+		}
+		
+		public function setPositionBySub2(child:BlockBase):void
+		{
+			x = child.x - BlockDrawer.armW;
+			y = child.y - getPositionSub2();
+		}
+		
 		public function layoutSubBlock():void
 		{
 			if(subBlock1 != null){
-				subBlock1.doLayout(x + BlockDrawer.armW, getPositionSub1());
+				subBlock1.doLayout(x + BlockDrawer.armW, y + getPositionSub1());
 				subBlock1.layoutAfterInsertBelow();
 			}
 			if(subBlock2 != null){
-				subBlock2.doLayout(x + BlockDrawer.armW, getPositionSub2());
+				subBlock2.doLayout(x + BlockDrawer.armW, y + getPositionSub2());
 				subBlock2.layoutAfterInsertBelow();
 			}
 		}
@@ -477,6 +498,11 @@ package blockly.design
 			drawBg();
 			layoutSubBlock();
 			layoutAfterInsertBelow();
+		}
+		
+		public function isNearTo(px:Number, py:Number):Boolean
+		{
+			return Math.abs(x - px) <= 10 && Math.abs(y - py) <= 10;
 		}
 	}
 }

@@ -111,40 +111,41 @@ package blockly.design
 			return defaultArgBlockList[index];
 		}
 		
-		public function tryLink(dragTarget:MyBlock):InsertPtInfo
+		public function tryLink(dragTarget:BlockBase):InsertPtInfo
 		{
+			if(dragTarget.isNearTo(x, y - dragTarget.getTotalBlockHeight())){
+				return new InsertPtInfo(this, INSERT_PT_ABOVE);
+			}
+			if(dragTarget.isControlBlock()){
+				if(null == dragTarget.subBlock1 && dragTarget.isNearTo(x, y - dragTarget.getPositionSub1())){
+					return new InsertPtInfo(this, INSERT_PT_WRAP, 0);
+				}
+				if(dragTarget.hasSubBlock2() && null == dragTarget.subBlock2 && dragTarget.isNearTo(x, y - dragTarget.getPositionSub2())){
+					return new InsertPtInfo(this, INSERT_PT_WRAP, 1);
+				}
+			}
 			var ptList:Array = calcInsertPt();
 			for each(var ptInfo:InsertPtInfo in ptList){
 				var target:BlockBase = ptInfo.block;
 				switch(ptInfo.type){
-					case INSERT_PT_ABOVE:
-						if(isNear(dragTarget, target.x, target.y-dragTarget.getTotalBlockHeight())){
-							return ptInfo;
-						}
-						break;
 					case INSERT_PT_BELOW:
-						if(isNear(dragTarget, target.x, target.getPositionBottom())){
+						if(dragTarget.isNearTo(target.x, target.y + target.getBlockHeight())){
 							return ptInfo;
 						}
 						break;
 					case INSERT_PT_SUB1:
-						if(isNear(dragTarget, target.x, target.getPositionSub1())){
+						if(dragTarget.isNearTo(target.x, target.y + target.getPositionSub1())){
 							return ptInfo;
 						}
 						break;
 					case INSERT_PT_SUB2:
-						if(isNear(dragTarget, target.x, target.getPositionSub2())){
+						if(dragTarget.isNearTo(target.x, target.y + target.getPositionSub2())){
 							return ptInfo;
 						}
 						break;
 				}
 			}
 			return null;
-		}
-		
-		private function isNear(target:DisplayObject, px:Number, py:Number):Boolean
-		{
-			return Math.abs(target.x - px) <= 10 && Math.abs(target.y - py) <= 10;
 		}
 	}
 }
