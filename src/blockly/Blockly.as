@@ -4,32 +4,29 @@ package blockly
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	
+	import blockly.design.BlockBase;
 	import blockly.design.InsertPtInfo;
 	import blockly.design.MyBlock;
-	import blockly.design.blocks.ExpressionBlock;
-	import blockly.design.blocks.ForBlock;
-	import blockly.design.blocks.IfBlock;
-	import blockly.design.blocks.StatementBlock;
 	
 	[SWF(frameRate="60", width="1000", height="600")]
 	public class Blockly extends Sprite
 	{
-		
 		public function Blockly()
 		{
-			create("showFace", "show face %d.port x:%1 y:%n characters:%s", StatementBlock);
-			create("showFace", "show face %d.port x:%2 y:%n characters:%s", StatementBlock);
-			create("showFace", "show face %d.port x:%3 y:%n characters:%s", StatementBlock);
+			create("showFace", "show face %d.port x:%1 y:%n characters:%s", BlockBase.BLOCK_TYPE_STATEMENT);
+			create("showFace", "show face %d.port x:%2 y:%n characters:%s", BlockBase.BLOCK_TYPE_STATEMENT);
+			create("showFace", "show face %d.port x:%3 y:%n characters:%s", BlockBase.BLOCK_TYPE_STATEMENT);
 			
-			create("setMotor", "set motor%d.motorPort speed %d.motorvalue", ExpressionBlock);
-			create("add", "%d + %d", ExpressionBlock);
-			create("for", "forever %d", ForBlock);
-			create("if", "if else you %d", IfBlock);
+			create("setMotor", "set motor%d.motorPort speed %d.motorvalue", BlockBase.BLOCK_TYPE_EXPRESSION);
+			create("add", "%d + %d", BlockBase.BLOCK_TYPE_EXPRESSION);
+			create("for", "forever %d", BlockBase.BLOCK_TYPE_FOR);
+			create("if", "if else you %d", BlockBase.BLOCK_TYPE_IF);
 		}
 		
-		private function create(cmd:String, spec:String, type:Class):MyBlock
+		private function create(cmd:String, spec:String, type:int):MyBlock
 		{
-			var exp:MyBlock = new type();
+			var exp:MyBlock = new MyBlock();
+			exp.type = type;
 			exp.addEventListener("drag_begin", __onDragBegin);
 			exp.addEventListener("drag_end", __onDragEnd);
 			exp.cmd = cmd;

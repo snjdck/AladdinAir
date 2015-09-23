@@ -12,7 +12,16 @@ package blockly.design
 		static public var armW:int = 10;
 		static public var armH:int = 10;
 		
-		static public function draw(g:Graphics, w:int, h:int):void
+		static public function drawExpression(g:Graphics, w:int, h:int):void
+		{
+			w += 4;
+			if(w < h){
+				w = h;
+			}
+			g.drawRoundRect(2, 0, w, h, h, h);
+		}
+		
+		static public function drawStatement(g:Graphics, w:int, h:int):void
 		{
 			drawTop(g, w);
 			g.lineTo(w, h);

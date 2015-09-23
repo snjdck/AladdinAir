@@ -1,6 +1,7 @@
 package blockly.design
 {
 	import flash.display.DisplayObject;
+	import flash.display.Graphics;
 	import flash.display.Sprite;
 
 	public class BlockBase extends Sprite
@@ -234,8 +235,25 @@ package blockly.design
 			return height;
 		}
 		
-		protected function drawBg(w:int, h:int):void
+		private function drawBg(w:int, h:int):void
 		{
+			var g:Graphics = graphics;
+			g.beginFill(0xFF00);
+			switch(type){
+				case BLOCK_TYPE_EXPRESSION:
+					BlockDrawer.drawExpression(g, w, h);
+					break;
+				case BLOCK_TYPE_STATEMENT:
+					BlockDrawer.drawStatement(g, w, h);
+					break;
+				case BLOCK_TYPE_FOR:
+					BlockDrawer.drawFor(g, w, h);
+					break;
+				case BLOCK_TYPE_IF:
+					BlockDrawer.drawIfElse(g, w, h);
+					break;
+			}
+			g.endFill();
 		}
 		
 		public function setChildBlockAt(block:BlockBase, index:int):void
