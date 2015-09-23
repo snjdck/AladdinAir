@@ -19,7 +19,6 @@ package blockly.design
 		static public const INSERT_PT_CHILD:int = 6;
 		
 		public var type:int;
-		private var isSubBlock:Boolean;
 		
 		private var _nextBlock:BlockBase;
 		private var _prevBlock:BlockBase;
@@ -144,11 +143,22 @@ package blockly.design
 			return type == BLOCK_TYPE_EXPRESSION;
 		}
 		
+		public function isSubBlock():Boolean
+		{
+			if(null == _parentBlock){
+				return false;
+			}
+			switch(this){
+				case _parentBlock._subBlock1:
+				case _parentBlock._subBlock2:
+					return true;
+			}
+			return false;
+		}
+		
 		public function isTopBlock():Boolean
 		{
-			if(isExpression()){
-				return false;
-			}else if(isSubBlock){
+			if(isExpression() || isSubBlock()){
 				return false;
 			}
 			return null == prevBlock;
@@ -241,6 +251,9 @@ package blockly.design
 			var w:int = _totalWidth;
 			var h:int = 20;
 			trace("-----------------", cmd, type);
+			var child1Height:int = _subBlock1 != null ? _subBlock1.getTotalBlockHeight() : 10;
+			var child2Height:int = _subBlock2 != null ? _subBlock2.getTotalBlockHeight() : 10;
+			
 			var g:Graphics = graphics;
 			g.clear();
 			g.beginFill(0xFF00);
@@ -252,10 +265,10 @@ package blockly.design
 					BlockDrawer.drawStatement(g, w, h);
 					break;
 				case BLOCK_TYPE_FOR:
-					BlockDrawer.drawFor(g, w, h, _subBlock1 ? _subBlock1.getTotalBlockHeight() : 10);
+					BlockDrawer.drawFor(g, w, h, child1Height);
 					break;
 				case BLOCK_TYPE_IF:
-					BlockDrawer.drawIfElse(g, w, h);
+					BlockDrawer.drawIfElse(g, w, h, child1Height, child2Height);
 					break;
 			}
 			g.endFill();
@@ -307,8 +320,20 @@ package blockly.design
 			
 			argBlockList[index] = null;
 			block._parentBlock = null;
-			layoutChildren();
-			drawBg();
+			notifyChildChanged();
+		}
+		
+		public function notifyChildChanged():void
+		{
+			var b:BlockBase = this;
+			while(b != null){
+				b.layoutChildren();
+				b.drawBg();
+				if(b.isSubBlock()){
+					break;
+				}
+				b = b.parentBlock;
+			}
 		}
 		
 		public function layoutChildren():void
@@ -349,7 +374,7 @@ package blockly.design
 					}
 				}
 				if(topParent != null){
-					topParent.drawBg();
+					topParent.redrawControlBlock();
 				}
 			}
 			swapToTopLayer();
@@ -408,9 +433,10 @@ package blockly.design
 			}
 		}
 		
-		public function adjustSubBlock1Change():void
+		public function redrawControlBlock():void
 		{
 			drawBg();
+			layoutAfterInsertBelow();
 		}
 	}
 }

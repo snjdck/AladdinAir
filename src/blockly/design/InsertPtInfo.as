@@ -25,8 +25,7 @@ package blockly.design
 		private function insertExpression(target:BlockBase):void
 		{
 			block.setChildBlockAt(target, index);
-			block.layoutChildren();
-			block.drawBg();
+			block.notifyChildChanged();
 		}
 		
 		private function insertStatement(target:BlockBase):void
@@ -36,8 +35,9 @@ package blockly.design
 					target.addBlockToLast(block.nextBlock);
 					target.prevBlock = block;
 					block.layoutAfterInsertBelow();
-					if(block.topBlock.parentBlock != null){
-						block.topBlock.parentBlock.adjustSubBlock1Change();
+					var topParent:BlockBase = block.topBlock.parentBlock;
+					if(topParent != null){
+						topParent.redrawControlBlock();
 					}
 					break;
 				case BlockBase.INSERT_PT_ABOVE:
@@ -48,12 +48,12 @@ package blockly.design
 				case BlockBase.INSERT_PT_SUB1:
 					block.subBlock1 = target;
 					block.relayout();
-					block.drawBg();
+					block.redrawControlBlock();
 					break;
 				case BlockBase.INSERT_PT_SUB2:
 					block.subBlock2 = target;
 					block.relayout();
-					block.drawBg();
+					block.redrawControlBlock();
 					break;
 			}
 		}

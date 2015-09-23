@@ -41,7 +41,7 @@ package blockly.design
 			g.lineTo(gapX, 0);
 		}
 		
-		static public function drawIfElse(g:Graphics, w:int, h:int, child1Height:int=10, child2Height:int=10):void
+		static public function drawIfElse(g:Graphics, w:int, h:int, child1Height:int, child2Height:int):void
 		{
 			var y1:int = h+child1Height+armH;
 			var y2:int = y1 + child2Height+armH;
