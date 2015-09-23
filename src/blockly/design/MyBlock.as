@@ -83,6 +83,7 @@ package blockly.design
 				}
 			}
 			layoutChildren();
+			drawBg();
 		}
 		
 		public function tryAccept(other:MyBlock):InsertPtInfo

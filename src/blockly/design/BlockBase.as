@@ -34,6 +34,7 @@ package blockly.design
 		private var _subBlock2:BlockBase;
 		
 		public var cmd:String;
+		private var _totalWidth:int;
 		
 		public function BlockBase()
 		{
@@ -235,9 +236,13 @@ package blockly.design
 			return height;
 		}
 		
-		private function drawBg(w:int, h:int):void
+		public function drawBg():void
 		{
+			var w:int = _totalWidth;
+			var h:int = 20;
+			trace("-----------------", cmd, type);
 			var g:Graphics = graphics;
+			g.clear();
 			g.beginFill(0xFF00);
 			switch(type){
 				case BLOCK_TYPE_EXPRESSION:
@@ -247,7 +252,7 @@ package blockly.design
 					BlockDrawer.drawStatement(g, w, h);
 					break;
 				case BLOCK_TYPE_FOR:
-					BlockDrawer.drawFor(g, w, h);
+					BlockDrawer.drawFor(g, w, h, _subBlock1 ? _subBlock1.getTotalBlockHeight() : 10);
 					break;
 				case BLOCK_TYPE_IF:
 					BlockDrawer.drawIfElse(g, w, h);
@@ -277,6 +282,7 @@ package blockly.design
 			}
 			
 			layoutChildren();
+			drawBg();
 		}
 		
 		private function hasChildBlock(block:BlockBase):Boolean
@@ -302,6 +308,7 @@ package blockly.design
 			argBlockList[index] = null;
 			block._parentBlock = null;
 			layoutChildren();
+			drawBg();
 		}
 		
 		public function layoutChildren():void
@@ -321,8 +328,7 @@ package blockly.design
 					offsetX += obj.width;
 				}
 			}
-			graphics.clear();
-			drawBg(offsetX, 20);
+			_totalWidth = offsetX;
 		}
 		
 		public function dragBegin():void
@@ -330,6 +336,7 @@ package blockly.design
 			if(isExpression()){
 				removeFromParentBlock();
 			}else{
+				var topParent:BlockBase = topBlock.parentBlock;
 				prevBlock = null;
 				if(parentBlock != null){
 					switch(this){
@@ -340,6 +347,9 @@ package blockly.design
 							parentBlock.subBlock2 = null;
 							break;
 					}
+				}
+				if(topParent != null){
+					topParent.drawBg();
 				}
 			}
 			swapToTopLayer();
@@ -396,6 +406,11 @@ package blockly.design
 					argBlock.swapToTopLayer();
 				}
 			}
+		}
+		
+		public function adjustSubBlock1Change():void
+		{
+			drawBg();
 		}
 	}
 }

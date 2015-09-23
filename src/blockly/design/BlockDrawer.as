@@ -29,7 +29,7 @@ package blockly.design
 			g.lineTo(gapX, 0);
 		}
 		
-		static public function drawFor(g:Graphics, w:int, h:int, childHeight:int=20):void
+		static public function drawFor(g:Graphics, w:int, h:int, childHeight:int):void
 		{
 			var y1:int = h+childHeight+armH;
 			
