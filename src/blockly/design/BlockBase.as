@@ -211,18 +211,25 @@ package blockly.design
 		{
 			var result:Array = [];
 			result.push(new InsertPtInfo(this, INSERT_PT_ABOVE));
-			var block:BlockBase = this;
+			collectInsertPt(this, result);
+			return result;
+		}
+		
+		private function collectInsertPt(block:BlockBase, result:Array):void
+		{
 			while(block != null){
-				if(block.type == BLOCK_TYPE_FOR){
-					result.push(new InsertPtInfo(block, INSERT_PT_SUB1));
-				}else if(block.type == BLOCK_TYPE_IF){
-					result.push(new InsertPtInfo(block, INSERT_PT_SUB1));
-					result.push(new InsertPtInfo(block, INSERT_PT_SUB2));
+				switch(block.type){
+					case BLOCK_TYPE_IF:
+						result.push(new InsertPtInfo(block, INSERT_PT_SUB2));
+						collectInsertPt(block.subBlock2, result);
+					case BLOCK_TYPE_FOR:
+						result.push(new InsertPtInfo(block, INSERT_PT_SUB1));
+						collectInsertPt(block.subBlock1, result);
+					case BLOCK_TYPE_STATEMENT:
+						result.push(new InsertPtInfo(block, INSERT_PT_BELOW));
 				}
-				result.push(new InsertPtInfo(block, INSERT_PT_BELOW));
 				block = block.nextBlock;
 			}
-			return result;
 		}
 		
 		public function getTotalBlockHeight():int
