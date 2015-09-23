@@ -200,10 +200,7 @@ package blockly.design
 		
 		public function relayout():void
 		{
-			if(subBlock1 != null){
-				subBlock1.doLayout(x + 5, y + 15);
-				subBlock1.layoutAfterInsertBelow();
-			}
+			layoutSubBlock();
 			layoutChildren();
 		}
 		
@@ -253,13 +250,36 @@ package blockly.design
 			return height;
 		}
 		
+		public function getPositionBottom():Number
+		{
+			return y + getBlockHeight();
+		}
+		
+		public function getPositionSub1():Number
+		{
+			return y + 20;
+		}
+		
+		public function getPositionSub2():Number
+		{
+			return y + 30 + getSub1Height();
+		}
+		
+		private function getSub1Height():int
+		{
+			return _subBlock1 != null ? _subBlock1.getTotalBlockHeight() : 10;
+		}
+		
+		private function getSub2Height():int
+		{
+			return _subBlock2 != null ? _subBlock2.getTotalBlockHeight() : 10;
+		}
+		
 		public function drawBg():void
 		{
 			var w:int = _totalWidth;
 			var h:int = 20;
 			trace("-----------------", cmd, type);
-			var child1Height:int = _subBlock1 != null ? _subBlock1.getTotalBlockHeight() : 10;
-			var child2Height:int = _subBlock2 != null ? _subBlock2.getTotalBlockHeight() : 10;
 			
 			var g:Graphics = graphics;
 			g.clear();
@@ -272,10 +292,10 @@ package blockly.design
 					BlockDrawer.drawStatement(g, w, h);
 					break;
 				case BLOCK_TYPE_FOR:
-					BlockDrawer.drawFor(g, w, h, child1Height);
+					BlockDrawer.drawFor(g, w, h, getSub1Height());
 					break;
 				case BLOCK_TYPE_IF:
-					BlockDrawer.drawIfElse(g, w, h, child1Height, child2Height);
+					BlockDrawer.drawIfElse(g, w, h, getSub1Height(), getSub2Height());
 					break;
 			}
 			g.endFill();
@@ -340,6 +360,18 @@ package blockly.design
 					break;
 				}
 				b = b.parentBlock;
+			}
+		}
+		
+		public function layoutSubBlock():void
+		{
+			if(subBlock1 != null){
+				subBlock1.doLayout(x + BlockDrawer.armW, getPositionSub1());
+				subBlock1.layoutAfterInsertBelow();
+			}
+			if(subBlock2 != null){
+				subBlock2.doLayout(x + BlockDrawer.armW, getPositionSub2());
+				subBlock2.layoutAfterInsertBelow();
 			}
 		}
 		
@@ -443,6 +475,7 @@ package blockly.design
 		public function redrawControlBlock():void
 		{
 			drawBg();
+			layoutSubBlock();
 			layoutAfterInsertBelow();
 		}
 	}

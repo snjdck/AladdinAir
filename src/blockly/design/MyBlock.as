@@ -123,17 +123,19 @@ package blockly.design
 						}
 						break;
 					case INSERT_PT_BELOW:
-						if(isNear(dragTarget, target.x, target.y+target.getBlockHeight())){
+						if(isNear(dragTarget, target.x, target.getPositionBottom())){
 							return ptInfo;
 						}
 						break;
 					case INSERT_PT_SUB1:
-						if(isNear(dragTarget, target.x, target.y+20)){
-							trace("bing");
+						if(isNear(dragTarget, target.x, target.getPositionSub1())){
 							return ptInfo;
 						}
 						break;
 					case INSERT_PT_SUB2:
+						if(isNear(dragTarget, target.x, target.getPositionSub2())){
+							return ptInfo;
+						}
 						break;
 				}
 			}
@@ -142,7 +144,7 @@ package blockly.design
 		
 		private function isNear(target:DisplayObject, px:Number, py:Number):Boolean
 		{
-			return Math.abs(target.x - px) <= 10 && Math.abs(target.y - py) <= 6;
+			return Math.abs(target.x - px) <= 10 && Math.abs(target.y - py) <= 10;
 		}
 	}
 }
