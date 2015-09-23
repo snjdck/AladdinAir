@@ -313,18 +313,18 @@ package blockly.design
 				removeFromParentBlock();
 			}else{
 				prevBlock = null;
-				if(null == parentBlock){
-					return;
-				}
-				switch(this){
-					case parentBlock.subBlock1:
-						parentBlock.subBlock1 = null;
-						break;
-					case parentBlock.subBlock2:
-						parentBlock.subBlock2 = null;
-						break;
+				if(parentBlock != null){
+					switch(this){
+						case parentBlock.subBlock1:
+							parentBlock.subBlock1 = null;
+							break;
+						case parentBlock.subBlock2:
+							parentBlock.subBlock2 = null;
+							break;
+					}
 				}
 			}
+			swapToTopLayer();
 		}
 		
 		public function getTotalCode():String
@@ -351,6 +351,33 @@ package blockly.design
 				}
 			}
 			return result + "(" + argList.join(", ") + ")";
+		}
+		
+		private function getArgCount():int
+		{
+			var result:int = 0;
+			for(var i:int=0; i<defaultArgBlockList.length; ++i){
+				var argBlock:BlockBase = argBlockList[i];
+				if(argBlock != null){
+					result += 1 + argBlock.getArgCount();
+				}
+			}
+			return result;
+		}
+		
+		private function swapToTopLayer():void
+		{
+			var topIndex:int = parent.numChildren - 1;
+			if(parent.getChildIndex(this) + getArgCount() == topIndex){
+				return;
+			}
+			parent.setChildIndex(this, topIndex);
+			for(var i:int=0; i<defaultArgBlockList.length; ++i){
+				var argBlock:BlockBase = argBlockList[i];
+				if(argBlock != null){
+					argBlock.swapToTopLayer();
+				}
+			}
 		}
 	}
 }
