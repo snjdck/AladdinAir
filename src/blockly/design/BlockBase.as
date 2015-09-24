@@ -440,30 +440,51 @@ package blockly.design
 			swapToTopLayer();
 		}
 		
-		public function getTotalCode():String
+		public function getTotalCode():Array
 		{
 			var block:BlockBase = this;
 			var result:Array = [];
 			while(block != null){
-				result.push(block.getSelfCode());
+				result = result.concat(block.getSelfCode());
 				block = block.nextBlock;
 			}
-			return result.join("\n");
+			return result;
 		}
 		
-		public function getSelfCode():String
+		public function getSelfCode():Array
 		{
-			var result:String = cmd;
-			var argList:Array = [];
-			for(var i:int=0; i<defaultArgBlockList.length; ++i){
-				var argBlock:BlockBase = argBlockList[i];
-				if(argBlock != null){
-					argList[i] = argBlock.getSelfCode();
-				}else{
-					argList[i] = defaultArgBlockList[i].text;
-				}
+			//*
+			if(type == BLOCK_TYPE_FOR){
+				return [];
 			}
-			return result + "(" + argList.join(", ") + ")";
+			//*/
+			var result:Array = [];
+			if(type == BLOCK_TYPE_IF){
+				if(subBlock1 != null){
+					var subCode:Array = subBlock1.getTotalCode();
+					getArgCode(0, result);
+					result.push("jumpIfFalse(" + subCode.length + ")");
+					result = result.concat(subCode);
+					return result;
+				}
+				return [];
+			}
+			
+			for(var i:int=0; i<defaultArgBlockList.length; ++i){
+				getArgCode(i, result);
+			}
+			result.push("call:" + cmd + "," + defaultArgBlockList.length);
+			return result;
+		}
+		
+		private function getArgCode(index:int, codeList:Array):void
+		{
+			var argBlock:BlockBase = argBlockList[index];
+			if(argBlock != null){
+				codeList.push.apply(null, argBlock.getSelfCode());
+			}else{
+				codeList.push("push:" + defaultArgBlockList[index].text);
+			}
 		}
 		
 		private function getArgCount():int

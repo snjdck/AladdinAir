@@ -87,7 +87,7 @@ package blockly
 			for each(var block:MyBlock in blockList){
 				if(block.isTopBlock()){
 					result.push(block);
-					trace(block.getTotalCode());
+					trace(block.getTotalCode().join("\n"));
 				}
 			}
 			return result;
