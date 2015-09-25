@@ -3,6 +3,8 @@ package blockly.design
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;
 	import flash.display.Sprite;
+	
+	import array.append;
 
 	public class BlockBase extends Sprite
 	{
@@ -445,7 +447,7 @@ package blockly.design
 			var block:BlockBase = this;
 			var result:Array = [];
 			while(block != null){
-				result = result.concat(block.getSelfCode());
+				append(result, block.getSelfCode());
 				block = block.nextBlock;
 			}
 			return result;
@@ -453,38 +455,93 @@ package blockly.design
 		
 		public function getSelfCode():Array
 		{
-			//*
-			if(type == BLOCK_TYPE_FOR){
-				return [];
+			switch(type){
+				case BLOCK_TYPE_FOR:
+					return getForCode();
+				case BLOCK_TYPE_IF:
+					return getIfCode();
+				case BLOCK_TYPE_STATEMENT:
+				case BLOCK_TYPE_EXPRESSION:
+					return getExpressionCode();
 			}
-			//*/
+			return null;
+		}
+		
+		private function getForeverCode():Array
+		{
 			var result:Array = [];
-			if(type == BLOCK_TYPE_IF){
-				if(subBlock1 != null){
-					var subCode:Array = subBlock1.getTotalCode();
-					getArgCode(0, result);
-					result.push("jumpIfFalse(" + subCode.length + ")");
-					result = result.concat(subCode);
-					return result;
-				}
-				return [];
+			if(subBlock1 != null){
+				var sub1Code:Array = subBlock1.getTotalCode();
+				append(result, sub1Code);
+				result.push("jump:-" + sub1Code.length);
+			}else{
+				result.push("jump:0");
 			}
-			
+			return result;
+		}
+		
+		private function getForCode():Array
+		{
+			var argCode:Array = getArgCode(0);
+			var sub1Code:Array;
+			var result:Array = argCode.slice();
+			var subCodeLength:int = 0;
+			if(subBlock1 != null){
+				sub1Code = subBlock1.getTotalCode();
+				subCodeLength = sub1Code.length;
+			}
+			result.push("jumpIfFalse:" + (subCodeLength + 1));
+			if(subBlock1 != null){
+				append(result, sub1Code);
+			}
+			result.push("jump:-" + (argCode.length + subCodeLength + 1));
+			return result;
+		}
+		
+		private function getIfCode():Array
+		{
+			var result:Array = [];
+			var sub1Code:Array;
+			var sub2Code:Array;
+			if(subBlock1 != null && subBlock2 != null){
+				sub1Code = subBlock1.getTotalCode();
+				sub2Code = subBlock2.getTotalCode();
+				append(result, getArgCode(0));
+				result.push("jumpIfFalse:" + (sub1Code.length + 1));
+				result = result.concat(sub1Code);
+				result.push("jump:" + sub2Code.length);
+				result = result.concat(sub2Code);
+			}else if(subBlock1 != null){
+				sub1Code = subBlock1.getTotalCode();
+				append(result, getArgCode(0));
+				result.push("jumpIfFalse:" + sub1Code.length);
+				result = result.concat(sub1Code);
+			}else if(subBlock2 != null){
+				sub2Code = subBlock2.getTotalCode();
+				append(result, getArgCode(0));
+				result.push("jumpIfTrue:" + sub2Code.length);
+				result = result.concat(sub2Code);
+			}
+			return result;
+		}
+		
+		private function getExpressionCode():Array
+		{
+			var result:Array = [];
 			for(var i:int=0; i<defaultArgBlockList.length; ++i){
-				getArgCode(i, result);
+				append(result, getArgCode(i));
 			}
 			result.push("call:" + cmd + "," + defaultArgBlockList.length);
 			return result;
 		}
 		
-		private function getArgCode(index:int, codeList:Array):void
+		private function getArgCode(index:int):Array
 		{
 			var argBlock:BlockBase = argBlockList[index];
 			if(argBlock != null){
-				codeList.push.apply(null, argBlock.getSelfCode());
-			}else{
-				codeList.push("push:" + defaultArgBlockList[index].text);
+				return argBlock.getSelfCode();
 			}
+			return ["push:" + defaultArgBlockList[index].text];
 		}
 		
 		private function getArgCount():int
