@@ -483,18 +483,16 @@ package blockly.design
 		private function getForCode():Array
 		{
 			var argCode:Array = getArgCode(0);
-			var sub1Code:Array;
-			var result:Array = argCode.slice();
-			var subCodeLength:int = 0;
+			var result:Array;
 			if(subBlock1 != null){
-				sub1Code = subBlock1.getTotalCode();
-				subCodeLength = sub1Code.length;
+				result = subBlock1.getTotalCode();
+				result.unshift("jump:" + result.length);
+				append(result, argCode);
+				result.push("jumpIfTrue:-" + (result.length - 1));
+			}else{
+				result = argCode.slice();
+				result.push("jumpIfTrue:-" + result.length);
 			}
-			result.push("jumpIfFalse:" + (subCodeLength + 1));
-			if(subBlock1 != null){
-				append(result, sub1Code);
-			}
-			result.push("jump:-" + (argCode.length + subCodeLength + 1));
 			return result;
 		}
 		
