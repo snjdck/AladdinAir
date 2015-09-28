@@ -20,7 +20,9 @@ package blockly
 			create("setMotor", "set motor%d.motorPort speed %d.motorvalue", BlockBase.BLOCK_TYPE_EXPRESSION);
 			create("add", "%d + %d", BlockBase.BLOCK_TYPE_EXPRESSION);
 			create("for", "forever %d", BlockBase.BLOCK_TYPE_FOR);
-			create("if", "if else you %d", BlockBase.BLOCK_TYPE_IF);
+			create("if", "if %d", BlockBase.BLOCK_TYPE_IF);
+			create(null, "break", BlockBase.BLOCK_TYPE_BREAK);
+			create(null, "continue", BlockBase.BLOCK_TYPE_CONTINUE);
 		}
 		
 		private function create(cmd:String, spec:String, type:int):MyBlock
@@ -33,7 +35,7 @@ package blockly
 			exp.setSpec(spec);
 			addChild(exp);
 			blockList.push(exp);
-			exp.y = 50 * blockList.length;
+			exp.y = 60 * blockList.length;
 			return exp;
 		}
 		
@@ -83,6 +85,7 @@ package blockly
 		
 		private function findRunableBlocks():Array
 		{
+			trace("============================begin");
 			var result:Array = [];
 			for each(var block:MyBlock in blockList){
 				if(block.isTopBlock()){
@@ -90,6 +93,7 @@ package blockly
 					trace(block.getTotalCode().join("\n"));
 				}
 			}
+			trace("============================end");
 			return result;
 		}
 	}

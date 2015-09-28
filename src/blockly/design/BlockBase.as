@@ -5,6 +5,8 @@ package blockly.design
 	import flash.display.Sprite;
 	
 	import array.append;
+	
+	import blockly.OpCode;
 
 	public class BlockBase extends Sprite
 	{
@@ -12,6 +14,8 @@ package blockly.design
 		static public const BLOCK_TYPE_STATEMENT:int = 2;
 		static public const BLOCK_TYPE_FOR:int = 3;
 		static public const BLOCK_TYPE_IF:int = 4;
+		static public const BLOCK_TYPE_BREAK:int = 5;
+		static public const BLOCK_TYPE_CONTINUE:int = 6;
 		
 		static public const INSERT_PT_BELOW:int = 1;
 		static public const INSERT_PT_ABOVE:int = 2;
@@ -300,6 +304,8 @@ package blockly.design
 					BlockDrawer.drawExpression(g, w, h);
 					break;
 				case BLOCK_TYPE_STATEMENT:
+				case BLOCK_TYPE_BREAK:
+				case BLOCK_TYPE_CONTINUE:
 					BlockDrawer.drawStatement(g, w, h);
 					break;
 				case BLOCK_TYPE_FOR:
@@ -463,6 +469,10 @@ package blockly.design
 				case BLOCK_TYPE_STATEMENT:
 				case BLOCK_TYPE_EXPRESSION:
 					return getExpressionCode();
+				case BLOCK_TYPE_BREAK:
+					return ["break"];
+				case BLOCK_TYPE_CONTINUE:
+					return ["continue"];
 			}
 			return null;
 		}
@@ -486,6 +496,7 @@ package blockly.design
 			var result:Array;
 			if(subBlock1 != null){
 				result = subBlock1.getTotalCode();
+				replaceBreakContinue(result, result.length + argCode.length);
 				result.unshift("jump:" + result.length);
 				append(result, argCode);
 				result.push("jumpIfTrue:-" + (result.length - 1));
@@ -494,6 +505,23 @@ package blockly.design
 				result.push("jumpIfTrue:-" + result.length);
 			}
 			return result;
+		}
+		
+		private function replaceBreakContinue(codeList:Array, totalCodeLength:int):void
+		{
+			for(var i:int=0, n:int=codeList.length; i<n; ++i){
+				var code:String = codeList[i];
+				if(code == OpCode.BREAK){
+					codeList[i] = "jump:" + (totalCodeLength - i);
+				}else if(code == OpCode.CONTINUE){
+					var offset:int = n - i - 1;
+					if(offset > 0){
+						codeList[i] = "jump:" + offset;
+					}else{
+						codeList.pop();
+					}
+				}
+			}
 		}
 		
 		private function getIfCode():Array
@@ -519,6 +547,9 @@ package blockly.design
 				append(result, getArgCode(0));
 				result.push("jumpIfTrue:" + sub2Code.length);
 				result = result.concat(sub2Code);
+			}else if(isArgBlock(0)){
+				append(result, getArgCode(0));
+				result.push("pop:1");
 			}
 			return result;
 		}
@@ -540,6 +571,11 @@ package blockly.design
 				return argBlock.getSelfCode();
 			}
 			return ["push:" + defaultArgBlockList[index].text];
+		}
+		
+		private function isArgBlock(index:int):Boolean
+		{
+			return argBlockList[index] != null;
 		}
 		
 		private function getArgCount():int

@@ -23,6 +23,7 @@ package blockly.design
 		
 		static public function drawStatement(g:Graphics, w:int, h:int):void
 		{
+			w = Math.max(w, 60);
 			drawTop(g, w);
 			g.lineTo(w, h);
 			drawBottom(g, h, gapX);
@@ -43,6 +44,7 @@ package blockly.design
 		
 		static public function drawIfElse(g:Graphics, w:int, h:int, child1Height:int, child2Height:int):void
 		{
+			w = Math.max(w, 60);
 			var y1:int = h+child1Height+armH;
 			var y2:int = y1 + child2Height+armH;
 			

@@ -25,7 +25,7 @@ package blockly
 				offset = list[0].length + list.index;
 			}
 			if(offset < spec.length){
-				nodeList.push(spec.slice(offset, -1));
+				nodeList.push(spec.slice(offset));
 			}
 			trace(JSON.stringify(nodeList));
 		}
