@@ -7,10 +7,17 @@ package blockly
 			regOpHandler(OpCode.CALL, __onCall);
 			regOpHandler(OpCode.PUSH, __onPush);
 			regOpHandler(OpCode.JUMP, __onJump);
-			regOpHandler(OpCode.JUMP_IF_FALSE, __onJumpIfFalse);
+//			regOpHandler(OpCode.JUMP_IF_FALSE, __onJumpIfFalse);
 			regOpHandler(OpCode.JUMP_IF_TRUE, __onJumpIfTrue);
 			regOpHandler(OpCode.BREAK, __onDoNothing);
 			regOpHandler(OpCode.CONTINUE, __onDoNothing);
+			
+			regMethodHandler(BuiltInMethod.NOT, onNot);
+		}
+		
+		private function onNot(interpreter:Interpreter, argList:Array):void
+		{
+			interpreter.push(!argList[0]);
 		}
 		
 		private function __onDoNothing():void
@@ -45,12 +52,13 @@ package blockly
 				ip += offset;
 			}
 		}
-		
+		/*
 		private function __onJumpIfFalse(offset:int):void
 		{
 			if(!pop()){
 				ip += offset;
 			}
 		}
+		*/
 	}
 }

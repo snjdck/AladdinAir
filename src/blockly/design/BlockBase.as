@@ -6,7 +6,9 @@ package blockly.design
 	
 	import array.append;
 	
+	import blockly.BuiltInMethod;
 	import blockly.OpCode;
+	import blockly.OpFactory;
 
 	public class BlockBase extends Sprite
 	{
@@ -471,22 +473,21 @@ package blockly.design
 				case BLOCK_TYPE_EXPRESSION:
 					return getExpressionCode();
 				case BLOCK_TYPE_BREAK:
-					return ["break"];
+					return [[OpCode.BREAK]];
 				case BLOCK_TYPE_CONTINUE:
-					return ["continue"];
+					return [[OpCode.CONTINUE]];
 			}
 			return null;
 		}
 		
 		private function getForeverCode():Array
 		{
-			var result:Array = [];
+			var result:Array;
 			if(subBlock1 != null){
-				var sub1Code:Array = subBlock1.getTotalCode();
-				append(result, sub1Code);
-				result.push("jump:-" + sub1Code.length);
+				result = subBlock1.getTotalCode();
+				result.push(OpFactory.Jump(-result.length));
 			}else{
-				result.push("jump:0");
+				result = [OpFactory.Jump(0)];
 			}
 			return result;
 		}
@@ -498,12 +499,12 @@ package blockly.design
 			if(subBlock1 != null){
 				result = subBlock1.getTotalCode();
 				replaceBreakContinue(result, result.length + argCode.length);
-				result.unshift("jump:" + result.length);
+				result.unshift(OpFactory.Jump(result.length));
 				append(result, argCode);
-				result.push("jumpIfTrue:-" + (result.length - 1));
+				result.push(OpFactory.JumpIfTrue(1-result.length));
 			}else{
 				result = argCode.slice();
-				result.push("jumpIfTrue:-" + result.length);
+				result.push(OpFactory.JumpIfTrue(-result.length));
 			}
 			return result;
 		}
@@ -511,13 +512,13 @@ package blockly.design
 		private function replaceBreakContinue(codeList:Array, totalCodeLength:int):void
 		{
 			for(var i:int=0, n:int=codeList.length; i<n; ++i){
-				var code:String = codeList[i];
-				if(code == OpCode.BREAK){
-					codeList[i] = "jump:" + (totalCodeLength - i);
-				}else if(code == OpCode.CONTINUE){
+				var code:Array = codeList[i];
+				if(code[0] == OpCode.BREAK){
+					codeList[i] = OpFactory.Jump(totalCodeLength - i);
+				}else if(code[0] == OpCode.CONTINUE){
 					var offset:int = n - i - 1;
 					if(offset > 0){
-						codeList[i] = "jump:" + offset;
+						codeList[i] = OpFactory.Jump(offset);
 					}else{
 						codeList.pop();
 					}
@@ -534,23 +535,24 @@ package blockly.design
 				sub1Code = subBlock1.getTotalCode();
 				sub2Code = subBlock2.getTotalCode();
 				append(result, getArgCode(0));
-				result.push("jumpIfFalse:" + (sub1Code.length + 1));
-				result = result.concat(sub1Code);
-				result.push("jump:" + sub2Code.length);
-				result = result.concat(sub2Code);
+				result.push(OpFactory.JumpIfTrue(sub2Code.length + 1));
+				append(result, sub2Code);
+				result.push(OpFactory.Jump(sub1Code.length));
+				append(result, sub1Code);
 			}else if(subBlock1 != null){
 				sub1Code = subBlock1.getTotalCode();
 				append(result, getArgCode(0));
-				result.push("jumpIfFalse:" + sub1Code.length);
-				result = result.concat(sub1Code);
+				result.push(OpFactory.Call(BuiltInMethod.NOT, 1));
+				result.push(OpFactory.JumpIfTrue(sub1Code.length));
+				append(result, sub1Code);
 			}else if(subBlock2 != null){
 				sub2Code = subBlock2.getTotalCode();
 				append(result, getArgCode(0));
-				result.push("jumpIfTrue:" + sub2Code.length);
-				result = result.concat(sub2Code);
+				result.push(OpFactory.JumpIfTrue(sub2Code.length));
+				append(result, sub2Code);
 			}else if(isArgBlock(0)){
 				append(result, getArgCode(0));
-				result.push("pop:1");
+				result.push(OpFactory.Pop(1));
 			}
 			return result;
 		}
@@ -561,7 +563,7 @@ package blockly.design
 			for(var i:int=0; i<defaultArgBlockList.length; ++i){
 				append(result, getArgCode(i));
 			}
-			result.push("call:" + cmd + "," + defaultArgBlockList.length);
+			result.push(OpFactory.Call(cmd, defaultArgBlockList.length));
 			return result;
 		}
 		
@@ -571,7 +573,7 @@ package blockly.design
 			if(argBlock != null){
 				return argBlock.getSelfCode();
 			}
-			return ["push:" + defaultArgBlockList[index].text];
+			return [OpFactory.Push(defaultArgBlockList[index].text)];
 		}
 		
 		private function isArgBlock(index:int):Boolean
