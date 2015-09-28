@@ -11,6 +11,8 @@ package blockly
 			regOpHandler(OpCode.JUMP_IF_TRUE, __onJumpIfTrue);
 			regOpHandler(OpCode.BREAK, __onDoNothing);
 			regOpHandler(OpCode.CONTINUE, __onDoNothing);
+			regOpHandler(OpCode.INVOKE, __onInvoke);
+			regOpHandler(OpCode.RETURN, __onReturn);
 			
 			regMethodHandler(BuiltInMethod.NOT, onNot);
 		}
@@ -60,5 +62,16 @@ package blockly
 			}
 		}
 		*/
+		
+		private function __onInvoke(address:int):void
+		{
+			push(ip);
+			ip = address;
+		}
+		
+		private function __onReturn():void
+		{
+			ip = pop();
+		}
 	}
 }
