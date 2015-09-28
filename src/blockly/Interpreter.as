@@ -25,6 +25,11 @@ package blockly
 			methodDict[methodName] = handler;
 		}
 		
+		public function isFinish():Boolean
+		{
+			return ip < codeList.length;
+		}
+		
 		public function execute(codeList:Array):void
 		{
 			this.codeList = codeList;

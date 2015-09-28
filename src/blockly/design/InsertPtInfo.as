@@ -37,7 +37,7 @@ package blockly.design
 					block.layoutAfterInsertBelow();
 					var topParent:BlockBase = block.topBlock.parentBlock;
 					if(topParent != null){
-						topParent.redrawControlBlock();
+						topParent.redrawControlBlockRecursively();
 					}
 					break;
 				case BlockBase.INSERT_PT_ABOVE:
@@ -48,12 +48,12 @@ package blockly.design
 				case BlockBase.INSERT_PT_SUB1:
 					target.addBlockToLast(block.subBlock1);
 					block.subBlock1 = target;
-					block.redrawControlBlock();
+					block.redrawControlBlockRecursively();
 					break;
 				case BlockBase.INSERT_PT_SUB2:
 					target.addBlockToLast(block.subBlock2);
 					block.subBlock2 = target;
-					block.redrawControlBlock();
+					block.redrawControlBlockRecursively();
 					break;
 				case BlockBase.INSERT_PT_WRAP:
 					if(0 == index){

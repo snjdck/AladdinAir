@@ -21,12 +21,16 @@ package blockly.design
 			g.drawRoundRect(2, 0, w, h, h, h);
 		}
 		
-		static public function drawStatement(g:Graphics, w:int, h:int):void
+		static public function drawStatement(g:Graphics, w:int, h:int, hasNext:Boolean=true):void
 		{
 			w = Math.max(w, 60);
 			drawTop(g, w);
 			g.lineTo(w, h);
-			drawBottom(g, h, gapX);
+			if(hasNext){
+				drawBottom(g, h, gapX);
+			}else{
+				g.lineTo(gapX, h);
+			}
 			g.lineTo(gapX, 0);
 		}
 		

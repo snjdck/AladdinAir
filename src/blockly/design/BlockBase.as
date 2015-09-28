@@ -294,7 +294,6 @@ package blockly.design
 		{
 			var w:int = _totalWidth;
 			var h:int = 20;
-			trace("-----------------", cmd, type);
 			
 			var g:Graphics = graphics;
 			g.clear();
@@ -304,9 +303,11 @@ package blockly.design
 					BlockDrawer.drawExpression(g, w, h);
 					break;
 				case BLOCK_TYPE_STATEMENT:
+					BlockDrawer.drawStatement(g, w, h);
+					break;
 				case BLOCK_TYPE_BREAK:
 				case BLOCK_TYPE_CONTINUE:
-					BlockDrawer.drawStatement(g, w, h);
+					BlockDrawer.drawStatement(g, w, h, false);
 					break;
 				case BLOCK_TYPE_FOR:
 					BlockDrawer.drawFor(g, w, h, getSub1Height());
@@ -442,7 +443,7 @@ package blockly.design
 					}
 				}
 				if(topParent != null){
-					topParent.redrawControlBlock();
+					topParent.redrawControlBlockRecursively();
 				}
 			}
 			swapToTopLayer();
@@ -603,6 +604,15 @@ package blockly.design
 					argBlock.swapToTopLayer();
 				}
 			}
+		}
+		
+		public function redrawControlBlockRecursively():void
+		{
+			var topParent:BlockBase = this;
+			do{
+				topParent.redrawControlBlock();
+				topParent = topParent.topBlock.parentBlock;
+			}while(topParent != null);
 		}
 		
 		public function redrawControlBlock():void

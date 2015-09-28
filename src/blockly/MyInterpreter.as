@@ -9,6 +9,13 @@ package blockly
 			regOpHandler(OpCode.JUMP, __onJump);
 			regOpHandler(OpCode.JUMP_IF_FALSE, __onJumpIfFalse);
 			regOpHandler(OpCode.JUMP_IF_TRUE, __onJumpIfTrue);
+			regOpHandler(OpCode.BREAK, __onDoNothing);
+			regOpHandler(OpCode.CONTINUE, __onDoNothing);
+		}
+		
+		private function __onDoNothing():void
+		{
+			++ip;
 		}
 		
 		private function __onCall(methodName:String, argCount:int):void
