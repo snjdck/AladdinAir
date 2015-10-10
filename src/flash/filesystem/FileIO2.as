@@ -1,6 +1,8 @@
 package flash.filesystem
 {
 	import flash.utils.ByteArray;
+	
+	import lambda.call;
 
 	final public class FileIO2
 	{
@@ -38,7 +40,7 @@ package flash.filesystem
 			fs.close();
 		}
 		
-		static public function Traverse(fileOrPath:*, handler:Function, fileFlag:Boolean=true, dirFlag:Boolean=false):void
+		static public function Traverse(fileOrPath:*, handler:Object, fileFlag:Boolean=true, dirFlag:Boolean=false):void
 		{
 			if(!(fileFlag || dirFlag)){
 				return;
@@ -49,11 +51,11 @@ package flash.filesystem
 			}
 		}
 		
-		static private function TraverseImpl(file:File, handler:Function, fileFlag:Boolean, dirFlag:Boolean):Boolean
+		static private function TraverseImpl(file:File, handler:Object, fileFlag:Boolean, dirFlag:Boolean):Boolean
 		{
 			if(false == file.isDirectory){
-				return fileFlag && handler(file);
-			}else if(dirFlag && handler(file)){
+				return fileFlag && call(handler, file);
+			}else if(dirFlag && call(handler, file)){
 				return true;
 			}
 			for each(var subFile:File in file.getDirectoryListing()){
