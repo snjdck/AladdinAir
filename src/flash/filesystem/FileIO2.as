@@ -38,16 +38,31 @@ package flash.filesystem
 			fs.close();
 		}
 		
-		static public function Traverse(fileOrPath:*, handler:Function):void
+		static public function Traverse(fileOrPath:*, handler:Function, fileFlag:Boolean=true, dirFlag:Boolean=false):void
 		{
-			var file:File = CastFile(fileOrPath);
-			if(false == file.isDirectory){
-				handler(file);
+			if(!(fileFlag || dirFlag)){
 				return;
 			}
-			for each(var subFile:File in file.getDirectoryListing()){
-				Traverse(subFile, handler);
+			var file:File = CastFile(fileOrPath);
+			if(file.exists){
+				TraverseImpl(file, handler, fileFlag, dirFlag);
 			}
+		}
+		
+		static private function TraverseImpl(file:File, handler:Function, fileFlag:Boolean, dirFlag:Boolean):Boolean
+		{
+			if(false == file.isDirectory){
+				return fileFlag && handler(file);
+			}else if(dirFlag && handler(file)){
+				return true;
+			}
+			for each(var subFile:File in file.getDirectoryListing()){
+				var stopFlag:Boolean = TraverseImpl(subFile, handler, fileFlag, dirFlag);
+				if(stopFlag){
+					return true;
+				}
+			}
+			return false;
 		}
 		
 		/** 修改文件扩展名 */
