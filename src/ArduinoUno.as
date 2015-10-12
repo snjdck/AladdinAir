@@ -7,6 +7,7 @@ package
 	import flash.events.ProgressEvent;
 	import flash.filesystem.File;
 	import flash.filesystem.FileIO2;
+	import flash.utils.IDataInput;
 	
 	public class ArduinoUno extends Sprite
 	{
@@ -21,6 +22,8 @@ package
 		private var elf:String = "project.elf";
 		private var eep:String = "project.eep";
 		private var hex:String = "project.hex";
+		
+		private var errorMsg:String;
 		
 		public function ArduinoUno()
 		{
@@ -72,8 +75,13 @@ package
 		private function __onError(evt:ProgressEvent):void
 		{
 			var process:NativeProcess = evt.target as NativeProcess;
-			var str:String = process.standardError.readMultiByte(process.standardError.bytesAvailable, "ascii");
-			trace(str);
+			var input:IDataInput = process.standardError;
+			var msg:String = input.readMultiByte(input.bytesAvailable, "ascii");
+			if(null == errorMsg){
+				errorMsg = msg;
+			}else{
+				errorMsg += msg;
+			}
 		}
 		
 		private var successCount:int = 0;
@@ -81,9 +89,10 @@ package
 		private function __onExit2(evt:NativeProcessExitEvent):void
 		{
 			if(evt.exitCode > 0){
-				trace(evt.exitCode);
+				trace(evt.exitCode, errorMsg);
 			}
 			runTask();
+			errorMsg = null;
 		}
 		private function runTask():void
 		{
@@ -103,12 +112,13 @@ package
 		private function __onExit(evt:NativeProcessExitEvent):void
 		{
 			if(evt.exitCode > 0){
-				trace(evt.exitCode);
+				trace(evt.exitCode, errorMsg);
 			}
 			if(++successCount >= taskList.length){
 				trace("complete1");
 				runTask();
 			}
+			errorMsg = null;
 		}
 		
 		private var fileDict:Object = {};
