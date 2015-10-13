@@ -1,5 +1,9 @@
 package
 {
+	import com.arduino.BoardInfo;
+	import com.arduino.BoardInfoFactory;
+	import com.arduino.BoardType;
+	
 	import flash.desktop.NativeProcess;
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.display.Sprite;
@@ -23,10 +27,14 @@ package
 		private var eep:String = "project.eep";
 		private var hex:String = "project.hex";
 		
+		private var boardInfo:BoardInfo;
+		
 		private var errorMsg:String;
 		
 		public function ArduinoUno()
 		{
+			boardInfo = BoardInfoFactory.GetBoardInfo(BoardType.uno);
+			
 			libList.push(sdk.resolvePath("hardware/arduino/avr/cores/arduino"));
 			libList.push(sdk.resolvePath("hardware/arduino/avr/variants/standard"));
 			libList.push(sdk.resolvePath("hardware/arduino/avr/libraries/Wire"));
@@ -49,9 +57,7 @@ package
 			taskList.unshift(info);
 			objList.unshift("project.cpp.o");
 			
-			for each(var path:String in sysList){
-				linkList.push(genLink(path));
-			}
+			linkList.push(genLink());
 			linkList.push(genElf());
 			linkList.push(copyObj());
 			linkList.push(copyHex());
@@ -62,14 +68,8 @@ package
 				process.addEventListener(NativeProcessExitEvent.EXIT, __onExit);
 				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, __onError);
 				process.start(task);
+				printProcessInfo(task);
 			}
-		}
-		
-		private function createInfo():NativeProcessStartupInfo
-		{
-			var info:NativeProcessStartupInfo = new NativeProcessStartupInfo();
-			info.workingDirectory = workDir;
-			return info;
 		}
 		
 		private function __onError(evt:ProgressEvent):void
@@ -105,8 +105,7 @@ package
 			process.addEventListener(NativeProcessExitEvent.EXIT, __onExit2);
 			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, __onError);
 			process.start(task);
-			trace(task.executable.nativePath);
-			trace(task.arguments.join(" "));
+			printProcessInfo(task);
 		}
 		
 		private function __onExit(evt:NativeProcessExitEvent):void
@@ -226,7 +225,7 @@ package
 			info.arguments = argList;
 		}
 		
-		private function genLink(objPath:String):NativeProcessStartupInfo
+		private function genLink():NativeProcessStartupInfo
 		{
 			var info:NativeProcessStartupInfo = createInfo();
 			info.executable = bin.resolvePath("avr-ar.exe");
@@ -235,7 +234,9 @@ package
 			
 			argList.push("rcs");
 			argList.push("core.a");
-			argList.push(objPath);
+			for each(var path:String in sysList){
+				argList.push(path);
+			}
 			
 			return info;
 		}
@@ -250,7 +251,7 @@ package
 			argList.push("-w");
 			argList.push("-Os");
 			argList.push("-Wl,--gc-sections");
-			argList.push("-mmcu=atmega328p");
+			argList.push("-mmcu=" + boardInfo.partno);
 			argList.push("-o");
 			argList.push(elf);
 			for each(var obj:String in objList){
@@ -313,17 +314,32 @@ package
 			argList.push("-C");
 			argList.push(bin.resolvePath("../etc/avrdude.conf").nativePath);
 			argList.push("-v");
-			argList.push("-patmega328p");
-			argList.push("-carduino"); 
+			argList.push("-p");
+			argList.push(boardInfo.partno);
+			argList.push("-c");
+			argList.push(boardInfo.programmer);
 			argList.push("-P");
 			argList.push("COM4");
 			argList.push("-b");
-			argList.push("115200");
+			argList.push(boardInfo.baudrate.toString());
 			argList.push("-D");
 			argList.push("-U");
 			argList.push("flash:w:"+hex+":i");
 			
 			return info;
+		}
+		
+		private function createInfo():NativeProcessStartupInfo
+		{
+			var info:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			info.workingDirectory = workDir;
+			return info;
+		}
+		
+		static private function printProcessInfo(info:NativeProcessStartupInfo):void
+		{
+//			trace(info.executable.nativePath);
+			trace(info.arguments.join(" "));
 		}
 	}
 }
