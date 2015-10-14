@@ -9,4 +9,5 @@
 		<!-- <renderMode>direct</renderMode> -->
 		<!-- <depthAndStencil>true</depthAndStencil> -->
 	</initialWindow>
+	<!-- <supportedProfiles>extendedDesktop</supportedProfiles> -->
 </application>

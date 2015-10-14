@@ -4,6 +4,7 @@ package blockly
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	
+	import blockly.design.ArduinoOutput;
 	import blockly.design.BlockBase;
 	import blockly.design.InsertPtInfo;
 	import blockly.design.MyBlock;
@@ -19,8 +20,8 @@ package blockly
 			
 			create("setMotor", "set motor%d.motorPort speed %d.motorvalue", BlockBase.BLOCK_TYPE_EXPRESSION);
 			create("add", "%d + %d", BlockBase.BLOCK_TYPE_EXPRESSION);
-			create("for", "forever %d", BlockBase.BLOCK_TYPE_FOR);
-			create("if", "if %d", BlockBase.BLOCK_TYPE_IF);
+			create(null, "forever %d", BlockBase.BLOCK_TYPE_FOR);
+			create(null, "if %d", BlockBase.BLOCK_TYPE_IF);
 			create(null, "break", BlockBase.BLOCK_TYPE_BREAK);
 			create(null, "continue", BlockBase.BLOCK_TYPE_CONTINUE);
 		}
@@ -90,7 +91,10 @@ package blockly
 			for each(var block:MyBlock in blockList){
 				if(block.isTopBlock()){
 					result.push(block);
-					trace(block.getTotalCode().join("\n"));
+//					trace(block.getTotalCode().join("\n"));
+					var temp:ArduinoOutput = new ArduinoOutput();
+					block.outputCodeAll(temp, 0);
+					trace(temp);
 				}
 			}
 			trace("============================end");

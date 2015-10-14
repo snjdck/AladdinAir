@@ -9,6 +9,8 @@ package blockly.design
 	import blockly.BuiltInMethod;
 	import blockly.OpCode;
 	import blockly.OpFactory;
+	
+	import string.repeat;
 
 	public class BlockBase extends Sprite
 	{
@@ -627,6 +629,66 @@ package blockly.design
 		public function isNearTo(px:Number, py:Number):Boolean
 		{
 			return Math.abs(x - px) <= 10 && Math.abs(y - py) <= 10;
+		}
+		
+		private function outputExpression(result:ArduinoOutput):String
+		{
+			var argList:Array = [];
+			for(var i:int=0; i<defaultArgBlockList.length; ++i){
+				argList.push(outputArg(result, i));
+			}
+			return cmd + "(" + argList.join(", ") + ")";
+		}
+		
+		private function outputArg(result:ArduinoOutput, index:int):String
+		{
+			var argBlock:BlockBase = argBlockList[index];
+			if(argBlock != null){
+				return argBlock.outputExpression(result);
+			}
+			return defaultArgBlockList[index].text;
+		}
+		
+		public function outputCodeAll(result:ArduinoOutput, indent:int):void
+		{
+			var block:BlockBase = this;
+			while(block != null){
+				block.outputCodeSelf(result, indent);
+				block = block.nextBlock;
+			}
+		}
+		
+		private function outputCodeSelf(result:ArduinoOutput, indent:int):void
+		{
+			switch(type){
+				case BLOCK_TYPE_BREAK:
+					result.addCode("break;", indent);
+					break;
+				case BLOCK_TYPE_CONTINUE:
+					result.addCode("continue;", indent);
+					break;
+				case BLOCK_TYPE_STATEMENT:
+					result.addCode(outputExpression(result) + ";", indent);
+					break;
+				case BLOCK_TYPE_FOR:
+					result.addCode("while(" + outputArg(result, 0) + "){", indent);
+					if(subBlock1 != null){
+						subBlock1.outputCodeAll(result, indent + 1);
+					}
+					result.addCode("}", indent);
+					break;
+				case BLOCK_TYPE_IF:
+					result.addCode("if(" + outputArg(result, 0) + "){", indent);
+					if(subBlock1 != null){
+						subBlock1.outputCodeAll(result, indent + 1);
+					}
+					if(subBlock2 != null){
+						result.addCode("}else{", indent);
+						subBlock2.outputCodeAll(result, indent + 1);
+					}
+					result.addCode("}", indent);
+					break;
+			}
 		}
 	}
 }
