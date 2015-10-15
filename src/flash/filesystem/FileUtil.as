@@ -4,14 +4,16 @@ package flash.filesystem
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
 	import flash.utils.ByteArray;
+	
+	import stdlib.constant.CharSet;
 
 	public class FileUtil
 	{
 		static private const fs:FileStream = new FileStream();
 		
-		static public function LoadFile(path:String):String
+		static public function LoadFile(path:String, charSet:String=null):String
 		{
-			return ReadString(File.applicationDirectory.resolvePath(path));
+			return ReadString(File.applicationDirectory.resolvePath(path), charSet);
 		}
 		
 		static public function ReadBytes(file:File):ByteArray
@@ -23,18 +25,24 @@ package flash.filesystem
 			return result;
 		}
 		
-		static public function ReadString(file:File):String
+		static public function ReadString(file:File, charSet:String=null):String
 		{
+			if(null == charSet){
+				charSet = CharSet.UTF_8;
+			}
 			fs.open(file, FileMode.READ);
-			var result:String = fs.readUTFBytes(fs.bytesAvailable);
+			var result:String = fs.readMultiByte(fs.bytesAvailable, charSet);
 			fs.close();
 			return result;
 		}
 		
-		static public function WriteString(file:File, str:String):void
+		static public function WriteString(file:File, str:String, charSet:String=null):void
 		{
+			if(null == charSet){
+				charSet = CharSet.UTF_8;
+			}
 			fs.open(file, FileMode.WRITE);
-			fs.writeUTFBytes(str);
+			fs.writeMultiByte(str, charSet);
 			fs.close();
 		}
 		
