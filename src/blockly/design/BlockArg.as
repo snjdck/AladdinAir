@@ -8,13 +8,17 @@ package blockly.design
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFieldType;
 	
+	import blockly.BlockContextMenuMgr;
+	
 	public class BlockArg extends Sprite implements IBlockArg
 	{
+		public var block:BlockBase;
 		private var tf:TextField;
 		private var type:Array;
 		
-		public function BlockArg(type:Array)
+		public function BlockArg(block:BlockBase, type:Array)
 		{
+			this.block = block;
 			this.type = type;
 			tf = new TextField();
 			tf.autoSize = TextFieldAutoSize.LEFT;
@@ -29,7 +33,7 @@ package blockly.design
 			if(evt.target != this){
 				return;
 			}
-			trace("arrao click");
+			BlockContextMenuMgr.Instance.show(this, type[2]);
 		}
 		
 		private function __onMouseDown(evt:MouseEvent):void

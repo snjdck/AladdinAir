@@ -9,8 +9,6 @@ package blockly.design
 	import blockly.BuiltInMethod;
 	import blockly.OpCode;
 	import blockly.OpFactory;
-	
-	import string.repeat;
 
 	public class BlockBase extends Sprite
 	{
@@ -29,6 +27,7 @@ package blockly.design
 		static public const INSERT_PT_CHILD:int = 6;
 		
 		public var type:int;
+		public var flag:uint;
 		
 		private var _nextBlock:BlockBase;
 		private var _prevBlock:BlockBase;

@@ -76,7 +76,7 @@ package blockly.design
 					tf.text = node;
 				}else{
 					var info:Array = node;
-					var ui:BlockArg = new BlockArg(info);
+					var ui:BlockArg = new BlockArg(this, info);
 					addChild(ui);
 					ui.text = info[1];
 					defaultArgBlockList.push(ui);
