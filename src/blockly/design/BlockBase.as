@@ -9,6 +9,8 @@ package blockly.design
 	import blockly.BuiltInMethod;
 	import blockly.OpCode;
 	import blockly.OpFactory;
+	
+	import string.genFuncCall;
 
 	public class BlockBase extends Sprite
 	{
@@ -632,11 +634,16 @@ package blockly.design
 		
 		private function outputExpression(result:ArduinoOutput):String
 		{
+			return onGenArduinoExpression(result, collectArgs(result));
+		}
+		
+		private function collectArgs(result:ArduinoOutput):Array
+		{
 			var argList:Array = [];
 			for(var i:int=0; i<defaultArgBlockList.length; ++i){
 				argList.push(outputArg(result, i));
 			}
-			return cmd + "(" + argList.join(", ") + ")";
+			return argList;
 		}
 		
 		private function outputArg(result:ArduinoOutput, index:int):String
@@ -667,7 +674,7 @@ package blockly.design
 					result.addCode("continue;", indent);
 					break;
 				case BLOCK_TYPE_STATEMENT:
-					result.addCode(outputExpression(result) + ";", indent);
+					onGenArduinoStatement(result, collectArgs(result), indent);
 					break;
 				case BLOCK_TYPE_FOR:
 					result.addCode("while(" + outputArg(result, 0) + "){", indent);
@@ -688,6 +695,16 @@ package blockly.design
 					result.addCode("}", indent);
 					break;
 			}
+		}
+		
+		protected function onGenArduinoExpression(result:ArduinoOutput, argList:Array):String
+		{
+			return genFuncCall(cmd, argList);
+		}
+		
+		protected function onGenArduinoStatement(result:ArduinoOutput, argList:Array, indent:int):void
+		{
+			result.addCode(genFuncCall(cmd, argList) + ";", indent);
 		}
 	}
 }

@@ -7,11 +7,13 @@ package blockly.design
 	public class ArduinoOutput
 	{
 		private var includeList:Array;
+		private var varList:Array;
 		private var codeList:Array;
 		
 		public function ArduinoOutput()
 		{
 			includeList = [];
+			varList = [];
 			codeList = [];
 		}
 		
@@ -27,7 +29,8 @@ package blockly.design
 		
 		public function addVarDefine(varType:String, varName:String):void
 		{
-			
+			var statement:String = varType + " " + varName + ";";
+			pushIfNotHas(varList, statement);
 		}
 		
 		public function addCode(code:String, indent:int):void
@@ -38,8 +41,8 @@ package blockly.design
 		public function toString():String
 		{
 			var result:String = "";
-			result += includeList.join("\n");
-			result += "\n";
+			result += includeList.join("\n") + "\n\n";
+			result += varList.join("\n") + "\n\n";
 			result += codeList.join("\n");
 			return result;
 		}

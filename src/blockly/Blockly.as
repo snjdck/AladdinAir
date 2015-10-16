@@ -4,6 +4,7 @@ package blockly
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	
+	import blockly.blocks.RunMotorBlock;
 	import blockly.design.ArduinoOutput;
 	import blockly.design.BlockBase;
 	import blockly.design.InsertPtInfo;
@@ -18,7 +19,7 @@ package blockly
 			create("showFace", "show face %d.port x:%2 y:%n characters:%s", BlockBase.BLOCK_TYPE_STATEMENT, BlockFlag.PORT_BLUE);
 			create("showFace", "show face %d.port x:%3 y:%n characters:%s", BlockBase.BLOCK_TYPE_STATEMENT, BlockFlag.PORT_BLUE);
 			
-			create("runMotor", "set motor%d.motorPort speed %d.motorvalue", BlockBase.BLOCK_TYPE_STATEMENT, BlockFlag.PORT_RED);
+			create("runMotor", "set motor%d.motorPort speed %d.motorvalue", BlockBase.BLOCK_TYPE_STATEMENT, BlockFlag.PORT_RED, RunMotorBlock);
 			create("runServo", "set servo %d.servoPort %d.slot angle %d.servovalue", BlockBase.BLOCK_TYPE_STATEMENT, BlockFlag.PORT_RED);
 			create("getUltrasonic", "ultrasonic sensor %d.normalPort distance", BlockBase.BLOCK_TYPE_EXPRESSION, BlockFlag.PORT_YELLOW);
 			
@@ -29,9 +30,9 @@ package blockly
 			create(null, "continue", BlockBase.BLOCK_TYPE_CONTINUE);
 		}
 		
-		private function create(cmd:String, spec:String, type:int, flag:uint=0):MyBlock
+		private function create(cmd:String, spec:String, type:int, flag:uint=0, blockCls:Class=null):MyBlock
 		{
-			var exp:MyBlock = new MyBlock();
+			var exp:MyBlock = blockCls ? new blockCls() : new MyBlock();
 			exp.flag = flag;
 			exp.type = type;
 			exp.addEventListener("drag_begin", __onDragBegin);
