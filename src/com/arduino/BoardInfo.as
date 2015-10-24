@@ -1,5 +1,7 @@
 package com.arduino
 {
+	import flash.filesystem.File;
+
 	public class BoardInfo
 	{
 		public var partno:String;
@@ -11,6 +13,14 @@ package com.arduino
 			this.partno = partno;
 			this.programmer = programmer;
 			this.baudrate = baudrate;
+		}
+		
+		public function getLibList(rootDir:File, result:Array):void
+		{
+		}
+		
+		public function getCompileArgList(result:Vector.<String>):void
+		{
 		}
 	}
 }

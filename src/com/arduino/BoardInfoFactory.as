@@ -7,9 +7,9 @@ package com.arduino
 			switch(boardType)
 			{
 				case BoardType.uno:
-					return new BoardInfo("atmega328p", "arduino", 115200);
+					return new BoardUno();
 				case BoardType.leonardo:
-					return new BoardInfo("atmega32u4", "avr109", 57600);
+					return new BoardLeonardo();
 				case BoardType.mega1280:
 					return new BoardInfo("atmega1280", "wiring", 57600);
 				case BoardType.mega2560:

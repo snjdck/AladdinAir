@@ -36,7 +36,7 @@ package
 			boardInfo = BoardInfoFactory.GetBoardInfo(BoardType.uno);
 			
 			libList.push(sdk.resolvePath("hardware/arduino/avr/cores/arduino"));
-			libList.push(sdk.resolvePath("hardware/arduino/avr/variants/standard"));
+			boardInfo.getLibList(sdk, libList);
 			libList.push(sdk.resolvePath("hardware/arduino/avr/libraries/Wire"));
 			libList.push(sdk.resolvePath("hardware/arduino/avr/libraries/Wire/utility"));
 			libList.push(sdk.resolvePath("hardware/arduino/avr/libraries/SoftwareSerial"));
@@ -181,9 +181,8 @@ package
 					isCpp = true;
 					break;
 				case "s":
-					info.executable = bin.resolvePath("avr-gcc.exe");
 					isAsm = true;
-					break;
+					//fall through
 				case "c":
 					info.executable = bin.resolvePath("avr-gcc.exe");
 					break;
@@ -208,11 +207,11 @@ package
 				argList.push("-fdata-sections");
 				argList.push("-MMD");
 			}
-			argList.push("-mmcu=atmega328p");
+			argList.push("-mmcu="+boardInfo.partno);
 			argList.push("-DF_CPU=16000000L");
 			argList.push("-DARDUINO=10605");
-			argList.push("-DARDUINO_AVR_UNO");
 			argList.push("-DARDUINO_ARCH_AVR");
+			boardInfo.getCompileArgList(argList);
 			
 			for each(var path:File in libList){
 				argList.push("-I", path.nativePath);
