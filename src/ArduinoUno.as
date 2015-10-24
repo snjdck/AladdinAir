@@ -12,6 +12,7 @@ package
 	import flash.filesystem.File;
 	import flash.filesystem.FileIO2;
 	import flash.utils.IDataInput;
+	import flash.utils.setTimeout;
 	
 	public class ArduinoUno extends Sprite
 	{
@@ -20,7 +21,6 @@ package
 		
 		private var libList:Array = [];
 		private var taskList:Array = [];
-		private var linkList:Array = [];
 		private var workDir:File = File.desktopDirectory.resolvePath("test");
 		
 		private var elf:String = "project.elf";
@@ -33,7 +33,7 @@ package
 		
 		public function ArduinoUno()
 		{
-			boardInfo = BoardInfoFactory.GetBoardInfo(BoardType.uno);
+			boardInfo = BoardInfoFactory.GetBoardInfo(BoardType.leonardo);
 			
 			libList.push(sdk.resolvePath("hardware/arduino/avr/cores/arduino"));
 			boardInfo.getLibList(sdk, libList);
@@ -53,71 +53,43 @@ package
 			}
 			
 			var info:NativeProcessStartupInfo = createInfo();
-			compile(info, File.desktopDirectory.resolvePath("project_9_6.cpp"), "project.cpp.o");
+			compile(info, File.desktopDirectory.resolvePath("project_9_6/project_9_6.cpp"), "project.cpp.o");
 			taskList.unshift(info);
 			objList.unshift("project.cpp.o");
 			
-			linkList.push(genLink());
-			linkList.push(genElf());
-			linkList.push(copyObj());
-			linkList.push(copyHex());
-			linkList.push(upload());
+			taskList.push(genLink());
+			taskList.push(genElf());
+			taskList.push(copyObj());
+			taskList.push(copyHex());
+			boardInfo.prepareUpload(taskList, "COM11");
+			taskList.push(upload("COM14"));
 			
-			for each(var task:NativeProcessStartupInfo in taskList){
-				var process:NativeProcess = new NativeProcess();
-				process.addEventListener(NativeProcessExitEvent.EXIT, __onExit);
-				process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, __onError);
-				process.start(task);
-				printProcessInfo(task);
-			}
-		}
-		
-		private function __onError(evt:ProgressEvent):void
-		{
-			var process:NativeProcess = evt.target as NativeProcess;
-			var input:IDataInput = process.standardError;
-			var msg:String = input.readMultiByte(input.bytesAvailable, "ascii");
-			if(null == errorMsg){
-				errorMsg = msg;
-			}else{
-				errorMsg += msg;
-			}
-		}
-		
-		private var successCount:int = 0;
-		
-		private function __onExit2(evt:NativeProcessExitEvent):void
-		{
-			if(evt.exitCode > 0){
-				trace(evt.exitCode, errorMsg);
-			}
+			totalCount = taskList.length;
 			runTask();
-			errorMsg = null;
 		}
-		private function runTask():void
-		{
-			if(linkList.length <= 0){
-				trace("complete2");
-				return;
-			}
-			var task:NativeProcessStartupInfo = linkList.shift();
-			var process:NativeProcess = new NativeProcess();
-			process.addEventListener(NativeProcessExitEvent.EXIT, __onExit2);
-			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, __onError);
-			process.start(task);
-			printProcessInfo(task);
-		}
+		
+		private var totalCount:int;
 		
 		private function __onExit(evt:NativeProcessExitEvent):void
 		{
 			if(evt.exitCode > 0){
 				trace(evt.exitCode, errorMsg);
-			}
-			if(++successCount >= taskList.length){
-				trace("complete1");
+			}else{
+				trace((1 - taskList.length / totalCount) * 100);
 				runTask();
 			}
 			errorMsg = null;
+		}
+		
+		private function runTask():void
+		{
+			if(taskList.length > 1){
+				execProcess(taskList.shift());
+			}else if(taskList.length > 0){
+				setTimeout(execProcess, 500, taskList.shift());
+			}else{
+				trace("complete2");
+			}
 		}
 		
 		private var fileDict:Object = {};
@@ -302,7 +274,7 @@ package
 			return info;
 		}
 		
-		private function upload():NativeProcessStartupInfo
+		private function upload(port:String):NativeProcessStartupInfo
 		{
 			var info:NativeProcessStartupInfo = createInfo();
 			info.executable = bin.resolvePath("avrdude.exe");
@@ -318,7 +290,7 @@ package
 			argList.push("-c");
 			argList.push(boardInfo.programmer);
 			argList.push("-P");
-			argList.push("COM4");
+			argList.push(port);
 			argList.push("-b");
 			argList.push(boardInfo.baudrate.toString());
 			argList.push("-D");
@@ -335,10 +307,31 @@ package
 			return info;
 		}
 		
+		private function execProcess(info:NativeProcessStartupInfo):void
+		{
+			var process:NativeProcess = new NativeProcess();
+			process.addEventListener(NativeProcessExitEvent.EXIT, __onExit);
+			process.addEventListener(ProgressEvent.STANDARD_ERROR_DATA, __onError);
+			process.start(info);
+			printProcessInfo(info);
+		}
+		
+		private function __onError(evt:ProgressEvent):void
+		{
+			var process:NativeProcess = evt.target as NativeProcess;
+			var input:IDataInput = process.standardError;
+			var msg:String = input.readMultiByte(input.bytesAvailable, "ascii");
+			if(null == errorMsg){
+				errorMsg = msg;
+			}else{
+				errorMsg += msg;
+			}
+		}
+		
 		static private function printProcessInfo(info:NativeProcessStartupInfo):void
 		{
 //			trace(info.executable.nativePath);
-			trace(info.arguments.join(" "));
+//			trace(info.arguments.join(" "));
 		}
 	}
 }

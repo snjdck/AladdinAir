@@ -1,5 +1,6 @@
 package com.arduino
 {
+	import flash.desktop.NativeProcessStartupInfo;
 	import flash.filesystem.File;
 
 	public class BoardLeonardo extends BoardInfo
@@ -21,6 +22,15 @@ package com.arduino
 			result.push("-DUSB_PID=0x8036");
 			result.push('-DUSB_MANUFACTURER="Unknown"');
 			result.push('-DUSB_PRODUCT="Arduino Leonardo"');
+		}
+		
+		override public function prepareUpload(taskList:Array, port:String):String
+		{
+			var info:NativeProcessStartupInfo = new NativeProcessStartupInfo();
+			info.executable = new File("C:/Windows/System32/cmd.exe");
+			info.arguments = new <String>["/c", "MODE " + port + ": BAUD=1200 PARITY=N DATA=8 STOP=1"];
+			taskList.push(info);
+			return port;
 		}
 	}
 }

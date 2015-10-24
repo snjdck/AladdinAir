@@ -22,5 +22,10 @@ package com.arduino
 		public function getCompileArgList(result:Vector.<String>):void
 		{
 		}
+		
+		public function prepareUpload(taskList:Array, port:String):String
+		{
+			return port;
+		}
 	}
 }
