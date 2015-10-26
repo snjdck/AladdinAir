@@ -11,13 +11,13 @@ package com.arduino
 				case BoardType.leonardo:
 					return new BoardLeonardo();
 				case BoardType.mega1280:
-					return new BoardInfo("atmega1280", "wiring", 57600);
+					return new BoardMega1280();
 				case BoardType.mega2560:
-					return new BoardInfo("atmega2560", "wiring", 115200);
+					return new BoardMega2560();
 				case BoardType.nano328:
-					return new BoardInfo("atmega328p", "arduino", 57600);
+					return new BoardNano328();
 				case BoardType.nano168:
-					return new BoardInfo("atmega168", "arduino", 19200);
+					return new BoardNano168();
 			}
 			return null;
 		}
