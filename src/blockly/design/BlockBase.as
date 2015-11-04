@@ -631,7 +631,7 @@ package blockly.design
 		{
 			return Math.abs(x - px) <= 10 && Math.abs(y - py) <= 10;
 		}
-		
+		/*
 		private function outputExpression(result:ArduinoOutput):String
 		{
 			return onGenArduinoExpression(result, collectArgs(result));
@@ -706,5 +706,6 @@ package blockly.design
 		{
 			result.addCode(genFuncCall(cmd, argList) + ";", indent);
 		}
+		*/
 	}
 }
