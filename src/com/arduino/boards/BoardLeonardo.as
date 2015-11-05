@@ -1,7 +1,8 @@
-package com.arduino
+package com.arduino.boards
 {
 	import flash.desktop.NativeProcessStartupInfo;
 	import flash.filesystem.File;
+	import com.arduino.BoardInfo;
 
 	public class BoardLeonardo extends BoardInfo
 	{

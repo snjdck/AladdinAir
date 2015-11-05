@@ -1,6 +1,7 @@
-package com.arduino
+package com.arduino.boards
 {
 	import flash.filesystem.File;
+	import com.arduino.BoardInfo;
 
 	public class BoardMega2560 extends BoardInfo
 	{

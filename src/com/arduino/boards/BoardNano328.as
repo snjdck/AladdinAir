@@ -1,12 +1,13 @@
-package com.arduino
+package com.arduino.boards
 {
 	import flash.filesystem.File;
+	import com.arduino.BoardInfo;
 
-	public class BoardNano168 extends BoardInfo
+	public class BoardNano328 extends BoardInfo
 	{
-		public function BoardNano168()
+		public function BoardNano328()
 		{
-			super("atmega168", "arduino", 19200);
+			super("atmega328p", "arduino", 57600);
 		}
 		
 		override public function getLibList(rootDir:File, result:Array):void

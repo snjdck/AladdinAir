@@ -1,5 +1,8 @@
-package com.arduino
+package com.arduino.boards
 {
+	import com.arduino.BoardInfo;
+	import com.arduino.BoardType;
+
 	public class BoardInfoFactory
 	{
 		static public function GetBoardInfo(boardType:String):BoardInfo
