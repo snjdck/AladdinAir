@@ -1,7 +1,7 @@
 package blockly.design
 {
 	import string.genFuncCall;
-
+	
 	public class ArduinoOutputEx extends ArduinoOutput
 	{
 		private var cmdDict:ArduinoCmdDict;
@@ -11,84 +11,79 @@ package blockly.design
 			this.cmdDict = cmdDict;
 		}
 		
-		private function outputExpression(block:BlockBase):String
+		private function outputExpression(block:Object):String
 		{
-			return onGenArduinoExpression(block, collectArgs(block));
-		}
-		
-		private function collectArgs(block:BlockBase):Array
-		{
-			var argList:Array = [];
-			for(var i:int=0; i<block.defaultArgBlockList.length; ++i){
-				argList.push(outputArg(block, i));
+			if(block is String){
+				return block as String;
 			}
-			return argList;
+			return onGenArduinoExpression(block);
 		}
 		
-		private function outputArg(block:BlockBase, index:int):String
+		private function collectArgs(block:Object):Array
 		{
-			var argBlock:BlockBase = block.argBlockList[index];
-			if(argBlock != null){
-				return outputExpression(argBlock);
+			var argList:Array = block["argList"];
+			var n:int = argList != null ? argList.length : 0;
+			var result:Array = [];
+			for(var i:int=0; i<n; ++i){
+				result[i] = outputExpression(argList[i]);
 			}
-			return block.defaultArgBlockList[index].text;
+			return result;
 		}
 		
-		final public function outputCodeAll(block:BlockBase, indent:int):void
+		final public function outputCodeAll(blockList:Array, indent:int):void
 		{
-			while(block != null){
+			for each(var block:Object in blockList){
 				outputCodeSelf(block, indent);
-				block = block.nextBlock;
 			}
 		}
 		
-		final public function outputCodeSelf(block:BlockBase, indent:int):void
+		final public function outputCodeSelf(block:Object, indent:int):void
 		{
-			switch(block.type){
-				case BlockBase.BLOCK_TYPE_BREAK:
+			switch(block["type"]){
+				case "break":
 					addCode("break;", indent);
 					break;
-				case BlockBase.BLOCK_TYPE_CONTINUE:
+				case "continue":
 					addCode("continue;", indent);
 					break;
-				case BlockBase.BLOCK_TYPE_STATEMENT:
-					onGenArduinoStatement(block, collectArgs(block), indent);
+				case "function":
+					onGenArduinoStatement(block, indent);
 					break;
-				case BlockBase.BLOCK_TYPE_FOR:
-					addCode("while(" + outputArg(block, 0) + "){", indent);
-					if(block.subBlock1 != null){
-						outputCodeAll(block.subBlock1, indent + 1);
-					}
-					addCode("}", indent);
-					break;
-				case BlockBase.BLOCK_TYPE_IF:
-					addCode("if(" + outputArg(block, 0) + "){", indent);
-					if(block.subBlock1 != null){
-						outputCodeAll(block.subBlock1, indent + 1);
-					}
-					if(block.subBlock2 != null){
+				case "if":
+					addCode("if(" + outputExpression(block["condition"]) + "){", indent);
+					outputCodeAll(block["caseTrue"], indent + 1);
+					if(block["caseFalse"] != null){
 						addCode("}else{", indent);
-						outputCodeAll(block.subBlock2, indent + 1);
+						outputCodeAll(block["caseFalse"], indent + 1);
 					}
+					addCode("}", indent);
+					break;
+				case "while":
+					addCode("while(" + outputExpression(block["condition"]) + "){", indent);
+					outputCodeAll(block["loop"], indent + 1);
 					addCode("}", indent);
 					break;
 			}
 		}
 		
-		private function onGenArduinoExpression(block:BlockBase, argList:Array):String
+		private function onGenArduinoExpression(block:Object):String
 		{
-			if(cmdDict.hasCmd(block.cmd)){
-				return cmdDict.translate(this, block.cmd, argList);
+			var method:String = block["method"];
+			var argList:Array = collectArgs(block);
+			if(cmdDict.hasCmd(method)){
+				return cmdDict.translate(this, method, argList);
 			}
-			return genFuncCall(block.cmd, argList);
+			return genFuncCall(method, argList);
 		}
 		
-		private function onGenArduinoStatement(block:BlockBase, argList:Array, indent:int):void
+		private function onGenArduinoStatement(block:Object, indent:int):void
 		{
-			if(cmdDict.hasCmd(block.cmd)){
-				cmdDict.translate(this, block.cmd, argList, indent);
+			var method:String = block["method"];
+			if(cmdDict.hasCmd(method)){
+				cmdDict.translate(this, method, collectArgs(block), indent);
+			}else{
+				addCode(onGenArduinoExpression(block) + ";", indent);
 			}
-			addCode(genFuncCall(block.cmd, argList) + ";", indent);
 		}
 	}
 }
