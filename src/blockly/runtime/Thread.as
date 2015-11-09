@@ -1,6 +1,5 @@
 package blockly.runtime
 {
-
 	public class Thread
 	{
 		private var interpreter:Interpreter;
@@ -10,12 +9,17 @@ package blockly.runtime
 		private var stack:Array = [];
 		public var sp:int = 0;
 		
-		private var isSuspend:Boolean;
+		private var _isSuspend:Boolean;
 		
 		public function Thread(interpreter:Interpreter, codeList:Array)
 		{
 			this.interpreter = interpreter;
 			this.codeList = codeList;
+		}
+		
+		public function interrupt():void
+		{
+			
 		}
 		
 		public function start():void
@@ -30,7 +34,7 @@ package blockly.runtime
 			return ip >= codeList.length;
 		}
 		
-		private function execNextCode():void
+		public function execNextCode():void
 		{
 			var code:Array = codeList[ip];
 			interpreter.execOp(this, code[0], code.slice(1));
@@ -38,15 +42,17 @@ package blockly.runtime
 		
 		public function suspend():void
 		{
-			isSuspend = true;
+			_isSuspend = true;
 		}
 		
 		public function resume():void
 		{
-			isSuspend = false;
-			while(!(isSuspend || isFinish())){
-				execNextCode();
-			}
+			_isSuspend = false;
+		}
+		
+		public function isSuspend():Boolean
+		{
+			return _isSuspend;
 		}
 		
 		public function push(value:Object):void
@@ -57,6 +63,11 @@ package blockly.runtime
 		public function pop():*
 		{
 			return stack[--sp];
+		}
+		
+		public function execMethod(methodName:String, argList:Array):void
+		{
+			interpreter.execMethod(this, methodName, argList);
 		}
 	}
 }

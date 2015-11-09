@@ -1,13 +1,17 @@
 package blockly.runtime
 {
+	import flash.utils.getTimer;
+	import flash.utils.setInterval;
 
 	public class Interpreter
 	{
 		private const opDict:Object = {};
 		private const methodDict:Object = {};
+		private const threadList:Array = [];
 		
 		public function Interpreter()
 		{
+			setInterval(updateThreads, 0);
 		}
 		
 		public function regOpHandler(op:String, handler:Function):void
@@ -39,7 +43,35 @@ package blockly.runtime
 		
 		public function newThread(codeList:Array):Thread
 		{
-			return new Thread(this, codeList);
+			var thread:Thread = new Thread(this, codeList);
+			threadList.push(thread);
+			return thread;
+		}
+		
+		public function stopAllThreads():void
+		{
+			threadList.length = 0;
+		}
+		
+		public function updateThreads():void
+		{
+			var endTime:int = getTimer() + 10;
+			var isRunning:Boolean = true;
+			while(isRunning && getTimer() < endTime){
+				isRunning = false;
+				for(var i:int=threadList.length-1; i>=0; --i){
+					var thread:Thread = threadList[i];
+					if(thread.isFinish()){
+						threadList.splice(i, 1);
+						continue;
+					}
+					if(thread.isSuspend()){
+						continue;
+					}
+					isRunning = true;
+					thread.execNextCode();
+				}
+			}
 		}
 	}
 }
