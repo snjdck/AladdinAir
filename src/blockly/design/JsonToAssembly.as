@@ -107,20 +107,20 @@ package blockly.design
 				sub1Code = getTotalCode(caseTrue);
 				sub2Code = getTotalCode(caseFalse);
 				append(result, getSelfCode(condition));
-				result.push(OpFactory.JumpIfTrue(sub2Code.length + 1));
+				result.push(OpFactory.JumpIfTrue(sub2Code.length + 2));
 				append(result, sub2Code);
-				result.push(OpFactory.Jump(sub1Code.length));
+				result.push(OpFactory.Jump(sub1Code.length + 1));
 				append(result, sub1Code);
 			}else if(caseTrue != null){
 				sub1Code = getTotalCode(caseTrue);
 				append(result, getSelfCode(condition));
 				result.push(OpFactory.Call(BuiltInMethod.NOT, 1));
-				result.push(OpFactory.JumpIfTrue(sub1Code.length));
+				result.push(OpFactory.JumpIfTrue(sub1Code.length + 1));
 				append(result, sub1Code);
 			}else if(caseFalse != null){
 				sub2Code = getTotalCode(caseFalse);
 				append(result, getSelfCode(condition));
-				result.push(OpFactory.JumpIfTrue(sub2Code.length));
+				result.push(OpFactory.JumpIfTrue(sub2Code.length + 1));
 				append(result, sub2Code);
 			}else if(!(condition is String)){
 				append(result, getSelfCode(condition));

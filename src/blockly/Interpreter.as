@@ -27,22 +27,19 @@ package blockly
 		
 		public function isFinish():Boolean
 		{
-			return ip < codeList.length;
+			return ip >= codeList.length;
 		}
 		
 		public function execute(codeList:Array):void
 		{
 			this.codeList = codeList;
 			ip = 0;
-			isSuspend = false;
-			execNextCode();
+			sp = 0;
+			resume();
 		}
 		
-		public function execNextCode():void
+		private function execNextCode():void
 		{
-			if(isSuspend || ip >= codeList.length){
-				return;
-			}
 			var code:Array = codeList[ip];
 			var opHandler:Function = opDict[code[0]];
 			opHandler.apply(null, code.slice(1));
@@ -53,9 +50,12 @@ package blockly
 			isSuspend = true;
 		}
 		
-		public function restore():void
+		public function resume():void
 		{
 			isSuspend = false;
+			while(!(isSuspend || isFinish())){
+				execNextCode();
+			}
 		}
 		
 		public function push(value:Object):void
@@ -65,13 +65,17 @@ package blockly
 		
 		public function pop():*
 		{
-			return stack[sp--];
+			return stack[--sp];
 		}
 		
 		public function callMethod(methodName:String, argList:Array):void
 		{
 			var handler:Function = methodDict[methodName];
-			handler(this, argList);
+			if(null == handler){
+				trace("interpreter invoke method:", methodName, argList);
+			}else{
+				handler(this, argList);
+			}
 		}
 	}
 }

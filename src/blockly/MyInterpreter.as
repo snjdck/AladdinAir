@@ -6,8 +6,8 @@ package blockly
 		{
 			regOpHandler(OpCode.CALL, __onCall);
 			regOpHandler(OpCode.PUSH, __onPush);
+			regOpHandler(OpCode.POP, __onPop);
 			regOpHandler(OpCode.JUMP, __onJump);
-//			regOpHandler(OpCode.JUMP_IF_FALSE, __onJumpIfFalse);
 			regOpHandler(OpCode.JUMP_IF_TRUE, __onJumpIfTrue);
 			regOpHandler(OpCode.BREAK, __onDoNothing);
 			regOpHandler(OpCode.CONTINUE, __onDoNothing);
@@ -15,6 +15,30 @@ package blockly
 			regOpHandler(OpCode.RETURN, __onReturn);
 			
 			regMethodHandler(BuiltInMethod.NOT, onNot);
+			regMethodHandler("+", onAdd);
+			regMethodHandler("-", onSub);
+			regMethodHandler("*", onMul);
+			regMethodHandler("/", onDiv);
+		}
+		
+		private function onAdd(interpreter:Interpreter, argList:Array):void
+		{
+			interpreter.push(argList[0] + argList[1]);
+		}
+		
+		private function onSub(interpreter:Interpreter, argList:Array):void
+		{
+			interpreter.push(argList[0] - argList[1]);
+		}
+		
+		private function onMul(interpreter:Interpreter, argList:Array):void
+		{
+			interpreter.push(argList[0] * argList[1]);
+		}
+		
+		private function onDiv(interpreter:Interpreter, argList:Array):void
+		{
+			interpreter.push(argList[0] / argList[1]);
 		}
 		
 		private function onNot(interpreter:Interpreter, argList:Array):void
@@ -30,10 +54,10 @@ package blockly
 		private function __onCall(methodName:String, argCount:int):void
 		{
 			var argList:Array = [];
-			while(argCount > 0){
-				argList.unshift(pop());
+			while(argList.length < argCount){
+				argList.push(pop());
 			}
-			callMethod(methodName, argList);
+			callMethod(methodName, argList.reverse());
 			++ip;
 		}
 		
@@ -43,25 +67,25 @@ package blockly
 			++ip;
 		}
 		
-		private function __onJump(offset:int):void
+		private function __onPop(count:int):void
 		{
-			ip += offset;
+			sp -= count;
+			++ip;
 		}
 		
-		private function __onJumpIfTrue(offset:int):void
+		private function __onJump(count:int):void
+		{
+			ip += count;
+		}
+		
+		private function __onJumpIfTrue(count:int):void
 		{
 			if(pop()){
-				ip += offset;
+				ip += count;
+			}else{
+				++ip;
 			}
 		}
-		/*
-		private function __onJumpIfFalse(offset:int):void
-		{
-			if(!pop()){
-				ip += offset;
-			}
-		}
-		*/
 		
 		private function __onInvoke(address:int):void
 		{
