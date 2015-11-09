@@ -13,8 +13,10 @@ package blockly.design
 		
 		private function outputExpression(block:Object):String
 		{
-			if(block is String){
-				return block as String;
+			switch(block["type"]){
+				case "string":
+				case "number":
+					return block["value"];
 			}
 			return onGenArduinoExpression(block);
 		}

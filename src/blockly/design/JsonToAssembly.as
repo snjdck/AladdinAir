@@ -23,10 +23,10 @@ package blockly.design
 		
 		private function getSelfCode(block:Object):Array
 		{
-			if(block is String){
-				return [OpFactory.Push(block)];
-			}
 			switch(block["type"]){
+				case "string":
+				case "number":
+					return [OpFactory.Push(block["value"])];
 				case "function":
 					return getExpressionCode(block);
 				case "break":
@@ -40,7 +40,6 @@ package blockly.design
 			}
 			return null;
 		}
-		
 		
 		private function getForeverCode(block:Object):Array
 		{
@@ -60,7 +59,14 @@ package blockly.design
 			var loop:Array = block["loop"];
 			var argCode:Array = getSelfCode(block["condition"]);
 			var result:Array;
-			if(loop != null){
+			
+			if(isLiteralCondition(argCode)){
+				if(isLiteralTrue(argCode)){
+					result = getForeverCode(block);
+				}else{
+					result = [];
+				}
+			}else if(loop != null){
 				result = getTotalCode(loop);
 				replaceBreakContinue(result, result.length + argCode.length);
 				result.unshift(OpFactory.Jump(result.length));
@@ -99,33 +105,46 @@ package blockly.design
 			var sub1Code:Array;
 			var sub2Code:Array;
 			
-			var condition:Object = block["condition"];
+			var argCode:Array = getSelfCode(block["condition"]);
 			var caseTrue:Array = block["caseTrue"];
 			var caseFalse:Array = block["caseFalse"];
 			
-			if(caseTrue != null && caseFalse != null){
-				sub1Code = getTotalCode(caseTrue);
-				sub2Code = getTotalCode(caseFalse);
-				append(result, getSelfCode(condition));
-				result.push(OpFactory.JumpIfTrue(sub2Code.length + 2));
-				append(result, sub2Code);
-				result.push(OpFactory.Jump(sub1Code.length + 1));
-				append(result, sub1Code);
-			}else if(caseTrue != null){
-				sub1Code = getTotalCode(caseTrue);
-				append(result, getSelfCode(condition));
-				result.push(OpFactory.Call(BuiltInMethod.NOT, 1));
-				result.push(OpFactory.JumpIfTrue(sub1Code.length + 1));
-				append(result, sub1Code);
-			}else if(caseFalse != null){
-				sub2Code = getTotalCode(caseFalse);
-				append(result, getSelfCode(condition));
-				result.push(OpFactory.JumpIfTrue(sub2Code.length + 1));
-				append(result, sub2Code);
-			}else if(!(condition is String)){
-				append(result, getSelfCode(condition));
-				result.push(OpFactory.Pop(1));
+			if(isLiteralCondition(argCode)){
+				if(isLiteralTrue(argCode)){
+					if(caseTrue != null){
+						return getTotalCode(caseTrue);
+					}
+				}else{
+					if(caseFalse != null){
+						return getTotalCode(caseFalse);
+					}
+				}
+			}else{
+				if(caseTrue != null && caseFalse != null){
+					sub1Code = getTotalCode(caseTrue);
+					sub2Code = getTotalCode(caseFalse);
+					append(result, argCode);
+					result.push(OpFactory.JumpIfTrue(sub2Code.length + 2));
+					append(result, sub2Code);
+					result.push(OpFactory.Jump(sub1Code.length + 1));
+					append(result, sub1Code);
+				}else if(caseTrue != null){
+					sub1Code = getTotalCode(caseTrue);
+					append(result, argCode);
+					result.push(OpFactory.Call(BuiltInMethod.NOT, 1));
+					result.push(OpFactory.JumpIfTrue(sub1Code.length + 1));
+					append(result, sub1Code);
+				}else if(caseFalse != null){
+					sub2Code = getTotalCode(caseFalse);
+					append(result, argCode);
+					result.push(OpFactory.JumpIfTrue(sub2Code.length + 1));
+					append(result, sub2Code);
+				}else{
+					append(result, argCode);
+					result.push(OpFactory.Pop(1));
+				}
 			}
+			
 			return result;
 		}
 		
@@ -139,6 +158,16 @@ package blockly.design
 			}
 			result.push(OpFactory.Call(block["method"], n));
 			return result;
+		}
+		
+		private function isLiteralCondition(argCode:Array):Boolean
+		{
+			return 1 == argCode.length && argCode[0][0] == OpCode.PUSH;
+		}
+		
+		private function isLiteralTrue(argCode:Array):Boolean
+		{
+			return Boolean(argCode[0][1]);
 		}
 	}
 }

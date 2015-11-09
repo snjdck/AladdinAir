@@ -22,7 +22,8 @@ package blockly.design
 			if(argBlock != null){
 				return outputCodeSelf(argBlock);
 			}
-			return block.defaultArgBlockList[index].text;
+			var value:String = block.defaultArgBlockList[index].text;
+			return {"type":"string", "value":value};
 		}
 		
 		public function outputCodeAll(block:BlockBase):Array
