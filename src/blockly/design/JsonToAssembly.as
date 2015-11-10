@@ -2,7 +2,6 @@ package blockly.design
 {
 	import array.append;
 	
-	import blockly.BuiltInMethod;
 	import blockly.OpCode;
 	import blockly.OpFactory;
 
@@ -34,6 +33,7 @@ package blockly.design
 				case "continue":
 					return [[OpCode.CONTINUE]];
 				case "while":
+				case "for":
 					return getForCode(block);
 				case "if":
 					return getIfCode(block);
@@ -43,107 +43,57 @@ package blockly.design
 		
 		private function getForeverCode(block:Object):Array
 		{
-			var loop:Array = block["loop"];
-			var result:Array;
-			if(loop != null){
-				result = getTotalCode(loop);
-				result.push(OpFactory.Jump(-result.length));
-			}else{
-				result = [OpFactory.Jump(0)];
-			}
+			var result:Array = getTotalCode(block["loop"]);
+			result.push(OpFactory.Jump(-result.length));
 			return result;
 		}
 		
 		private function getForCode(block:Object):Array
 		{
-			var loop:Array = block["loop"];
+			var result:Array = getTotalCode(block["init"]);
+			var iter:Array = getTotalCode(block["iter"]);
+			var loop:Array = getTotalCode(block["loop"]);
 			var argCode:Array = getSelfCode(block["condition"]);
-			var result:Array;
 			
-			if(isLiteralCondition(argCode)){
-				if(isLiteralTrue(argCode)){
-					result = getForeverCode(block);
-				}else{
-					result = [];
-				}
-			}else if(loop != null){
-				result = getTotalCode(loop);
-				replaceBreakContinue(result, result.length + argCode.length);
-				result.unshift(OpFactory.Jump(result.length));
-				append(result, argCode);
-				result.push(OpFactory.JumpIfTrue(1-result.length));
-			}else{
-				result = argCode.slice();
-				result.push(OpFactory.JumpIfTrue(-result.length));
-			}
+			var loopCount:int = loop.length + iter.length;
+			var totalCount:int = loopCount + argCode.length;
+			
+			replaceBreakContinue(loop, totalCount + 1);
+			
+			result.push(OpFactory.Jump(loopCount + 1));
+			append(result, loop);
+			append(result, iter);
+			append(result, argCode);
+			result.push(OpFactory.JumpIfTrue(-totalCount));
+			
 			return result;
 		}
 		
 		private function replaceBreakContinue(codeList:Array, totalCodeLength:int):void
 		{
 			for(var i:int=0, n:int=codeList.length; i<n; ++i){
-				var code:Array = codeList[i];
-				if(code[0] == OpCode.BREAK){
-					codeList[i] = OpFactory.Jump(totalCodeLength - i);
-					continue;
-				}
-				if(code[0] == OpCode.CONTINUE){
-					var offset:int = n - i - 1;
-					if(offset > 0){
-						codeList[i] = OpFactory.Jump(offset);
-					}else{
-						codeList.pop();
-					}
+				switch(codeList[i][0]){
+					case OpCode.BREAK:
+						codeList[i] = OpFactory.Jump(totalCodeLength - i);
+						break;
+					case OpCode.CONTINUE:
+						codeList[i] = OpFactory.Jump(n - i);
+						break;
 				}
 			}
 		}
 		
 		private function getIfCode(block:Object):Array
 		{
-			var result:Array = [];
+			var result:Array = getSelfCode(block["condition"]);
 			
-			var sub1Code:Array;
-			var sub2Code:Array;
+			var caseTrue:Array = getTotalCode(block["caseTrue"]);
+			var caseFalse:Array = getTotalCode(block["caseFalse"]);
 			
-			var argCode:Array = getSelfCode(block["condition"]);
-			var caseTrue:Array = block["caseTrue"];
-			var caseFalse:Array = block["caseFalse"];
-			
-			if(isLiteralCondition(argCode)){
-				if(isLiteralTrue(argCode)){
-					if(caseTrue != null){
-						return getTotalCode(caseTrue);
-					}
-				}else{
-					if(caseFalse != null){
-						return getTotalCode(caseFalse);
-					}
-				}
-			}else{
-				if(caseTrue != null && caseFalse != null){
-					sub1Code = getTotalCode(caseTrue);
-					sub2Code = getTotalCode(caseFalse);
-					append(result, argCode);
-					result.push(OpFactory.JumpIfTrue(sub2Code.length + 2));
-					append(result, sub2Code);
-					result.push(OpFactory.Jump(sub1Code.length + 1));
-					append(result, sub1Code);
-				}else if(caseTrue != null){
-					sub1Code = getTotalCode(caseTrue);
-					append(result, argCode);
-					result.push(OpFactory.Call(BuiltInMethod.NOT, 1));
-					result.push(OpFactory.JumpIfTrue(sub1Code.length + 1));
-					append(result, sub1Code);
-				}else if(caseFalse != null){
-					sub2Code = getTotalCode(caseFalse);
-					append(result, argCode);
-					result.push(OpFactory.JumpIfTrue(sub2Code.length + 1));
-					append(result, sub2Code);
-				}else{
-					append(result, argCode);
-					result.push(OpFactory.Pop(1));
-				}
-			}
+			result.push(OpFactory.JumpIfTrue(caseFalse.length + 2));
+			append(result, caseFalse);
+			result.push(OpFactory.Jump(caseTrue.length + 1));
+			append(result, caseTrue);
 			
 			return result;
 		}
@@ -158,16 +108,6 @@ package blockly.design
 			}
 			result.push(OpFactory.Call(block["method"], n));
 			return result;
-		}
-		
-		private function isLiteralCondition(argCode:Array):Boolean
-		{
-			return 1 == argCode.length && argCode[0][0] == OpCode.PUSH;
-		}
-		
-		private function isLiteralTrue(argCode:Array):Boolean
-		{
-			return Boolean(argCode[0][1]);
 		}
 	}
 }

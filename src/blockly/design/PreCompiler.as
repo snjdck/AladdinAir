@@ -36,6 +36,10 @@ package blockly.design
 			var code:Array = codeList[index];
 			switch(code["type"]){
 				case "until":
+					code["type"] = "while";
+					code["condition"] = {"type":"function", "method":"not", "argList":[code["condition"]]};
+					return true;
+				case "unless":
 					code["type"] = "if";
 					code["condition"] = {"type":"function", "method":"not", "argList":[code["condition"]]};
 					return true;
