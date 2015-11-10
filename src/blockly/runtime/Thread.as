@@ -1,5 +1,8 @@
 package blockly.runtime
 {
+	import flash.signals.ISignal;
+	import flash.signals.Signal;
+
 	public class Thread
 	{
 		private var interpreter:Interpreter;
@@ -11,6 +14,8 @@ package blockly.runtime
 		
 		private var _isSuspend:Boolean;
 		
+		public const stopedSignal:Signal = new Signal();
+		
 		public function Thread(interpreter:Interpreter, codeList:Array)
 		{
 			this.interpreter = interpreter;
@@ -19,7 +24,7 @@ package blockly.runtime
 		
 		public function interrupt():void
 		{
-			
+			stopedSignal.notify();
 		}
 		
 		public function start():void

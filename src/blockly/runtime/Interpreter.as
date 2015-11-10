@@ -50,7 +50,10 @@ package blockly.runtime
 		
 		public function stopAllThreads():void
 		{
-			threadList.length = 0;
+			while(threadList.length > 0){
+				var thread:Thread = threadList.pop();
+				thread.interrupt();
+			}
 		}
 		
 		public function updateThreads():void
