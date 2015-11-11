@@ -111,20 +111,24 @@ package blockly.design
 			return defaultArgBlockList[index];
 		}
 		
+		static private const insertPtsFilter:InsertPtsFilter = new InsertPtsFilter();
+		
 		public function tryLink(dragTarget:BlockBase):InsertPtInfo
 		{
-			if(dragTarget.isNearTo(x, y - dragTarget.getTotalBlockHeight())){
-				return new InsertPtInfo(this, INSERT_PT_ABOVE);
-			}
-			if(dragTarget.isControlBlock()){
-				if(null == dragTarget.subBlock1 && dragTarget.isNearTo(x, y - dragTarget.getPositionSub1())){
-					return new InsertPtInfo(this, INSERT_PT_WRAP, 0);
+			if(!isElseBlock()){
+				if(dragTarget.isNearTo(x, y - dragTarget.getTotalBlockHeight())){
+					return new InsertPtInfo(this, INSERT_PT_ABOVE);
 				}
-				if(dragTarget.hasSubBlock2() && null == dragTarget.subBlock2 && dragTarget.isNearTo(x, y - dragTarget.getPositionSub2())){
-					return new InsertPtInfo(this, INSERT_PT_WRAP, 1);
+				if(dragTarget.isControlBlock()){
+					if(null == dragTarget.subBlock1 && dragTarget.isNearTo(x, y - dragTarget.getPositionSub1())){
+						return new InsertPtInfo(this, INSERT_PT_WRAP, 0);
+					}
+					if(dragTarget.hasSubBlock2() && null == dragTarget.subBlock2 && dragTarget.isNearTo(x, y - dragTarget.getPositionSub2())){
+						return new InsertPtInfo(this, INSERT_PT_WRAP, 1);
+					}
 				}
 			}
-			var ptList:Array = calcInsertPt();
+			var ptList:Array = insertPtsFilter.filter(calcInsertPt(), dragTarget.type);
 			for each(var ptInfo:InsertPtInfo in ptList){
 				var target:BlockBase = ptInfo.block;
 				switch(ptInfo.type){

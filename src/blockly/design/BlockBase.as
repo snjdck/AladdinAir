@@ -15,6 +15,8 @@ package blockly.design
 		static public const BLOCK_TYPE_ELSE_IF:int = 7;
 		static public const BLOCK_TYPE_ELSE:int = 8;
 		
+		static public const BLOCK_TYPE_ARDUINO:int = 10;
+		
 		static public const INSERT_PT_BELOW:int = 1;
 		static public const INSERT_PT_ABOVE:int = 2;
 		static public const INSERT_PT_SUB1:int = 3;
@@ -143,9 +145,19 @@ package blockly.design
 			return block;
 		}
 		
+		public function isIfBlock():Boolean
+		{
+			return type == BLOCK_TYPE_IF || type == BLOCK_TYPE_ELSE_IF;
+		}
+		
+		public function isElseBlock():Boolean
+		{
+			return type == BLOCK_TYPE_ELSE || type == BLOCK_TYPE_ELSE_IF;
+		}
+		
 		public function hasSubBlock2():Boolean
 		{
-			return type == BLOCK_TYPE_IF;
+			return type == BLOCK_TYPE_ARDUINO;
 		}
 		
 		public function isExpression():Boolean
@@ -171,6 +183,9 @@ package blockly.design
 			switch(type){
 				case BLOCK_TYPE_FOR:
 				case BLOCK_TYPE_IF:
+				case BLOCK_TYPE_ELSE_IF:
+				case BLOCK_TYPE_ELSE:
+				case BLOCK_TYPE_ARDUINO:
 					return true;
 			}
 			return false;
@@ -235,14 +250,22 @@ package blockly.design
 		{
 			while(block != null){
 				switch(block.type){
-					case BLOCK_TYPE_IF:
+					case BLOCK_TYPE_ARDUINO:
+						result.push(new InsertPtInfo(block, INSERT_PT_SUB1));
 						result.push(new InsertPtInfo(block, INSERT_PT_SUB2));
+						collectInsertPt(block.subBlock1, result);
 						collectInsertPt(block.subBlock2, result);
+						break;
+					case BLOCK_TYPE_IF:
+					case BLOCK_TYPE_ELSE_IF:
+					case BLOCK_TYPE_ELSE:
 					case BLOCK_TYPE_FOR:
 						result.push(new InsertPtInfo(block, INSERT_PT_SUB1));
 						collectInsertPt(block.subBlock1, result);
+						//fall through
 					case BLOCK_TYPE_STATEMENT:
 						result.push(new InsertPtInfo(block, INSERT_PT_BELOW));
+						break;
 				}
 				block = block.nextBlock;
 			}
@@ -309,9 +332,12 @@ package blockly.design
 					BlockDrawer.drawStatement(g, w, h, false);
 					break;
 				case BLOCK_TYPE_FOR:
+				case BLOCK_TYPE_IF:
+				case BLOCK_TYPE_ELSE_IF:
+				case BLOCK_TYPE_ELSE:
 					BlockDrawer.drawFor(g, w, h, getSub1Height());
 					break;
-				case BLOCK_TYPE_IF:
+				case BLOCK_TYPE_ARDUINO:
 					BlockDrawer.drawIfElse(g, w, h, getSub1Height(), getSub2Height());
 					break;
 			}
