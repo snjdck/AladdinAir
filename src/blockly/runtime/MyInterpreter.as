@@ -8,7 +8,6 @@ package blockly.runtime
 		{
 			regOpHandler(OpCode.CALL, __onCall);
 			regOpHandler(OpCode.PUSH, __onPush);
-			regOpHandler(OpCode.POP, __onPop);
 			regOpHandler(OpCode.JUMP, __onJump);
 			regOpHandler(OpCode.JUMP_IF_TRUE, __onJumpIfTrue);
 			regOpHandler(OpCode.BREAK, __onDoNothing);
@@ -68,13 +67,13 @@ package blockly.runtime
 			thread.push(value);
 			++thread.ip;
 		}
-		
+		/*
 		private function __onPop(thread:Thread, count:int):void
 		{
 			thread.sp -= count;
 			++thread.ip;
 		}
-		
+		*/
 		private function __onJump(thread:Thread, count:int):void
 		{
 			thread.ip += count;

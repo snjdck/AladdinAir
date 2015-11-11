@@ -1,6 +1,5 @@
 package blockly.runtime
 {
-	import flash.signals.ISignal;
 	import flash.signals.Signal;
 
 	public class Thread
@@ -10,7 +9,7 @@ package blockly.runtime
 		
 		public var ip:int = 0;
 		private var stack:Array = [];
-		public var sp:int = 0;
+		private var sp:int = 0;
 		
 		private var _isSuspend:Boolean;
 		
