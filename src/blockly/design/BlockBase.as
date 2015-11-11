@@ -8,10 +8,12 @@ package blockly.design
 	{
 		static public const BLOCK_TYPE_EXPRESSION:int = 1;
 		static public const BLOCK_TYPE_STATEMENT:int = 2;
-		static public const BLOCK_TYPE_FOR:int = 3;
-		static public const BLOCK_TYPE_IF:int = 4;
-		static public const BLOCK_TYPE_BREAK:int = 5;
-		static public const BLOCK_TYPE_CONTINUE:int = 6;
+		static public const BLOCK_TYPE_BREAK:int = 3;
+		static public const BLOCK_TYPE_CONTINUE:int = 4;
+		static public const BLOCK_TYPE_FOR:int = 5;
+		static public const BLOCK_TYPE_IF:int = 6;
+		static public const BLOCK_TYPE_ELSE_IF:int = 7;
+		static public const BLOCK_TYPE_ELSE:int = 8;
 		
 		static public const INSERT_PT_BELOW:int = 1;
 		static public const INSERT_PT_ABOVE:int = 2;

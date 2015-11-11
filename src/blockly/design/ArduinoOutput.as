@@ -38,6 +38,11 @@ package blockly.design
 			codeList.push(repeat("\t", indent) + code);
 		}
 		
+		public function replaceLastCode(code:String, indent:int):void
+		{
+			codeList[codeList.length-1] = repeat("\t", indent) + code;
+		}
+		
 		public function toString():String
 		{
 			var result:String = "";

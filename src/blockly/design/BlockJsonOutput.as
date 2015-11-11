@@ -63,8 +63,20 @@ package blockly.design
 					return {
 						"type":"if",
 						"condition":outputArg(block, 0),
+						"code":outputCodeAll(block.subBlock1),
 						"caseTrue":outputCodeAll(block.subBlock1),
 						"caseFalse":outputCodeAll(block.subBlock2)
+					};
+				case BlockBase.BLOCK_TYPE_ELSE_IF:
+					return {
+						"type":"else if",
+						"condition":outputArg(block, 0),
+						"code":outputCodeAll(block.subBlock1)
+					};
+				case BlockBase.BLOCK_TYPE_ELSE:
+					return {
+						"type":"else",
+						"code":outputCodeAll(block.subBlock1)
 					};
 			}
 			return null;

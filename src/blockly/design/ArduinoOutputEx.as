@@ -53,11 +53,23 @@ package blockly.design
 					break;
 				case "if":
 					addCode("if(" + outputExpression(block["condition"]) + "){", indent);
-					outputCodeAll(block["caseTrue"], indent + 1);
+					outputCodeAll(block["code"], indent + 1);
+					/*
 					if(block["caseFalse"] != null){
 						addCode("}else{", indent);
 						outputCodeAll(block["caseFalse"], indent + 1);
 					}
+					*/
+					addCode("}", indent);
+					break;
+				case "else if":
+					replaceLastCode("}else if(" + outputExpression(block["condition"]) + "){", indent);
+					outputCodeAll(block["code"], indent + 1);
+					addCode("}", indent);
+					break;
+				case "else":
+					replaceLastCode("}else{", indent);
+					outputCodeAll(block["code"], indent + 1);
 					addCode("}", indent);
 					break;
 				case "while":
