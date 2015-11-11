@@ -1,6 +1,5 @@
 package blockly.runtime
 {
-	import blockly.BuiltInMethod;
 	import blockly.OpCode;
 
 	public class MyInterpreter extends Interpreter
@@ -17,7 +16,7 @@ package blockly.runtime
 			regOpHandler(OpCode.INVOKE, __onInvoke);
 			regOpHandler(OpCode.RETURN, __onReturn);
 			
-			regMethodHandler(BuiltInMethod.NOT, onNot);
+			regMethodHandler("not", onNot);
 			regMethodHandler("+", onAdd);
 			regMethodHandler("-", onSub);
 			regMethodHandler("*", onMul);
@@ -60,7 +59,7 @@ package blockly.runtime
 			while(argList.length < argCount){
 				argList.push(thread.pop());
 			}
-			execMethod(thread, methodName, argList.reverse());
+			thread.execMethod(methodName, argList.reverse());
 			++thread.ip;
 		}
 		

@@ -15,12 +15,12 @@ package blockly.design
 		{
 			var result:Array = [];
 			for each(var block:Object in blockList){
-				append(result, getSelfCode(block));
+				append(result, getSelfCode(block, blockList));
 			}
 			return result;
 		}
 		
-		private function getSelfCode(block:Object):Array
+		private function getSelfCode(block:Object, blockList:Array=null):Array
 		{
 			switch(block["type"]){
 				case "string":
@@ -36,9 +36,21 @@ package blockly.design
 				case "for":
 					return getForCode(block);
 				case "if":
-					return getIfCode(block);
+					return getIfCode2(getIfBlockList(block, blockList));
 			}
 			return null;
+		}
+		
+		private function getExpressionCode(block:Object):Array
+		{
+			var argList:Array = block["argList"];
+			var n:int = argList != null ? argList.length : 0;
+			var result:Array = [];
+			for(var i:int=0; i<n; ++i){
+				append(result, getSelfCode(argList[i]));
+			}
+			result.push(OpFactory.Call(block["method"], n));
+			return result;
 		}
 		
 		private function getForeverCode(block:Object):Array
@@ -85,10 +97,16 @@ package blockly.design
 		
 		private function getIfCode(block:Object):Array
 		{
-			var result:Array = getSelfCode(block["condition"]);
-			
-			var caseTrue:Array = getTotalCode(block["caseTrue"]);
-			var caseFalse:Array = getTotalCode(block["caseFalse"]);
+			return getIfCodeImpl(
+				block["condition"],
+				getTotalCode(block["caseTrue"]),
+				getTotalCode(block["caseFalse"])
+			);
+		}
+
+		private function getIfCodeImpl(condition:Object, caseTrue:Array, caseFalse:Array):Array
+		{
+			var result:Array = getSelfCode(condition);
 			
 			result.push(OpFactory.JumpIfTrue(caseFalse.length + 2));
 			append(result, caseFalse);
@@ -98,15 +116,38 @@ package blockly.design
 			return result;
 		}
 		
-		private function getExpressionCode(block:Object):Array
+		private function getIfCode2(blockList:Array):Array
 		{
-			var argList:Array = block["argList"];
-			var n:int = argList != null ? argList.length : 0;
-			var result:Array = [];
-			for(var i:int=0; i<n; ++i){
-				append(result, getSelfCode(argList[i]));
+			if(blockList.length <= 0){
+				return [];
 			}
-			result.push(OpFactory.Call(block["method"], n));
+			var block:Object = blockList.shift();
+			switch(block["type"]){
+				case "else if":
+				case "if":
+					return getIfCodeImpl(block["condition"], getTotalCode(block["code"]), getIfCode2(blockList));
+				case "else":
+					return getTotalCode(block["code"]);
+			}
+			return null;
+		}
+		
+		private function getIfBlockList(block:Object, blockList:Array):Array
+		{
+			var result:Array = [block];
+			var i:int = blockList.indexOf(block) + 1;
+			for(var n:int=blockList.length; i < n; ++i){
+				block = blockList[i];
+				var blockType:String = block["type"];
+				if("else if" == blockType){
+					result.push(block);
+				}else{
+					if("else" == blockType){
+						result.push(block);
+					}
+					break;
+				}
+			}
 			return result;
 		}
 	}
