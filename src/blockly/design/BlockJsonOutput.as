@@ -63,9 +63,7 @@ package blockly.design
 					return {
 						"type":"if",
 						"condition":outputArg(block, 0),
-						"code":outputCodeAll(block.subBlock1),
-						"caseTrue":outputCodeAll(block.subBlock1),
-						"caseFalse":outputCodeAll(block.subBlock2)
+						"code":outputCodeAll(block.subBlock1)
 					};
 				case BlockBase.BLOCK_TYPE_ELSE_IF:
 					return {
@@ -77,6 +75,12 @@ package blockly.design
 					return {
 						"type":"else",
 						"code":outputCodeAll(block.subBlock1)
+					};
+				case BlockBase.BLOCK_TYPE_ARDUINO:
+					return {
+						"type":"arduino",
+						"setup":outputCodeAll(block.subBlock1),
+						"loop":outputCodeAll(block.subBlock2)
 					};
 			}
 			return null;

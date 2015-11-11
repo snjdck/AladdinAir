@@ -54,12 +54,6 @@ package blockly.design
 				case "if":
 					addCode("if(" + outputExpression(block["condition"]) + "){", indent);
 					outputCodeAll(block["code"], indent + 1);
-					/*
-					if(block["caseFalse"] != null){
-						addCode("}else{", indent);
-						outputCodeAll(block["caseFalse"], indent + 1);
-					}
-					*/
 					addCode("}", indent);
 					break;
 				case "else if":
@@ -76,6 +70,14 @@ package blockly.design
 					addCode("while(" + outputExpression(block["condition"]) + "){", indent);
 					outputCodeAll(block["loop"], indent + 1);
 					addCode("}", indent);
+					break;
+				case "arduino":
+					addCode("void setup(){", 0);
+					outputCodeAll(block["setup"], 1);
+					addCode("}", 0);
+					addCode("void loop(){", 0);
+					outputCodeAll(block["loop"], 1);
+					addCode("}", 0);
 					break;
 			}
 		}
