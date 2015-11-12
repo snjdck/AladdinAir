@@ -45,14 +45,14 @@ package blockly.design
 					target.addBlockToLast(block);
 					block.layoutAfterInsertAbove();
 					break;
-				case BlockBase.INSERT_PT_SUB1:
-					target.addBlockToLast(block.subBlock1);
-					block.subBlock1 = target;
-					block.redrawControlBlockRecursively();
-					break;
-				case BlockBase.INSERT_PT_SUB2:
-					target.addBlockToLast(block.subBlock2);
-					block.subBlock2 = target;
+				case BlockBase.INSERT_PT_SUB:
+					if(0 == index){
+						target.addBlockToLast(block.subBlock1);
+						block.subBlock1 = target;
+					}else{
+						target.addBlockToLast(block.subBlock2);
+						block.subBlock2 = target;
+					}
 					block.redrawControlBlockRecursively();
 					break;
 				case BlockBase.INSERT_PT_WRAP:

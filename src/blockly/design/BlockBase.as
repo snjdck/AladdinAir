@@ -19,10 +19,9 @@ package blockly.design
 		
 		static public const INSERT_PT_BELOW:int = 1;
 		static public const INSERT_PT_ABOVE:int = 2;
-		static public const INSERT_PT_SUB1:int = 3;
-		static public const INSERT_PT_SUB2:int = 4;
-		static public const INSERT_PT_WRAP:int = 5;
-		static public const INSERT_PT_CHILD:int = 6;
+		static public const INSERT_PT_SUB:int = 3;
+		static public const INSERT_PT_WRAP:int = 4;
+		static public const INSERT_PT_CHILD:int = 5;
 		
 		public var type:int;
 		public var flag:uint;
@@ -42,8 +41,11 @@ package blockly.design
 		public var cmd:String;
 		private var _totalWidth:int;
 		
+		private var drawer:BlockDrawer;
+		
 		public function BlockBase()
 		{
+			drawer = new BlockDrawer(graphics);
 		}
 		
 		public function get subBlock1():BlockBase
@@ -251,8 +253,8 @@ package blockly.design
 			while(block != null){
 				switch(block.type){
 					case BLOCK_TYPE_ARDUINO:
-						result.push(new InsertPtInfo(block, INSERT_PT_SUB1));
-						result.push(new InsertPtInfo(block, INSERT_PT_SUB2));
+						result.push(new InsertPtInfo(block, INSERT_PT_SUB, 0));
+						result.push(new InsertPtInfo(block, INSERT_PT_SUB, 1));
 						collectInsertPt(block.subBlock1, result);
 						collectInsertPt(block.subBlock2, result);
 						break;
@@ -260,7 +262,7 @@ package blockly.design
 					case BLOCK_TYPE_ELSE_IF:
 					case BLOCK_TYPE_ELSE:
 					case BLOCK_TYPE_FOR:
-						result.push(new InsertPtInfo(block, INSERT_PT_SUB1));
+						result.push(new InsertPtInfo(block, INSERT_PT_SUB));
 						collectInsertPt(block.subBlock1, result);
 						//fall through
 					case BLOCK_TYPE_STATEMENT:
@@ -292,6 +294,14 @@ package blockly.design
 			return height;
 		}
 		
+		public function getPositionSub(index:int):Number
+		{
+			if(0 == index){
+				return getPositionSub1();
+			}
+			return getPositionSub2();
+		}
+		
 		public function getPositionSub1():Number
 		{
 			return 20;
@@ -302,12 +312,12 @@ package blockly.design
 			return 30 + getSub1Height();
 		}
 		
-		private function getSub1Height():int
+		public function getSub1Height():int
 		{
 			return _subBlock1 != null ? _subBlock1.getTotalBlockHeight() : 10;
 		}
 		
-		private function getSub2Height():int
+		public function getSub2Height():int
 		{
 			return _subBlock2 != null ? _subBlock2.getTotalBlockHeight() : 10;
 		}
@@ -322,23 +332,23 @@ package blockly.design
 			g.beginFill(0xFF00);
 			switch(type){
 				case BLOCK_TYPE_EXPRESSION:
-					BlockDrawer.drawExpression(g, w, h);
+					drawer.drawExpression(w, h);
 					break;
 				case BLOCK_TYPE_STATEMENT:
-					BlockDrawer.drawStatement(g, w, h);
+					drawer.drawStatement(w, h);
 					break;
 				case BLOCK_TYPE_BREAK:
 				case BLOCK_TYPE_CONTINUE:
-					BlockDrawer.drawStatement(g, w, h, false);
+					drawer.drawStatement(w, h, false);
 					break;
 				case BLOCK_TYPE_FOR:
 				case BLOCK_TYPE_IF:
 				case BLOCK_TYPE_ELSE_IF:
 				case BLOCK_TYPE_ELSE:
-					BlockDrawer.drawFor(g, w, h, getSub1Height());
+					drawer.drawFor(w, h, getSub1Height());
 					break;
 				case BLOCK_TYPE_ARDUINO:
-					BlockDrawer.drawIfElse(g, w, h, getSub1Height(), getSub2Height());
+					drawer.drawIfElse(w, h, getSub1Height(), getSub2Height());
 					break;
 			}
 			g.endFill();

@@ -91,7 +91,7 @@ package blockly.design
 			for(var i:int=0; i<defaultArgBlockList.length; i++){
 				var argBlock:MyBlock = argBlockList[i];
 				if(argBlock != null){
-					var result:InsertPtInfo = argBlock.tryAccept(other)
+					var result:InsertPtInfo = argBlock.tryAccept(other);
 					if(result != null){
 						return result;
 					}
@@ -103,7 +103,7 @@ package blockly.design
 			return null;
 		}
 		
-		private function getArgBlockAt(index:int):DisplayObject
+		public function getArgBlockAt(index:int):DisplayObject
 		{
 			if(argBlockList[index]){
 				return argBlockList[index];
@@ -137,13 +137,8 @@ package blockly.design
 							return ptInfo;
 						}
 						break;
-					case INSERT_PT_SUB1:
-						if(dragTarget.isNearTo(target.x, target.y + target.getPositionSub1())){
-							return ptInfo;
-						}
-						break;
-					case INSERT_PT_SUB2:
-						if(dragTarget.isNearTo(target.x, target.y + target.getPositionSub2())){
+					case INSERT_PT_SUB:
+						if(dragTarget.isNearTo(target.x, target.y + target.getPositionSub(ptInfo.index))){
 							return ptInfo;
 						}
 						break;
