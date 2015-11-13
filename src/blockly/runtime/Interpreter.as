@@ -1,17 +1,15 @@
 package blockly.runtime
 {
-	import blockly.design.JsonToAssembly;
-
 	public class Interpreter
 	{
 		private const methodDict:Object = {};
-		private var compiler:JsonToAssembly;
+		private var compiler:JsonCodeToAssembly;
 		private var virtualMachine:VirtualMachine;
 		
 		public function Interpreter(functionProvider:FunctionProvider)
 		{
 			virtualMachine = new VirtualMachine(functionProvider);
-			compiler = new JsonToAssembly();
+			compiler = new JsonCodeToAssembly();
 		}
 		
 		public function compile(blockList:Array):Array

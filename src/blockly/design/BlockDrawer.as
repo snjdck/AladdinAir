@@ -38,13 +38,13 @@ package blockly.design
 		{
 			w = Math.max(w, 60);
 			drawTop(w);
-			g.lineTo(offsetX + w, offsetY + h);
+			lineTo(w, h);
 			if(hasNext){
 				drawBottom(h, gapX);
 			}else{
-				g.lineTo(offsetX + gapX, offsetY + h);
+				lineTo(gapX, h);
 			}
-			g.lineTo(offsetX + gapX, offsetY);
+			lineTo(gapX, 0);
 		}
 		
 		public function drawFor(w:int, h:int, childHeight:int):void
@@ -52,11 +52,11 @@ package blockly.design
 			var y1:int = h+childHeight+armH;
 			
 			drawTop(w);
-			g.lineTo(offsetX + w, offsetY + h);
+			lineTo(w, h);
 			drawMiddle(h, w-armW, childHeight);
-			g.lineTo(offsetX + w, offsetY + y1);
+			lineTo(w, y1);
 			drawBottom(y1, gapX);
-			g.lineTo(offsetX + gapX, offsetY);
+			lineTo(gapX, 0);
 		}
 		
 		public function drawIfElse(w:int, h:int, child1Height:int, child2Height:int):void
@@ -66,43 +66,50 @@ package blockly.design
 			var y2:int = y1 + child2Height+armH;
 			
 			drawTop(w);
-			g.lineTo(offsetX + w, offsetY + h);
+			lineTo(w, h);
 			drawMiddle(h, w-armW, child1Height);
-			g.lineTo(offsetX + w, offsetY + y1);
+			lineTo(w, y1);
 			drawMiddle(y1, w-armW, child2Height);
-			g.lineTo(offsetX + w, offsetY + y2);
+			lineTo(w, y2);
 			drawBottom(y2, gapX);
-			g.lineTo(offsetX + gapX, offsetY);
+			lineTo(gapX, 0);
 		}
 		
 		private function drawTop(w:int):void
 		{
-			var x:int = offsetX + gapX;
-			g.moveTo(x,		offsetY);
-			g.lineTo(x + a,	offsetY);
-			g.lineTo(x + a,	offsetY + b);
-			g.lineTo(x + a + len, offsetY + b);
-			g.lineTo(x + a + len, offsetY);
-			g.lineTo(offsetX + w, offsetY);
+			var x:int = gapX;
+			moveTo(x,		0);
+			lineTo(x + a,	0);
+			lineTo(x + a,	b);
+			lineTo(x + a + len, b);
+			lineTo(x + a + len, 0);
+			lineTo(w, 0);
 		}
 		
 		private function drawBottom(y:int, endX:int):void
 		{
-			endX += offsetX;
-			y += offsetY;
-			g.lineTo(endX + a + len, y);
-			g.lineTo(endX + a + len, y + b);
-			g.lineTo(endX + a, y + b);
-			g.lineTo(endX + a, y);
-			g.lineTo(endX, y);
+			lineTo(endX + a + len, y);
+			lineTo(endX + a + len, y + b);
+			lineTo(endX + a, y + b);
+			lineTo(endX + a, y);
+			lineTo(endX, y);
 		}
 		
 		private function drawMiddle(y:int, w:int, h:int):void
 		{
 			drawBottom(y, armW);
-			y += offsetY + h;
-			g.lineTo(offsetX + armW, y);
-			g.lineTo(offsetX + armW + w, y);
+			lineTo(armW, y + h);
+			lineTo(armW + w, y + h);
+		}
+		
+		private function moveTo(px:int, py:int):void
+		{
+			g.moveTo(offsetX + px, offsetY + py);
+		}
+		
+		private function lineTo(px:int, py:int):void
+		{
+			g.lineTo(offsetX + px, offsetY + py);
 		}
 	}
 }

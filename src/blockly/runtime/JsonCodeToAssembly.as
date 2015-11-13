@@ -1,13 +1,13 @@
-package blockly.design
+package blockly.runtime
 {
 	import array.append;
 	
 	import blockly.OpCode;
 	import blockly.OpFactory;
 
-	public class JsonToAssembly
+	internal class JsonCodeToAssembly
 	{
-		public function JsonToAssembly()
+		public function JsonCodeToAssembly()
 		{
 		}
 		
