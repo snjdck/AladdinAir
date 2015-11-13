@@ -3,18 +3,22 @@ package blockly.runtime
 	public class Interpreter
 	{
 		private const methodDict:Object = {};
-		private var compiler:JsonCodeToAssembly;
 		private var virtualMachine:VirtualMachine;
+		private var compiler:JsonCodeToAssembly;
+		private var optimizer:AssemblyOptimizer;
 		
 		public function Interpreter(functionProvider:FunctionProvider)
 		{
 			virtualMachine = new VirtualMachine(functionProvider);
 			compiler = new JsonCodeToAssembly();
+			optimizer = new AssemblyOptimizer();
 		}
 		
 		public function compile(blockList:Array):Array
 		{
-			return compiler.getTotalCode(blockList);
+			var codeList:Array = compiler.getTotalCode(blockList);
+			optimizer.optimize(codeList);
+			return codeList;
 		}
 		
 		public function execute(blockList:Array):Thread

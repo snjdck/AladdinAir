@@ -36,7 +36,7 @@ package blockly.runtime
 				case "for":
 					return getForCode(block);
 				case "if":
-					return getIfCode2(getIfBlockList(block, blockList));
+					return getIfCode(getIfBlockList(block, blockList));
 			}
 			return null;
 		}
@@ -94,15 +94,6 @@ package blockly.runtime
 				}
 			}
 		}
-		
-		private function getIfCode(block:Object):Array
-		{
-			return getIfCodeImpl(
-				block["condition"],
-				getTotalCode(block["caseTrue"]),
-				getTotalCode(block["caseFalse"])
-			);
-		}
 
 		private function getIfCodeImpl(condition:Object, caseTrue:Array, caseFalse:Array):Array
 		{
@@ -116,7 +107,7 @@ package blockly.runtime
 			return result;
 		}
 		
-		private function getIfCode2(blockList:Array):Array
+		private function getIfCode(blockList:Array):Array
 		{
 			if(blockList.length <= 0){
 				return [];
@@ -125,7 +116,7 @@ package blockly.runtime
 			switch(block["type"]){
 				case "else if":
 				case "if":
-					return getIfCodeImpl(block["condition"], getTotalCode(block["code"]), getIfCode2(blockList));
+					return getIfCodeImpl(block["condition"], getTotalCode(block["code"]), getIfCode(blockList));
 				case "else":
 					return getTotalCode(block["code"]);
 			}
