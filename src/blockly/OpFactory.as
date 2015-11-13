@@ -17,9 +17,9 @@ package blockly
 			return [OpCode.PUSH, value];
 		}
 		
-		static public function Call(funcName:String, argCount:int):Array
+		static public function Call(funcName:String, argCount:int, retCount:int):Array
 		{
-			return [OpCode.CALL, funcName, argCount];
+			return [OpCode.CALL, funcName, argCount, retCount];
 		}
 	}
 }

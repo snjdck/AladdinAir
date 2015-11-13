@@ -1,80 +1,39 @@
 package blockly.runtime
 {
-	import flash.utils.getTimer;
-	import flash.utils.setInterval;
+	import blockly.design.JsonToAssembly;
 
 	public class Interpreter
 	{
-		private const opDict:Object = {};
 		private const methodDict:Object = {};
-		private const threadList:Array = [];
+		private var compiler:JsonToAssembly;
+		private var virtualMachine:VirtualMachine;
 		
-		public function Interpreter()
+		public function Interpreter(functionProvider:FunctionProvider)
 		{
-			setInterval(updateThreads, 0);
+			virtualMachine = new VirtualMachine(functionProvider);
+			compiler = new JsonToAssembly();
 		}
 		
-		public function regOpHandler(op:String, handler:Function):void
+		public function compile(blockList:Array):Array
 		{
-			opDict[op] = handler;
+			return compiler.getTotalCode(blockList);
 		}
 		
-		public function regMethodHandler(methodName:String, handler:Function):void
+		public function execute(blockList:Array):Thread
 		{
-			methodDict[methodName] = handler;
+			return executeAssembly(compile(blockList));
 		}
 		
-		public function execOp(thread:Thread, op:String, argList:Array):void
+		public function executeAssembly(codeList:Array):Thread
 		{
-			var handler:Function = opDict[op];
-			argList.unshift(thread);
-			handler.apply(null, argList);
-		}
-		
-		public function execMethod(thread:Thread, methodName:String, argList:Array):void
-		{
-			var handler:Function = methodDict[methodName];
-			if(null == handler){
-				trace("interpreter invoke method:", methodName, argList);
-			}else{
-				handler(thread, argList);
-			}
-		}
-		
-		public function newThread(codeList:Array):Thread
-		{
-			var thread:Thread = new Thread(this, codeList);
-			threadList.push(thread);
+			var thread:Thread = new Thread(codeList);
+			virtualMachine.startThread(thread);
 			return thread;
 		}
 		
 		public function stopAllThreads():void
 		{
-			while(threadList.length > 0){
-				var thread:Thread = threadList.pop();
-				thread.interrupt();
-			}
-		}
-		
-		public function updateThreads():void
-		{
-			var endTime:int = getTimer() + 10;
-			var isRunning:Boolean = true;
-			while(isRunning && getTimer() < endTime){
-				isRunning = false;
-				for(var i:int=threadList.length-1; i>=0; --i){
-					var thread:Thread = threadList[i];
-					if(thread.isFinish()){
-						threadList.splice(i, 1);
-						continue;
-					}
-					if(thread.isSuspend()){
-						continue;
-					}
-					isRunning = true;
-					thread.execNextCode();
-				}
-			}
+			virtualMachine.stopAllThreads();
 		}
 	}
 }

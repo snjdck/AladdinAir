@@ -47,12 +47,9 @@ package blockly.design
 				case BlockBase.BLOCK_TYPE_CONTINUE:
 					return {"type":"continue"};
 				case BlockBase.BLOCK_TYPE_EXPRESSION:
+					return outputFunction(block, 1);
 				case BlockBase.BLOCK_TYPE_STATEMENT:
-					return {
-						"type":"function",
-						"method":block.cmd,
-						"argList":collectArgs(block)
-					};
+					return outputFunction(block, 0);
 				case BlockBase.BLOCK_TYPE_FOR:
 					return {
 						"type":"while",
@@ -84,6 +81,16 @@ package blockly.design
 					};
 			}
 			return null;
+		}
+		
+		private function outputFunction(block:BlockBase, retCount:int):Object
+		{
+			return {
+				"type":"function",
+				"method":block.cmd,
+				"argList":collectArgs(block),
+				"retCount":retCount
+			};
 		}
 	}
 }

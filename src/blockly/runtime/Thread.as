@@ -1,36 +1,35 @@
 package blockly.runtime
 {
+	import flash.signals.ISignal;
 	import flash.signals.Signal;
 
 	public class Thread
 	{
-		private var interpreter:Interpreter;
 		private var codeList:Array;
 		
-		public var ip:int = 0;
+		internal var ip:int;
 		private var stack:Array = [];
-		private var sp:int = 0;
+		private var sp:int;
+		internal var sc:int;
 		
 		private var _isSuspend:Boolean;
 		
-		public const stopedSignal:Signal = new Signal();
+		private const _interruptSignal:Signal = new Signal();
 		
-		public function Thread(interpreter:Interpreter, codeList:Array)
+		public function Thread(codeList:Array)
 		{
-			this.interpreter = interpreter;
 			this.codeList = codeList;
+		}
+		
+		public function get interruptSignal():ISignal
+		{
+			return _interruptSignal;
 		}
 		
 		public function interrupt():void
 		{
-			stopedSignal.notify();
-		}
-		
-		public function start():void
-		{
-			ip = 0;
-			sp = 0;
-			resume();
+			ip = codeList.length;
+			_interruptSignal.notify();
 		}
 		
 		public function isFinish():Boolean
@@ -38,10 +37,11 @@ package blockly.runtime
 			return ip >= codeList.length;
 		}
 		
-		public function execNextCode():void
+		internal function execNextCode(instructionExcetor:InstructionExector):void
 		{
+			assert(sp == sc);
 			var code:Array = codeList[ip];
-			interpreter.execOp(this, code[0], code.slice(1));
+			instructionExcetor.execute(this, code[0], code.slice(1));
 		}
 		
 		public function suspend():void
@@ -64,14 +64,9 @@ package blockly.runtime
 			stack[sp++] = value;
 		}
 		
-		public function pop():*
+		internal function pop():*
 		{
 			return stack[--sp];
-		}
-		
-		public function execMethod(methodName:String, argList:Array):void
-		{
-			interpreter.execMethod(this, methodName, argList);
 		}
 	}
 }

@@ -49,7 +49,7 @@ package blockly.design
 			for(var i:int=0; i<n; ++i){
 				append(result, getSelfCode(argList[i]));
 			}
-			result.push(OpFactory.Call(block["method"], n));
+			result.push(OpFactory.Call(block["method"], n, block["retCount"]));
 			return result;
 		}
 		
