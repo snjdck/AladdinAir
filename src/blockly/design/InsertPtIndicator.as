@@ -29,10 +29,17 @@ package blockly.design
 			var block:BlockBase = insertPt.block;
 			switch(insertPt.type){
 				case BlockBase.INSERT_PT_ABOVE:
-					drawRect(block.x, block.y - RECT_H, block.getBlockWidth());
+					var dragTargetTotalHeight:int = dragTarget.getTotalBlockHeight();
+					beginDrawOutline(block.x, block.y - dragTargetTotalHeight);
+					drawer.drawStatement(dragTarget.getTotalBlockWidth(), dragTargetTotalHeight);
 					break;
 				case BlockBase.INSERT_PT_BELOW:
-					drawRect(block.x, block.y + block.getBlockHeight(), block.getBlockWidth());
+					if(null == block.nextBlock){
+						beginDrawOutline(block.x, block.y + block.getBlockHeight());
+						drawer.drawStatement(dragTarget.getTotalBlockWidth(), dragTarget.getTotalBlockHeight());
+					}else{
+						drawRect(block.x, block.y + block.getBlockHeight(), block.getBlockWidth());
+					}
 					break;
 				case BlockBase.INSERT_PT_CHILD:
 					var child:DisplayObject = (block as MyBlock).getArgBlockAt(insertPt.index);
@@ -46,8 +53,7 @@ package blockly.design
 					drawRect(block.x + BlockDrawer.armW, block.y + block.getPositionSub(insertPt.index), block.getBlockWidth());
 					break;
 				case BlockBase.INSERT_PT_WRAP:
-					graphics.lineStyle(2, 0xFF);
-					drawer.setOffset(
+					beginDrawOutline(
 						block.x - BlockDrawer.armW,
 						block.y - dragTarget.getPositionSub(insertPt.index)
 					);
@@ -68,6 +74,12 @@ package blockly.design
 			g.beginFill(0xFF);
 			g.drawRect(px, py, w, RECT_H);
 			g.endFill();
+		}
+		
+		private function beginDrawOutline(offsetX:int, offsetY:int):void
+		{
+			graphics.lineStyle(2, 0xFF);
+			drawer.setOffset(offsetX, offsetY);
 		}
 	}
 }

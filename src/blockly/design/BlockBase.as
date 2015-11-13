@@ -273,6 +273,17 @@ package blockly.design
 			}
 		}
 		
+		public function getTotalBlockWidth():int
+		{
+			var result:int = 0;
+			var block:BlockBase = this;
+			while(block != null){
+				result = Math.max(result, block.getBlockWidth());
+				block = block.nextBlock;
+			}
+			return result;
+		}
+		
 		public function getTotalBlockHeight():int
 		{
 			var result:int = 0;
@@ -329,7 +340,7 @@ package blockly.design
 			
 			var g:Graphics = graphics;
 			g.clear();
-			g.beginFill(0xFF00);
+			g.beginFill(0xcccccc);
 			switch(type){
 				case BLOCK_TYPE_EXPRESSION:
 					drawer.drawExpression(w, h);

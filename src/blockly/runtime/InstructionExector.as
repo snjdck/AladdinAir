@@ -42,7 +42,7 @@ package blockly.runtime
 				argList.push(thread.pop());
 			}
 			functionProvider.execute(thread, methodName, argList.reverse());
-			thread.sc += retCount;
+			thread.sc += retCount - argCount;
 			++thread.ip;
 		}
 		
@@ -76,6 +76,7 @@ package blockly.runtime
 		
 		private function __onReturn(thread:Thread):void
 		{
+			--thread.sc;
 			thread.ip = thread.pop();
 		}
 	}

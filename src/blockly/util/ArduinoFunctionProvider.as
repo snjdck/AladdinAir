@@ -11,6 +11,7 @@ package blockly.util
 		{
 			register("getUltrasonic", getUltrasonic);
 			register("randomFrom:to:", onRandomInt);
+			FunctionProviderHelper.InitMath(this);
 		}
 		
 		private function onRandomInt(thread:Thread, argList:Array):void
