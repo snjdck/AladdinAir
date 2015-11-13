@@ -3,7 +3,7 @@ package blockly.runtime
 	import blockly.OpCode;
 	import blockly.OpFactory;
 
-	public class AssemblyOptimizer
+	internal class AssemblyOptimizer
 	{
 		public function AssemblyOptimizer()
 		{
