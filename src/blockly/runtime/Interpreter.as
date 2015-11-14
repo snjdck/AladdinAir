@@ -19,8 +19,8 @@ package blockly.runtime
 		public function compile(blockList:Array):Array
 		{
 			var codeList:Array = compiler.getTotalCode(blockList);
-			codeList = deadCodeCleaner.clean(codeList);
 			optimizer.optimize(codeList);
+			deadCodeCleaner.clean(codeList);
 			return codeList;
 		}
 		
@@ -39,6 +39,11 @@ package blockly.runtime
 		public function stopAllThreads():void
 		{
 			virtualMachine.stopAllThreads();
+		}
+		
+		public function calculateAssembly(codeList:Array):*
+		{
+			return virtualMachine.calculate(new Thread(codeList));
 		}
 	}
 }

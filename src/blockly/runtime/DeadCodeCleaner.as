@@ -8,72 +8,141 @@ package blockly.runtime
 		{
 		}
 		
-		public function clean(codeList:Array):Array
+		public function clean(codeList:Array):void
 		{
-			var newCodeList:Array = generateSyntaxTree(codeList, 0, codeList.length);
-			trace("dead code", JSON.stringify(newCodeList));
-			return codeList;
+			var codeUsage:Array = [];
+			markCodeUsage(codeList, codeUsage, 0);
+			removeAndAdjustCode(codeList, parseDeadInfo(codeUsage, codeList.length));
+			removeAndAdjustCode(codeList, getJump1Info(codeList));
 		}
 		
-		private function removeDeadCode(codeList:Array):void
+		private function markCodeUsage(codeList:Array, codeUsage:Array, fromIndex:int):void
 		{
-			
-		}
-		
-		private function generateSyntaxTree(codeList:Array, begin:int, end:int):Array
-		{
-			var result:Array = [];
-			var info:Object;
-			while(begin < end){
-				var code:Array = codeList[begin];
+			var index:int = fromIndex;
+			var totalCount:int = codeList.length;
+			while(index < totalCount){
+				if(codeUsage[index]){
+					return;
+				}
+				codeUsage[index] = true;
+				var code:Array = codeList[index];
 				switch(code[0]){
 					case OpCode.JUMP_IF_TRUE:
-						info = parseIf(codeList, begin);
-						break;
+						markCodeUsage(codeList, codeUsage, index+1);
+						//fallthrough
 					case OpCode.JUMP:
-						info = parseLoop(codeList, begin);
+						index += code[1];
 						break;
 					default:
-						result.push(code);
-						++begin;
+						++index;
+				}
+			}
+		}
+		
+		private function parseDeadInfo(codeUsage:Array, codeCount:int):Array
+		{
+			var deadCodeInfo:Array = [];
+			var isInDeadCode:Boolean;
+			for(var i:int=0; i<codeCount; ++i){
+				if(Boolean(codeUsage[i]) == isInDeadCode){
+					isInDeadCode = !isInDeadCode;
+					deadCodeInfo.push(i);
+				}
+			}
+			if(isInDeadCode){
+				deadCodeInfo.push(codeCount);
+			}
+			return deadCodeInfo;
+		}
+		
+		private function removeAndAdjustCode(codeList:Array, deadCodeInfo:Array):void
+		{
+			removeDeadCode(codeList, deadCodeInfo);
+			adjustJumpCode(codeList, deadCodeInfo);
+		}
+		
+		private function removeDeadCode(codeList:Array, deadCodeInfo:Array):void
+		{
+			for(var i:int=deadCodeInfo.length-1; i>0; i-=2){
+				var begin:int = deadCodeInfo[i-1];
+				var end:int = deadCodeInfo[i];
+				codeList.splice(begin, end-begin);
+			}
+		}
+		
+		private function adjustJumpCode(codeList:Array, deadCodeInfo:Array):void
+		{
+			for(var i:int=0, n:int=codeList.length; i<n; ++i){
+				var code:Array = codeList[i];
+				switch(code[0]){
+					case OpCode.JUMP:
+					case OpCode.JUMP_IF_TRUE:
+						break;
+					default:
 						continue;
 				}
-				result.push(info);
-				begin = info["endIndex"];
+				var jumpCount:int = code[1];
+				if(jumpCount > 0){
+					code[1] -= calcSpace(deadCodeInfo, i, i+jumpCount);
+				}else if(jumpCount < 0){
+					code[1] += calcSpace(deadCodeInfo, i+jumpCount, i);
+				}
+			}
+		}
+		
+		private function calcSpace(deadCodeInfo:Array, fromIndex:int, toIndex:int):int
+		{
+			var result:int = 0;
+			for(var i:int=0; i<deadCodeInfo.length; i+=2){
+				var begin:int = deadCodeInfo[i];
+				var end:int = deadCodeInfo[i+1];
+				if(fromIndex < begin && end <= toIndex){
+					result += end - begin;
+				}
 			}
 			return result;
 		}
 		
-		private function parseIf(codeList:Array, index:int):Object
+		private function getJump1Info(codeList:Array):Array
 		{
-			var jumpIndex:int = index + codeList[index][1] - 1;
-			var endIndex:int = jumpIndex + codeList[jumpIndex][1];
-			return {
-				"type":"if",
-				"condition":codeList.slice(index, index+1),
-				"caseTrue":generateSyntaxTree(codeList, jumpIndex+1, endIndex),
-				"caseFalse":generateSyntaxTree(codeList, index+1, jumpIndex),
-				"endIndex":endIndex
-			};
+			var jumpCodeInfo:Array = [];
+			for(var i:int=0, n:int=codeList.length; i<n; ++i){
+				var code:Array = codeList[i];
+				switch(code[0]){
+					case OpCode.PUSH:
+					case OpCode.CALL:
+					case OpCode.JUMP_IF_TRUE:
+						continue;
+					case OpCode.JUMP:
+						if(code[1] != 1){
+							continue;
+						}
+						//fallthrough
+					default:
+						jumpCodeInfo.push(i, i+1);
+				}
+			}
+			return jumpCodeInfo;
 		}
 		
-		private function parseLoop(codeList:Array, index:int):Object
+		private function findConditionHeadIndex(codeList:Array, jumpTrueIndex:int):int
 		{
-			var conditionIndex:int = index + codeList[index][1];
-			var endIndex:int = getLoopEndIndex(codeList, conditionIndex);
-			return {
-				"type":"loop",
-				"condition":codeList.slice(conditionIndex, endIndex),
-				"code":generateSyntaxTree(codeList, index+1, conditionIndex),
-				"endIndex":endIndex
-			};
-		}
-		
-		private function getLoopEndIndex(codeList:Array, index:int):int
-		{
-			for(;;++index){
-				if(codeList[index][0] == OpCode.JUMP_IF_TRUE){
-					return index + 1;
+			var needCount:int = 1;
+			for(var i:int=jumpTrueIndex-1; i>=0; --i){
+				var code:Array = codeList[i];
+				switch(code[0]){
+					case OpCode.PUSH:
+						--needCount;
+						break;
+					case OpCode.CALL:
+						needCount += code[2] - code[3];
+						break;
+					default:
+						assert(false);
+						continue;
+				}
+				if(0 == needCount){
+					return i;
 				}
 			}
 			return -1;

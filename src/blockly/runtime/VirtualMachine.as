@@ -29,7 +29,7 @@ package blockly.runtime
 			}
 		}
 		
-		public function updateThreads():void
+		private function updateThreads():void
 		{
 			var endTime:int = getTimer() + 10;
 			var isRunning:Boolean = true;
@@ -48,6 +48,15 @@ package blockly.runtime
 					thread.execNextCode(instructionExector);
 				}
 			}
+		}
+		
+		public function calculate(thread:Thread):*
+		{
+			while(!thread.isFinish()){
+				thread.execNextCode(instructionExector);
+			}
+			assert(thread.sc == 1);
+			return thread.pop();
 		}
 	}
 }
