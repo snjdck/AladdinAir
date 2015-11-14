@@ -1,7 +1,6 @@
 package blockly.runtime
 {
 	import blockly.OpCode;
-	import blockly.OpFactory;
 
 	internal class AssemblyOptimizer
 	{
@@ -11,7 +10,6 @@ package blockly.runtime
 		
 		public function optimize(codeList:Array):void
 		{
-			runPass(codeList, OpCode.JUMP_IF_TRUE, optimizeConstCondition);
 			runPass(codeList, OpCode.JUMP, optimizeJump);
 			runPass(codeList, OpCode.JUMP_IF_TRUE, optimizeJumpIfTrue);
 		}
@@ -24,17 +22,6 @@ package blockly.runtime
 					handler(codeList, i);
 				}
 			}
-		}
-		
-		private function optimizeConstCondition(codeList:Array, index:int):void
-		{
-			var prevCode:Array = codeList[index-1];
-			if(prevCode[0] != OpCode.PUSH){
-				return;
-			}
-			var jumpCount:int = Boolean(prevCode[1]) ? (codeList[index][1] + 1) : 2;
-			codeList[index-1] = OpFactory.Jump(jumpCount);
-			codeList[index] = null;
 		}
 		
 		private function optimizeJumpIfTrue(codeList:Array, index:int):void

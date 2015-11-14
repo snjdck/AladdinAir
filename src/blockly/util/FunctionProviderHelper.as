@@ -7,17 +7,17 @@ package blockly.util
 	{
 		static public function InitMath(provider:FunctionProvider):void
 		{
-			provider.register("not", onNot);
-			provider.register("+", onAdd);
-			provider.register("-", onSub);
-			provider.register("*", onMul);
-			provider.register("/", onDiv);
+			provider.registerNative("not", onNot);
+			provider.registerNative("+", onAdd);
+			provider.registerNative("-", onSub);
+			provider.registerNative("*", onMul);
+			provider.registerNative("/", onDiv);
 			
-			provider.register("<", onLess);
-			provider.register(">", onGreater);
-			provider.register("=", onEqual);
-			provider.register("&", onAnd);
-			provider.register("|", onOr);
+			provider.registerNative("<", onLess);
+			provider.registerNative(">", onGreater);
+			provider.registerNative("==", onEqual);
+			provider.registerNative("&&", onAnd);
+			provider.registerNative("||", onOr);
 		}
 		
 		static private function onAdd(thread:Thread, argList:Array):void

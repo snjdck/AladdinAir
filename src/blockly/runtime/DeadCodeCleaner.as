@@ -124,28 +124,5 @@ package blockly.runtime
 			}
 			return jumpCodeInfo;
 		}
-		
-		private function findConditionHeadIndex(codeList:Array, jumpTrueIndex:int):int
-		{
-			var needCount:int = 1;
-			for(var i:int=jumpTrueIndex-1; i>=0; --i){
-				var code:Array = codeList[i];
-				switch(code[0]){
-					case OpCode.PUSH:
-						--needCount;
-						break;
-					case OpCode.CALL:
-						needCount += code[2] - code[3];
-						break;
-					default:
-						assert(false);
-						continue;
-				}
-				if(0 == needCount){
-					return i;
-				}
-			}
-			return -1;
-		}
 	}
 }

@@ -7,18 +7,21 @@ package blockly.runtime
 		private var compiler:JsonCodeToAssembly;
 		private var deadCodeCleaner:DeadCodeCleaner;
 		private var optimizer:AssemblyOptimizer;
+		private var conditionCalculater:ConditionCalculater;
 		
 		public function Interpreter(functionProvider:FunctionProvider)
 		{
 			virtualMachine = new VirtualMachine(functionProvider);
 			compiler = new JsonCodeToAssembly();
-			deadCodeCleaner = new DeadCodeCleaner();
+			conditionCalculater = new ConditionCalculater(this, functionProvider);
 			optimizer = new AssemblyOptimizer();
+			deadCodeCleaner = new DeadCodeCleaner();
 		}
 		
 		public function compile(blockList:Array):Array
 		{
 			var codeList:Array = compiler.getTotalCode(blockList);
+			conditionCalculater.calculate(codeList);
 			optimizer.optimize(codeList);
 			deadCodeCleaner.clean(codeList);
 			return codeList;
