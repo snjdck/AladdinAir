@@ -4,13 +4,18 @@ package blockly.runtime
 
 	internal class AssemblyOptimizer
 	{
+		private const newJumpIndex:Array = [];
+		private const jumpStack:Array = [];
+		
 		public function AssemblyOptimizer()
 		{
 		}
 		
 		public function optimize(codeList:Array):void
 		{
+			runPass(codeList, OpCode.JUMP, calcNewJumpIndex);
 			runPass(codeList, OpCode.JUMP, optimizeJump);
+			newJumpIndex.length = 0;
 			runPass(codeList, OpCode.JUMP_IF_TRUE, optimizeJumpIfTrue);
 		}
 		
@@ -33,9 +38,15 @@ package blockly.runtime
 			}
 		}
 		
+		private function calcNewJumpIndex(codeList:Array, index:int):void
+		{
+			newJumpIndex[index] = getFinalJumpCount(codeList, index);
+			jumpStack.length = 0;
+		}
+		
 		private function optimizeJump(codeList:Array, index:int):void
 		{
-			var realCount:int = getFinalJumpCount(codeList, index);
+			var realCount:int = newJumpIndex[index];
 			var code:Array = codeList[index];
 			if(code[1] != realCount){
 				code[1] = realCount;
@@ -44,6 +55,10 @@ package blockly.runtime
 		
 		private function getFinalJumpCount(codeList:Array, index:int):int
 		{
+			if(jumpStack.indexOf(index) >= 0){
+				return 0;
+			}
+			jumpStack.push(index);
 			var count:int = codeList[index][1];
 			if(0 == count){
 				return 0;
