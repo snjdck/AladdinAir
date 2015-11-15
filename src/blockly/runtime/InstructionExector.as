@@ -27,10 +27,7 @@ package blockly.runtime
 		public function execute(thread:Thread, op:String, argList:Array):void
 		{
 			var handler:Function = opDict[op];
-			if(null == handler){
-				++thread.ip;
-				return;
-			}
+			assert(handler != null);
 			argList.unshift(thread);
 			handler.apply(null, argList);
 		}

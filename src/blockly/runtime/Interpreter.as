@@ -20,7 +20,7 @@ package blockly.runtime
 		
 		public function compile(blockList:Array):Array
 		{
-			var codeList:Array = compiler.getTotalCode(blockList);
+			var codeList:Array = compiler.translate(blockList);
 			conditionCalculater.calculate(codeList);
 			optimizer.optimize(codeList);
 			deadCodeCleaner.clean(codeList);

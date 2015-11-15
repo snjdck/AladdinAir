@@ -7,11 +7,19 @@ package blockly.runtime
 
 	internal class JsonCodeToAssembly
 	{
+		private var loopCount:int;
+		
 		public function JsonCodeToAssembly()
 		{
 		}
 		
-		public function getTotalCode(blockList:Array):Array
+		public function translate(blockList:Array):Array
+		{
+			assert(loopCount == 0);
+			return getTotalCode(blockList);
+		}
+		
+		private function getTotalCode(blockList:Array):Array
 		{
 			var result:Array = [];
 			for each(var block:Object in blockList){
@@ -29,9 +37,13 @@ package blockly.runtime
 				case "function":
 					return getExpressionCode(block);
 				case "break":
-					return [[OpCode.BREAK]];
+					if(loopCount > 0){
+						return [[OpCode.BREAK]];
+					}
 				case "continue":
-					return [[OpCode.CONTINUE]];
+					if(loopCount > 0){
+						return [[OpCode.CONTINUE]];
+					}
 				case "while":
 				case "for":
 					return getForCode(block);
@@ -64,8 +76,10 @@ package blockly.runtime
 		{
 			var result:Array = getTotalCode(block["init"]);
 			var iter:Array = getTotalCode(block["iter"]);
-			var loop:Array = getTotalCode(block["loop"]);
 			var argCode:Array = getSelfCode(block["condition"]);
+			++loopCount;
+			var loop:Array = getTotalCode(block["loop"]);
+			--loopCount;
 			
 			var loopCount:int = loop.length + iter.length;
 			var totalCount:int = loopCount + argCode.length;

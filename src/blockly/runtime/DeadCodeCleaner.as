@@ -108,18 +108,8 @@ package blockly.runtime
 			var jumpCodeInfo:Array = [];
 			for(var i:int=0, n:int=codeList.length; i<n; ++i){
 				var code:Array = codeList[i];
-				switch(code[0]){
-					case OpCode.PUSH:
-					case OpCode.CALL:
-					case OpCode.JUMP_IF_TRUE:
-						continue;
-					case OpCode.JUMP:
-						if(code[1] != 1){
-							continue;
-						}
-						//fallthrough
-					default:
-						jumpCodeInfo.push(i, i+1);
+				if(code[0] == OpCode.JUMP && code[1] == 1){
+					jumpCodeInfo.push(i, i+1);
 				}
 			}
 			return jumpCodeInfo;
