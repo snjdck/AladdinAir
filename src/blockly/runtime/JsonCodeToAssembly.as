@@ -40,10 +40,12 @@ package blockly.runtime
 					if(loopCount > 0){
 						return [[OpCode.BREAK]];
 					}
+					break;
 				case "continue":
 					if(loopCount > 0){
 						return [[OpCode.CONTINUE]];
 					}
+					break;
 				case "while":
 				case "for":
 					return getForCode(block);

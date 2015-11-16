@@ -16,20 +16,24 @@ package blockly.runtime
 		
 		public function calculate(codeList:Array):void
 		{
-			for(var i:int=0, n:int=codeList.length; i<n; ++i){
+			//jump_if_true won't be the first code, so I use i > 0 as condition.
+			for(var i:int=codeList.length-1; i>0; --i){
 				var code:Array = codeList[i];
 				if(code[0] != OpCode.JUMP_IF_TRUE){
 					continue;
 				}
 				var conditionBeginIndex:int = findConditionCodeBeginIndex(codeList, i);
 				var conditionCodes:Array = codeList.slice(conditionBeginIndex, i);
-				if(!isConstCondition(conditionCodes)){
-					continue;
+				if(isConstCondition(conditionCodes)){
+					var conditionValue:Object = interpreter.calculateAssembly(conditionCodes);
+					var jumpCount:int = (conditionValue ? code[1] : 1) + conditionCodes.length;
+					codeList[conditionBeginIndex] = OpFactory.Jump(jumpCount);
+					for(; i > conditionBeginIndex; --i){
+						codeList[i] = null;
+					}
+				}else{
+					i = conditionBeginIndex;
 				}
-				var conditionValue:Object = interpreter.calculateAssembly(conditionCodes);
-				var jumpCount:int = (conditionValue ? code[1] : 1) + conditionCodes.length;
-				codeList[conditionBeginIndex] = OpFactory.Jump(jumpCount);
-				codeList[i] = null;
 			}
 		}
 		
@@ -58,10 +62,8 @@ package blockly.runtime
 		
 		private function isConstCondition(codeList:Array):Boolean
 		{
-			if(1 == codeList.length){
-				return true;
-			}
-			for each(var code:Array in codeList){
+			for(var i:int=codeList.length-1; i>=0; --i){
+				var code:Array = codeList[i];
 				if(code[0] != OpCode.CALL){
 					continue;
 				}

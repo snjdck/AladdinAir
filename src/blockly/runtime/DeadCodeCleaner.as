@@ -10,13 +10,16 @@ package blockly.runtime
 		
 		public function clean(codeList:Array):void
 		{
-			var codeUsage:Array = [];
-			markCodeUsage(codeList, codeUsage, 0);
-			removeAndAdjustCode(codeList, parseDeadInfo(codeUsage, codeList.length));
-			removeAndAdjustCode(codeList, getJump1Info(codeList));
+			var codeUsage:Vector.<Boolean> = new Vector.<Boolean>(codeList.length, true);
+			calcCodeUsage(codeList, codeUsage, 0);
+			markJump1Codes(codeList, codeUsage);
+			var deadCodeInfo:Vector.<int> = calcDeadCodeInfo(codeUsage);
+			removeDeadCode(codeList, deadCodeInfo);
+			adjustJumpCode(codeList, deadCodeInfo);
+			checkResult(codeList);
 		}
 		
-		private function markCodeUsage(codeList:Array, codeUsage:Array, fromIndex:int):void
+		private function calcCodeUsage(codeList:Array, codeUsage:Vector.<Boolean>, fromIndex:int):void
 		{
 			var index:int = fromIndex;
 			var totalCount:int = codeList.length;
@@ -28,7 +31,7 @@ package blockly.runtime
 				var code:Array = codeList[index];
 				switch(code[0]){
 					case OpCode.JUMP_IF_TRUE:
-						markCodeUsage(codeList, codeUsage, index+1);
+						calcCodeUsage(codeList, codeUsage, index+1);
 						//fallthrough
 					case OpCode.JUMP:
 						index += code[1];
@@ -39,29 +42,44 @@ package blockly.runtime
 			}
 		}
 		
-		private function parseDeadInfo(codeUsage:Array, codeCount:int):Array
+		private function calcDeadCodeInfo(codeUsage:Vector.<Boolean>):Vector.<int>
 		{
-			var deadCodeInfo:Array = [];
+			var deadCodeInfo:Vector.<int> = new Vector.<int>();
 			var isInDeadCode:Boolean;
-			for(var i:int=0; i<codeCount; ++i){
-				if(Boolean(codeUsage[i]) == isInDeadCode){
+			for(var i:int=0, n:int=codeUsage.length; i<n; ++i){
+				if(codeUsage[i] == isInDeadCode){
 					isInDeadCode = !isInDeadCode;
 					deadCodeInfo.push(i);
 				}
 			}
 			if(isInDeadCode){
-				deadCodeInfo.push(codeCount);
+				deadCodeInfo.push(n);
 			}
 			return deadCodeInfo;
 		}
 		
-		private function removeAndAdjustCode(codeList:Array, deadCodeInfo:Array):void
+		private function markJump1Codes(codeList:Array, codeUsage:Vector.<Boolean>):void
 		{
-			removeDeadCode(codeList, deadCodeInfo);
-			adjustJumpCode(codeList, deadCodeInfo);
+			loop:
+			for(var i:int=codeUsage.length-1; i>=0; --i){
+				if(!codeUsage[i]){
+					continue;
+				}
+				var code:Array = codeList[i];
+				if(code[0] != OpCode.JUMP || code[1] < 1){
+					continue;
+				}
+				var jumpIndex:int = i + code[1];
+				for(var j:int=i+1; j<jumpIndex; ++j){
+					if(codeUsage[j]){
+						continue loop;
+					}
+				}
+				codeUsage[i] = false;
+			}
 		}
 		
-		private function removeDeadCode(codeList:Array, deadCodeInfo:Array):void
+		private function removeDeadCode(codeList:Array, deadCodeInfo:Vector.<int>):void
 		{
 			for(var i:int=deadCodeInfo.length-1; i>0; i-=2){
 				var begin:int = deadCodeInfo[i-1];
@@ -70,9 +88,25 @@ package blockly.runtime
 			}
 		}
 		
-		private function adjustJumpCode(codeList:Array, deadCodeInfo:Array):void
+		private function calcSpace(deadCodeInfo:Vector.<int>, fromIndex:int, toIndex:int):int
 		{
-			for(var i:int=0, n:int=codeList.length; i<n; ++i){
+			var result:int = 0;
+			for(var i:int=deadCodeInfo.length-1; i>0; i-=2){
+				var begin:int = deadCodeInfo[i-1];
+				if(begin < fromIndex){
+					break;
+				}
+				var end:int = deadCodeInfo[i];
+				if(end <= toIndex){
+					result += end - begin;
+				}
+			}
+			return result;
+		}
+		
+		private function adjustJumpCode(codeList:Array, deadCodeInfo:Vector.<int>):void
+		{
+			for(var i:int=codeList.length-1; i>=0; --i){
 				var code:Array = codeList[i];
 				switch(code[0]){
 					case OpCode.JUMP:
@@ -90,29 +124,12 @@ package blockly.runtime
 			}
 		}
 		
-		private function calcSpace(deadCodeInfo:Array, fromIndex:int, toIndex:int):int
+		private function checkResult(codeList:Array):void
 		{
-			var result:int = 0;
-			for(var i:int=0; i<deadCodeInfo.length; i+=2){
-				var begin:int = deadCodeInfo[i];
-				var end:int = deadCodeInfo[i+1];
-				if(fromIndex < begin && end <= toIndex){
-					result += end - begin;
-				}
-			}
-			return result;
-		}
-		
-		private function getJump1Info(codeList:Array):Array
-		{
-			var jumpCodeInfo:Array = [];
-			for(var i:int=0, n:int=codeList.length; i<n; ++i){
+			for(var i:int=codeList.length-1; i>=0; --i){
 				var code:Array = codeList[i];
-				if(code[0] == OpCode.JUMP && code[1] == 1){
-					jumpCodeInfo.push(i, i+1);
-				}
+				assert(code[0] != OpCode.JUMP || code[1] != 1);
 			}
-			return jumpCodeInfo;
 		}
 	}
 }

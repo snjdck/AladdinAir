@@ -4,8 +4,8 @@ package blockly.runtime
 
 	internal class AssemblyOptimizer
 	{
-		private const newJumpIndex:Array = [];
-		private const jumpStack:Array = [];
+		private const newJumpIndex:Vector.<int> = new Vector.<int>();
+		private const jumpStack:Vector.<int> = new Vector.<int>();
 		
 		public function AssemblyOptimizer()
 		{
@@ -13,9 +13,9 @@ package blockly.runtime
 		
 		public function optimize(codeList:Array):void
 		{
+			newJumpIndex.length = codeList.length;
 			runPass(codeList, OpCode.JUMP, calcNewJumpIndex);
 			runPass(codeList, OpCode.JUMP, optimizeJump);
-			newJumpIndex.length = 0;
 			runPass(codeList, OpCode.JUMP_IF_TRUE, optimizeJumpIfTrue);
 		}
 		

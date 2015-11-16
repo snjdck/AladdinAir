@@ -6,7 +6,7 @@ package blockly.runtime
 	internal class VirtualMachine
 	{
 		private var instructionExector:InstructionExector;
-		private const threadList:Array = [];
+		private const threadList:Vector.<Thread> = new Vector.<Thread>();
 		
 		public function VirtualMachine(functionProvider:FunctionProvider)
 		{
