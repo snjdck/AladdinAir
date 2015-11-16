@@ -67,13 +67,6 @@ package blockly.runtime
 			return result;
 		}
 		
-		private function getForeverCode(block:Object):Array
-		{
-			var result:Array = getTotalCode(block["loop"]);
-			result.push(OpFactory.Jump(-result.length));
-			return result;
-		}
-		
 		private function getForCode(block:Object):Array
 		{
 			var result:Array = getTotalCode(block["init"]);

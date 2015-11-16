@@ -15,6 +15,8 @@ package blockly.runtime
 			regOpHandler(OpCode.JUMP_IF_TRUE, __onJumpIfTrue);
 			regOpHandler(OpCode.INVOKE, __onInvoke);
 			regOpHandler(OpCode.RETURN, __onReturn);
+			regOpHandler(OpCode.LOAD_SLOT, __onLoadSlot);
+			regOpHandler(OpCode.SAVE_SLOT, __onSaveSlot);
 			
 			this.functionProvider = functionProvider;
 		}
@@ -75,6 +77,20 @@ package blockly.runtime
 		{
 			--thread.sc;
 			thread.ip = thread.pop();
+		}
+		
+		private function __onLoadSlot(thread:Thread, index:int):void
+		{
+			thread.push(thread.register[index]);
+			++thread.sc;
+			++thread.ip;
+		}
+		
+		private function __onSaveSlot(thread:Thread, index:int):void
+		{
+			thread.register[index] = thread.pop();
+			--thread.sc;
+			++thread.ip;
 		}
 	}
 }

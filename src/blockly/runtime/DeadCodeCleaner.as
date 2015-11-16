@@ -14,8 +14,8 @@ package blockly.runtime
 			calcCodeUsage(codeList, codeUsage, 0);
 			markJump1Codes(codeList, codeUsage);
 			var deadCodeInfo:Vector.<int> = calcDeadCodeInfo(codeUsage);
+			adjustJumpCode(codeList, deadCodeInfo, codeUsage);
 			removeDeadCode(codeList, deadCodeInfo);
-			adjustJumpCode(codeList, deadCodeInfo);
 		}
 		
 		private function calcCodeUsage(codeList:Array, codeUsage:Vector.<Boolean>, fromIndex:int):void
@@ -103,9 +103,12 @@ package blockly.runtime
 			return result;
 		}
 		
-		private function adjustJumpCode(codeList:Array, deadCodeInfo:Vector.<int>):void
+		private function adjustJumpCode(codeList:Array, deadCodeInfo:Vector.<int>, codeUsage:Vector.<Boolean>):void
 		{
 			for(var i:int=codeList.length-1; i>=0; --i){
+				if(!codeUsage[i]){
+					continue;
+				}
 				var code:Array = codeList[i];
 				switch(code[0]){
 					case OpCode.JUMP:

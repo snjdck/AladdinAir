@@ -38,13 +38,18 @@ package blockly.design
 				case "until":
 					code["type"] = "while";
 					code["condition"] = {"type":"function", "method":"not", "argList":[code["condition"]]};
-					return true;
+					break;
 				case "unless":
 					code["type"] = "if";
 					code["condition"] = {"type":"function", "method":"not", "argList":[code["condition"]]};
-					return true;
+					break;
+				case "loopTimes":
+					code["type"] = "for";
+					break;
+				default:
+					return false;
 			}
-			return false;
+			return true;
 		}
 	}
 }

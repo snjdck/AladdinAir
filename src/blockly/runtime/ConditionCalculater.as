@@ -43,6 +43,7 @@ package blockly.runtime
 			for(var i:int=jumpTrueIndex-1; i>=0; --i){
 				var code:Array = codeList[i];
 				switch(code[0]){
+					case OpCode.LOAD_SLOT:
 					case OpCode.PUSH:
 						--needCount;
 						break;
@@ -64,11 +65,14 @@ package blockly.runtime
 		{
 			for(var i:int=codeList.length-1; i>=0; --i){
 				var code:Array = codeList[i];
-				if(code[0] != OpCode.CALL){
-					continue;
-				}
-				if(!functionProvider.isNativeFunction(code[1])){
-					return false;
+				switch(code[0]){
+					case OpCode.LOAD_SLOT:
+						return false;
+					case OpCode.CALL:
+						if(!functionProvider.isNativeFunction(code[1])){
+							return false;
+						}
+						break;
 				}
 			}
 			return true;

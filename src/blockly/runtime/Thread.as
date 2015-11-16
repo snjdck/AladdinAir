@@ -8,9 +8,11 @@ package blockly.runtime
 		private var codeList:Array;
 		
 		internal var ip:int;
-		private var stack:Array = [];
+		private const stack:Vector.<Object> = new Vector.<Object>();
 		private var sp:int;
 		internal var sc:int;
+		
+		internal const register:Vector.<int> = new Vector.<int>(8, true);
 		
 		private var _isSuspend:Boolean;
 		

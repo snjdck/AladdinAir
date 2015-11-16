@@ -26,6 +26,9 @@ package blockly
 		//push current ip to stack
 		static public const INVOKE:String = "invoke";
 		
+		static public const SAVE_SLOT:String = "saveSlot";
+		static public const LOAD_SLOT:String = "loadSlot";
+		
 		static public const PUSH_SCOPE:String = "pushScope";
 		static public const POP_SCOPE:String = "popScope";
 		
