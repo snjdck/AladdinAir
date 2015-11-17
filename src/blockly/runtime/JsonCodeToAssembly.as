@@ -46,6 +46,9 @@ package blockly.runtime
 					case "if":
 						append(result, genIfCode(blockList, i));
 						break;
+					case "loop":
+						append(result, genLoopTimesCode(block));
+						break;
 				}
 			}
 			return result;
@@ -77,23 +80,31 @@ package blockly.runtime
 		
 		private function genForCode(block:Object):Array
 		{
-			var result:Array = genStatementCode(block["init"]);
-			var iter:Array = genStatementCode(block["iter"]);
-			var argCode:Array = genExpressionCode(block["condition"]);
-			
+			return genForCodeImpl(
+				genStatementCode(block["init"]),
+				genExpressionCode(block["condition"]),
+				genStatementCode(block["iter"]),
+				block["loop"]
+			);
+		}
+		
+		private function genForCodeImpl(initCode:Array, conditionCode:Array, iterCode:Array, loopBlock:Array):Array
+		{
 			++loopCount;
-			var loop:Array = genStatementCode(block["loop"]);
+			var loopCode:Array = genStatementCode(loopBlock);
 			--loopCount;
 			
-			var loopCount:int = loop.length + iter.length;
-			var totalCount:int = loopCount + argCode.length;
+			var result:Array = initCode;
 			
-			replaceBreakContinue(loop, totalCount + 1);
+			var loopCount:int = loopCode.length + iterCode.length;
+			var totalCount:int = loopCount + conditionCode.length;
+			
+			replaceBreakContinue(loopCode, totalCount + 1);
 			
 			result.push(OpFactory.Jump(loopCount + 1));
-			append(result, loop);
-			append(result, iter);
-			append(result, argCode);
+			append(result, loopCode);
+			append(result, iterCode);
+			append(result, conditionCode);
 			result.push(OpFactory.JumpIfTrue(-totalCount));
 			
 			return result;
@@ -143,6 +154,24 @@ package blockly.runtime
 				}
 			}
 			return [];
+		}
+		
+		private function genLoopTimesCode(block:Object):Array
+		{
+			var conditionCode:Array = [
+				OpFactory.LoadSlot(0),
+				OpFactory.Push(0),
+				OpFactory.Call(">", 2, 1)
+			];
+			var iterCode:Array = [
+				OpFactory.LoadSlot(0),
+				OpFactory.Push(1),
+				OpFactory.Call("-", 2, 1),
+				OpFactory.SaveSlot(0)
+			];
+			var initCode:Array = genStatementCode(block["count"]);
+			initCode.push(OpFactory.SaveSlot(0));
+			return genForCodeImpl(initCode, conditionCode, iterCode, block["code"]);
 		}
 	}
 }
