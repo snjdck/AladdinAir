@@ -16,64 +16,73 @@ package blockly.runtime
 		public function translate(blockList:Array):Array
 		{
 			assert(loopCount == 0);
-			return getTotalCode(blockList);
+			return genStatementCode(blockList);
 		}
 		
-		private function getTotalCode(blockList:Array):Array
+		private function genStatementCode(blockList:Array):Array
 		{
 			var result:Array = [];
-			for each(var block:Object in blockList){
-				append(result, getSelfCode(block, blockList));
+			var n:int = blockList != null ? blockList.length : 0;
+			for(var i:int=0; i<n; ++i){
+				var block:Object = blockList[i];
+				switch(block["type"]){
+					case "break":
+						if(loopCount > 0){
+							result.push([OpCode.BREAK]);
+						}
+						break;
+					case "continue":
+						if(loopCount > 0){
+							result.push([OpCode.CONTINUE]);
+						}
+						break;
+					case "function":
+						append(result, genFunctionCode(block));
+						break;
+					case "while":
+					case "for":
+						append(result, genForCode(block));
+						break;
+					case "if":
+						append(result, genIfCode(blockList, i));
+						break;
+				}
 			}
 			return result;
 		}
 		
-		private function getSelfCode(block:Object, blockList:Array=null):Array
+		private function genExpressionCode(block:Object, blockList:Array=null):Array
 		{
 			switch(block["type"]){
 				case "string":
 				case "number":
 					return [OpFactory.Push(block["value"])];
 				case "function":
-					return getExpressionCode(block);
-				case "break":
-					if(loopCount > 0){
-						return [[OpCode.BREAK]];
-					}
-					break;
-				case "continue":
-					if(loopCount > 0){
-						return [[OpCode.CONTINUE]];
-					}
-					break;
-				case "while":
-				case "for":
-					return getForCode(block);
-				case "if":
-					return getIfCode(getIfBlockList(block, blockList));
+					return genFunctionCode(block);
 			}
 			return null;
 		}
 		
-		private function getExpressionCode(block:Object):Array
+		private function genFunctionCode(block:Object):Array
 		{
 			var argList:Array = block["argList"];
 			var n:int = argList != null ? argList.length : 0;
 			var result:Array = [];
 			for(var i:int=0; i<n; ++i){
-				append(result, getSelfCode(argList[i]));
+				append(result, genExpressionCode(argList[i]));
 			}
 			result.push(OpFactory.Call(block["method"], n, block["retCount"]));
 			return result;
 		}
 		
-		private function getForCode(block:Object):Array
+		private function genForCode(block:Object):Array
 		{
-			var result:Array = getTotalCode(block["init"]);
-			var iter:Array = getTotalCode(block["iter"]);
-			var argCode:Array = getSelfCode(block["condition"]);
+			var result:Array = genStatementCode(block["init"]);
+			var iter:Array = genStatementCode(block["iter"]);
+			var argCode:Array = genExpressionCode(block["condition"]);
+			
 			++loopCount;
-			var loop:Array = getTotalCode(block["loop"]);
+			var loop:Array = genStatementCode(block["loop"]);
 			--loopCount;
 			
 			var loopCount:int = loop.length + iter.length;
@@ -104,9 +113,9 @@ package blockly.runtime
 			}
 		}
 
-		private function getIfCodeImpl(condition:Object, caseTrue:Array, caseFalse:Array):Array
+		private function genIfCodeImpl(condition:Object, caseTrue:Array, caseFalse:Array):Array
 		{
-			var result:Array = getSelfCode(condition);
+			var result:Array = genExpressionCode(condition);
 			
 			result.push(OpFactory.JumpIfTrue(caseFalse.length + 2));
 			append(result, caseFalse);
@@ -116,39 +125,24 @@ package blockly.runtime
 			return result;
 		}
 		
-		private function getIfCode(blockList:Array):Array
+		private function genIfCode(blockList:Array, index:int):Array
 		{
-			if(blockList.length <= 0){
-				return [];
-			}
-			var block:Object = blockList.shift();
-			switch(block["type"]){
-				case "else if":
-				case "if":
-					return getIfCodeImpl(block["condition"], getTotalCode(block["code"]), getIfCode(blockList));
-				case "else":
-					return getTotalCode(block["code"]);
-			}
-			return null;
+			var block:Object = blockList[index];
+			return genIfCodeImpl(block["condition"], genStatementCode(block["code"]), genElseCode(blockList, index + 1));
 		}
 		
-		private function getIfBlockList(block:Object, blockList:Array):Array
+		private function genElseCode(blockList:Array, index:int):Array
 		{
-			var result:Array = [block];
-			var i:int = blockList.indexOf(block) + 1;
-			for(var n:int=blockList.length; i < n; ++i){
-				block = blockList[i];
-				var blockType:String = block["type"];
-				if("else if" == blockType){
-					result.push(block);
-				}else{
-					if("else" == blockType){
-						result.push(block);
-					}
-					break;
+			if(index < blockList.length){
+				var block:Object = blockList[index];
+				switch(block["type"]){
+					case "else if":
+						return genIfCode(blockList, index);
+					case "else":
+						return genStatementCode(block["code"]);
 				}
 			}
-			return result;
+			return [];
 		}
 	}
 }
