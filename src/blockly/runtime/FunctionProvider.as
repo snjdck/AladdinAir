@@ -24,7 +24,7 @@ package blockly.runtime
 		{
 			var handler:Function = methodDict[name];
 			if(null == handler){
-				trace("interpreter invoke method:", name, argList);
+				onCallUnregisteredFunction(thread, name, argList);
 			}else{
 				handler(thread, argList);
 			}
@@ -33,6 +33,11 @@ package blockly.runtime
 		internal function isNativeFunction(name:String):Boolean
 		{
 			return Boolean(nativeDict[name]);
+		}
+		
+		protected function onCallUnregisteredFunction(thread:Thread, name:String, argList:Array):void
+		{
+			trace("interpreter invoke method:", name, argList);
 		}
 	}
 }
