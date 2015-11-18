@@ -18,6 +18,8 @@ package blockly.runtime
 		
 		private const _interruptSignal:Signal = new Signal();
 		
+		public var userData:*;
+		
 		public function Thread(codeList:Array)
 		{
 			this.codeList = codeList;
