@@ -2,12 +2,12 @@ package blockly.runtime
 {
 	public class Interpreter
 	{
-		private const methodDict:Object = {};
 		private var virtualMachine:VirtualMachine;
 		private var compiler:JsonCodeToAssembly;
 		private var deadCodeCleaner:DeadCodeCleaner;
 		private var optimizer:AssemblyOptimizer;
 		private var conditionCalculater:ConditionCalculater;
+		private var codeLinker:FunctionLinker;
 		
 		public function Interpreter(functionProvider:FunctionProvider)
 		{
@@ -16,20 +16,22 @@ package blockly.runtime
 			conditionCalculater = new ConditionCalculater(this, functionProvider);
 			optimizer = new AssemblyOptimizer();
 			deadCodeCleaner = new DeadCodeCleaner();
+			codeLinker = new FunctionLinker(compiler);
 		}
 		
-		public function compile(blockList:Array):Array
+		public function compile(blockList:Array, functionDef:Object=null):Array
 		{
 			var codeList:Array = compiler.translate(blockList);
+			codeLinker.link(codeList, functionDef);
 			conditionCalculater.calculate(codeList);
 			optimizer.optimize(codeList);
 			deadCodeCleaner.clean(codeList);
 			return codeList;
 		}
 		
-		public function execute(blockList:Array):Thread
+		public function execute(blockList:Array, functionDef:Object=null):Thread
 		{
-			return executeAssembly(compile(blockList));
+			return executeAssembly(compile(blockList, functionDef));
 		}
 		
 		public function executeAssembly(codeList:Array):Thread

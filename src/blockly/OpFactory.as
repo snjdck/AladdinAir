@@ -31,5 +31,10 @@ package blockly
 		{
 			return [OpCode.SAVE_SLOT, index];
 		}
+		
+		static public function Invoke(offset:int):Array
+		{
+			return [OpCode.INVOKE, offset];
+		}
 	}
 }

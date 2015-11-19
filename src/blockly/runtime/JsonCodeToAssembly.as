@@ -16,7 +16,7 @@ package blockly.runtime
 		
 		public function translate(blockList:Array):Array
 		{
-			assert(loopCount == 0);
+			assert(loopCount == 0 && slotIndex == 0);
 			return genStatementCode(blockList);
 		}
 		

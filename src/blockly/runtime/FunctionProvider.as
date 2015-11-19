@@ -20,7 +20,13 @@ package blockly.runtime
 			nativeDict[name] = true;
 		}
 		
-		public function execute(thread:Thread, name:String, argList:Array):void
+		public function alias(name:String, newName:String):void
+		{
+			assert(methodDict[name] != null);
+			methodDict[newName] = methodDict[name];
+		}
+		
+		internal function execute(thread:Thread, name:String, argList:Array):void
 		{
 			var handler:Function = methodDict[name];
 			if(null == handler){
