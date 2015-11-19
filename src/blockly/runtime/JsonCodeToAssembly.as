@@ -8,6 +8,7 @@ package blockly.runtime
 	internal class JsonCodeToAssembly
 	{
 		private var loopCount:int;
+		private var slotIndex:int;
 		
 		public function JsonCodeToAssembly()
 		{
@@ -159,19 +160,23 @@ package blockly.runtime
 		private function genLoopTimesCode(block:Object):Array
 		{
 			var conditionCode:Array = [
-				OpFactory.LoadSlot(0),
+				OpFactory.LoadSlot(slotIndex),
 				OpFactory.Push(0),
 				OpFactory.Call(">", 2, 1)
 			];
 			var iterCode:Array = [
-				OpFactory.LoadSlot(0),
+				OpFactory.LoadSlot(slotIndex),
 				OpFactory.Push(1),
 				OpFactory.Call("-", 2, 1),
-				OpFactory.SaveSlot(0)
+				OpFactory.SaveSlot(slotIndex)
 			];
 			var initCode:Array = genStatementCode(block["count"]);
-			initCode.push(OpFactory.SaveSlot(0));
-			return genForCodeImpl(initCode, conditionCode, iterCode, block["code"]);
+			initCode.push(OpFactory.SaveSlot(slotIndex));
+			
+			++slotIndex;
+			var result:Array = genForCodeImpl(initCode, conditionCode, iterCode, block["code"]);
+			--slotIndex;
+			return result;
 		}
 	}
 }
