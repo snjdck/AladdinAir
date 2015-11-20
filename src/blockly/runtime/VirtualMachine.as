@@ -42,6 +42,7 @@ package blockly.runtime
 						continue;
 					}
 					if(thread.isSuspend()){
+						thread.updateSuspendState();
 						continue;
 					}
 					isRunning = true;

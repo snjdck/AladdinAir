@@ -205,7 +205,7 @@ package blockly.runtime
 				OpFactory.Call("-", 2, 1),
 				OpFactory.SaveSlot(slotIndex)
 			];
-			var initCode:Array = genStatementCode(block["count"]);
+			var initCode:Array = genExpressionCode(block["count"]);
 			initCode.push(OpFactory.SaveSlot(slotIndex));
 			
 			++slotIndex;

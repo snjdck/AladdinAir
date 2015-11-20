@@ -2,6 +2,9 @@ package blockly.runtime
 {
 	import flash.signals.ISignal;
 	import flash.signals.Signal;
+	import flash.utils.getTimer;
+	
+	import lambda.call;
 
 	public class Thread
 	{
@@ -16,6 +19,8 @@ package blockly.runtime
 		private const varDictStack:Array = [];
 		
 		private var _isSuspend:Boolean;
+		private var _suspendTimestamp:int;
+		public var suspendUpdater:Object;
 		
 		private const _interruptSignal:Signal = new Signal();
 		
@@ -52,11 +57,13 @@ package blockly.runtime
 		public function suspend():void
 		{
 			_isSuspend = true;
+			_suspendTimestamp = getTimer();
 		}
 		
 		public function resume():void
 		{
 			_isSuspend = false;
+			suspendUpdater = null;
 		}
 		
 		public function isSuspend():Boolean
@@ -118,6 +125,16 @@ package blockly.runtime
 			valueStack.splice.apply(null, argList);
 			sc = sp = sp + regCount + 2;
 			varDictStack.push({});
+		}
+		
+		internal function updateSuspendState():void
+		{
+			call(suspendUpdater, this);
+		}
+		
+		public function get timeElapsedSinceSuspend():int
+		{
+			return _isSuspend ? (getTimer() - _suspendTimestamp) : 0;
 		}
 	}
 }
