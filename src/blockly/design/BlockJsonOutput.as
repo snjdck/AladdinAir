@@ -54,7 +54,7 @@ package blockly.design
 					return {
 						"type":"while",
 						"condition":outputArg(block, 0),
-						"loop":outputCodeAll(block.subBlock1)
+						"code":outputCodeAll(block.subBlock1)
 					};
 				case BlockBase.BLOCK_TYPE_IF:
 					return {

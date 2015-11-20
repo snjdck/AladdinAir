@@ -44,8 +44,14 @@ package blockly.runtime
 					case "for":
 						append(result, genForCode(block));
 						break;
+					case "until":
+						append(result, genUntilCode(block));
+						break;
 					case "if":
 						append(result, genIfCode(blockList, i));
+						break;
+					case "unless":
+						append(result, genUnlessCode(block));
 						break;
 					case "loop":
 						append(result, genLoopTimesCode(block));
@@ -102,8 +108,15 @@ package blockly.runtime
 				genStatementCode(block["init"]),
 				genExpressionCode(block["condition"]),
 				genStatementCode(block["iter"]),
-				block["loop"]
+				block["code"]
 			);
+		}
+		
+		private function genUntilCode(block:Object):Array
+		{
+			var conditionCode:Array = genExpressionCode(block["condition"]);
+			conditionCode.push([OpFactory.Call("!", 1, 1)]);
+			return genForCodeImpl([], conditionCode, [], block["code"]);
 		}
 		
 		private function genForCodeImpl(initCode:Array, conditionCode:Array, iterCode:Array, loopBlock:Array):Array
@@ -172,6 +185,11 @@ package blockly.runtime
 				}
 			}
 			return [];
+		}
+		
+		private function genUnlessCode(block:Object):Array
+		{
+			return genIfCodeImpl(block["condition"], [], genStatementCode(block["code"]));
 		}
 		
 		private function genLoopTimesCode(block:Object):Array

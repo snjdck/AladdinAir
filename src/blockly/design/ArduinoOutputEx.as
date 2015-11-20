@@ -68,7 +68,7 @@ package blockly.design
 					break;
 				case "while":
 					addCode("while(" + outputExpression(block["condition"]) + "){", indent);
-					outputCodeAll(block["loop"], indent + 1);
+					outputCodeAll(block["code"], indent + 1);
 					addCode("}", indent);
 					break;
 				case "arduino":
