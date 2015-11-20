@@ -72,6 +72,8 @@ package blockly.runtime
 					return [OpFactory.Push(block["value"])];
 				case "function":
 					return genFunctionCode(block);
+				case "getVar":
+					return [OpFactory.GetVar(block["name"])];
 			}
 			return null;
 		}
