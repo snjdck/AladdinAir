@@ -4,6 +4,8 @@ package blockly.runtime
 	
 	import blockly.OpCode;
 	import blockly.OpFactory;
+	
+	import dict.hasKey;
 
 	internal class FunctionLinker
 	{
@@ -16,33 +18,16 @@ package blockly.runtime
 		
 		public function link(codeList:Array, functionDict:Object):void
 		{
-//			trace(JSON.stringify(functionDict));
-//			return;
 			if(!hasFunctionInvoke(codeList)){
 				return;
 			}
-			
-			var codeSize:int = codeList.length;
-			
-			var compiledFunctionDict:Object = {};
-			collectInvokedFunctions(codeList, functionDict, compiledFunctionDict);
 			var functionIndexDict:Object = {};
 			var functionCode:Array = [];
-			for(var key:String in compiledFunctionDict){
-				functionIndexDict[key] = functionCode.length;
-				append(functionCode, compiledFunctionDict[key]);
-			}
+			collectInvokedFunctions(codeList, functionDict, functionCode, functionIndexDict);
 			codeList.push(OpFactory.Jump(functionCode.length + 1));
+			var functionCodeOffset:int = codeList.length;
 			append(codeList, functionCode);
-			
-			for(var i:int=0, n:int=codeList.length; i<n; ++i){
-				var code:Array = codeList[i];
-				if(code[0] != OpCode.INVOKE){
-					continue;
-				}
-				var funcName:String = code[1];
-				code[1] = functionIndexDict[funcName] + codeSize + 1 - i;
-			}
+			calcInvokeAddress(codeList, functionIndexDict, functionCodeOffset);
 		}
 		
 		private function hasFunctionInvoke(codeList:Array):Boolean
@@ -55,7 +40,7 @@ package blockly.runtime
 			return false;
 		}
 		
-		private function collectInvokedFunctions(codeList:Array, functionDict:Object, compiledFunctionDict:Object):void
+		private function collectInvokedFunctions(codeList:Array, functionDict:Object, resultCode:Array, functionIndexDict:Object):void
 		{
 			for(var i:int=0, n:int=codeList.length; i<n; ++i){
 				var code:Array = codeList[i];
@@ -63,14 +48,25 @@ package blockly.runtime
 					continue;
 				}
 				var funcName:String = code[1];
-				var functionCode:Array = compiledFunctionDict[funcName];
-				if(functionCode != null){
+				if(hasKey(functionIndexDict, funcName)){
 					continue;
 				}
-				functionCode = compiler.translate(functionDict[funcName]);
-				functionCode.push([OpCode.RETURN]);
-				compiledFunctionDict[funcName] = functionCode;
-				collectInvokedFunctions(functionCode, functionDict, compiledFunctionDict);
+				functionIndexDict[funcName] = resultCode.length;
+				var functionCode:Array = compiler.translate(functionDict[funcName]);
+				append(resultCode, functionCode);
+				resultCode.push([OpCode.RETURN]);
+				collectInvokedFunctions(functionCode, functionDict, resultCode, functionIndexDict);
+			}
+		}
+		
+		private function calcInvokeAddress(codeList:Array, functionIndexDict:Object, offset:int):void
+		{
+			for(var i:int=0, n:int=codeList.length; i<n; ++i){
+				var code:Array = codeList[i];
+				if(code[0] != OpCode.INVOKE){
+					continue;
+				}
+				code[1] = functionIndexDict[code[1]] + offset - i;
 			}
 		}
 	}

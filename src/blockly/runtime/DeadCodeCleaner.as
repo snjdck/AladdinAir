@@ -22,6 +22,7 @@ package blockly.runtime
 		{
 			var index:int = fromIndex;
 			var totalCount:int = codeList.length;
+			var invokeStack:Array = [];
 			while(index < totalCount){
 				if(codeUsage[index]){
 					return;
@@ -29,15 +30,22 @@ package blockly.runtime
 				codeUsage[index] = true;
 				var code:Array = codeList[index];
 				switch(code[0]){
-					case OpCode.INVOKE:
 					case OpCode.JUMP_IF_TRUE:
 						calcCodeUsage(codeList, codeUsage, index+1);
 						//fallthrough
 					case OpCode.JUMP:
 						index += code[1];
 						break;
+					case OpCode.INVOKE:
+						invokeStack.push(index + 1);
+						index += code[1];
+						break;
 					case OpCode.RETURN:
-						return;
+						if(invokeStack.length <= 0){
+							return;
+						}
+						index = invokeStack.pop();
+						break;
 					default:
 						++index;
 				}
