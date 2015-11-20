@@ -50,12 +50,18 @@ package blockly.runtime
 					case "loop":
 						append(result, genLoopTimesCode(block));
 						break;
+					case "invoke":
+						append(result, genInvokeCode(block));
+						break;
+					case "return":
+						result.push([OpCode.RETURN]);
+						break;
 				}
 			}
 			return result;
 		}
 		
-		private function genExpressionCode(block:Object, blockList:Array=null):Array
+		private function genExpressionCode(block:Object):Array
 		{
 			switch(block["type"]){
 				case "string":
@@ -67,15 +73,21 @@ package blockly.runtime
 			return null;
 		}
 		
-		private function genFunctionCode(block:Object):Array
+		private function genArgListCode(argList:Array):Array
 		{
-			var argList:Array = block["argList"];
 			var n:int = argList != null ? argList.length : 0;
 			var result:Array = [];
 			for(var i:int=0; i<n; ++i){
 				append(result, genExpressionCode(argList[i]));
 			}
-			result.push(OpFactory.Call(block["method"], n, block["retCount"]));
+			return result;
+		}
+		
+		private function genFunctionCode(block:Object):Array
+		{
+			var argList:Array = block["argList"];
+			var result:Array = genArgListCode(argList);
+			result.push(OpFactory.Call(block["method"], argList.length, block["retCount"]));
 			return result;
 		}
 		
@@ -176,6 +188,14 @@ package blockly.runtime
 			++slotIndex;
 			var result:Array = genForCodeImpl(initCode, conditionCode, iterCode, block["code"]);
 			--slotIndex;
+			return result;
+		}
+		
+		private function genInvokeCode(block:Object):Array
+		{
+			var argList:Array = block["argList"];
+			var result:Array = genArgListCode(argList);
+			result.push(OpFactory.Invoke(block["method"], argList.length, block["retCount"], slotIndex));
 			return result;
 		}
 	}

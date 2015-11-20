@@ -16,21 +16,24 @@ package blockly.runtime
 		
 		public function link(codeList:Array, functionDict:Object):void
 		{
+//			trace(JSON.stringify(functionDict));
+//			return;
 			if(!hasFunctionInvoke(codeList)){
 				return;
 			}
 			
 			var codeSize:int = codeList.length;
-			codeList.push(OpFactory.Jump(0));
 			
 			var compiledFunctionDict:Object = {};
 			collectInvokedFunctions(codeList, functionDict, compiledFunctionDict);
 			var functionIndexDict:Object = {};
-			
+			var functionCode:Array = [];
 			for(var key:String in compiledFunctionDict){
-				functionIndexDict[key] = codeList.length;
-				append(codeList, functionIndexDict[key]);
+				functionIndexDict[key] = functionCode.length;
+				append(functionCode, compiledFunctionDict[key]);
 			}
+			codeList.push(OpFactory.Jump(functionCode.length + 1));
+			append(codeList, functionCode);
 			
 			for(var i:int=0, n:int=codeList.length; i<n; ++i){
 				var code:Array = codeList[i];
@@ -38,7 +41,7 @@ package blockly.runtime
 					continue;
 				}
 				var funcName:String = code[1];
-				codeList[i] = OpFactory.Invoke(functionIndexDict[funcName] - i);
+				code[1] = functionIndexDict[funcName] + codeSize + 1 - i;
 			}
 		}
 		
@@ -65,6 +68,7 @@ package blockly.runtime
 					continue;
 				}
 				functionCode = compiler.translate(functionDict[funcName]);
+				functionCode.push([OpCode.RETURN]);
 				compiledFunctionDict[funcName] = functionCode;
 				collectInvokedFunctions(functionCode, functionDict, compiledFunctionDict);
 			}

@@ -67,28 +67,28 @@ package blockly.runtime
 			}
 		}
 		
-		private function __onInvoke(thread:Thread, address:int):void
+		private function __onInvoke(thread:Thread, jumpCount:int, argCount:int, retCount:int, regCount:int):void
 		{
-			thread.push(thread.ip);
-			thread.ip = address;
+			thread.saveInvokeContext(argCount, regCount);
+			thread.ip += jumpCount;
 		}
 		
 		private function __onReturn(thread:Thread):void
 		{
-			--thread.sc;
-			thread.ip = thread.pop();
+			thread.loadInvokeContext();
+			++thread.ip;
 		}
 		
 		private function __onLoadSlot(thread:Thread, index:int):void
 		{
-			thread.push(thread.register[index]);
+			thread.loadSlot(index);
 			++thread.sc;
 			++thread.ip;
 		}
 		
 		private function __onSaveSlot(thread:Thread, index:int):void
 		{
-			thread.register[index] = thread.pop();
+			thread.saveSlot(index);
 			--thread.sc;
 			++thread.ip;
 		}

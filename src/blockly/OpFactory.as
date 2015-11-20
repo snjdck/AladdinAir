@@ -32,9 +32,9 @@ package blockly
 			return [OpCode.SAVE_SLOT, index];
 		}
 		
-		static public function Invoke(offset:int):Array
+		static public function Invoke(funcName:String, argCount:int, retCount:int, regCount:int):Array
 		{
-			return [OpCode.INVOKE, offset];
+			return [OpCode.INVOKE, funcName, argCount, retCount, regCount];
 		}
 	}
 }

@@ -29,12 +29,15 @@ package blockly.runtime
 				codeUsage[index] = true;
 				var code:Array = codeList[index];
 				switch(code[0]){
+					case OpCode.INVOKE:
 					case OpCode.JUMP_IF_TRUE:
 						calcCodeUsage(codeList, codeUsage, index+1);
 						//fallthrough
 					case OpCode.JUMP:
 						index += code[1];
 						break;
+					case OpCode.RETURN:
+						return;
 					default:
 						++index;
 				}
@@ -113,6 +116,7 @@ package blockly.runtime
 				switch(code[0]){
 					case OpCode.JUMP:
 					case OpCode.JUMP_IF_TRUE:
+					case OpCode.INVOKE:
 						break;
 					default:
 						continue;

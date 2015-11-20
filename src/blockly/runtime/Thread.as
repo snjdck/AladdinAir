@@ -8,11 +8,11 @@ package blockly.runtime
 		private var codeList:Array;
 		
 		internal var ip:int;
+		internal var sc:int;
 		private const stack:Vector.<Object> = new Vector.<Object>();
 		private var sp:int;
-		internal var sc:int;
 		
-		internal const register:Vector.<int> = new Vector.<int>(8, true);
+		private const register:Vector.<int> = new Vector.<int>(8, true);
 		
 		private var _isSuspend:Boolean;
 		
@@ -71,6 +71,35 @@ package blockly.runtime
 		internal function pop():*
 		{
 			return stack[--sp];
+		}
+		
+		internal function loadSlot(index:int):void
+		{
+			push(register[index]);
+		}
+		
+		internal function saveSlot(index:int):void
+		{
+			register[index] = pop();
+		}
+		
+		internal function loadInvokeContext():void
+		{
+			ip = pop();
+			var regCount:int = pop();
+			while(regCount-- > 0)
+				register[regCount] = pop();
+			sc = sp;
+		}
+		
+		internal function saveInvokeContext(argCount:int, regCount:int):void
+		{
+			var argList:Array = [sp-argCount, 0];
+			for(var i:int=0; i<regCount; ++i)
+				argList.push(register[i]);
+			argList.push(regCount, ip);
+			stack.splice.apply(null, argList);
+			sc = sp = sp + regCount + 2;
 		}
 	}
 }
