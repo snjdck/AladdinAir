@@ -56,6 +56,9 @@ package blockly.runtime
 					case "return":
 						result.push([OpCode.RETURN]);
 						break;
+					case "define":
+						append(result, genFunctionDefineCode(block));
+						break;
 				}
 			}
 			return result;
@@ -197,6 +200,16 @@ package blockly.runtime
 			var result:Array = genArgListCode(argList);
 			result.push(OpFactory.Invoke(block["method"], argList.length, block["retCount"], slotIndex));
 			return result;
+		}
+		
+		private function genFunctionDefineCode(block:Object):Array
+		{
+			var argList:Array = block["argList"];
+			var result:Array = [];
+			for(var i:int=argList.length-1; i>=0; --i){
+				result.push(OpFactory.SetVar(argList[i]));
+			}
+			return append(result, translate(block["code"]));
 		}
 	}
 }

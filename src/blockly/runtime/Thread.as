@@ -9,10 +9,11 @@ package blockly.runtime
 		
 		internal var ip:int;
 		internal var sc:int;
-		private const stack:Vector.<Object> = new Vector.<Object>();
+		private const valueStack:Vector.<Object> = new Vector.<Object>();
 		private var sp:int;
 		
 		private const register:Vector.<int> = new Vector.<int>(8, true);
+		private const varDictStack:Array = [];
 		
 		private var _isSuspend:Boolean;
 		
@@ -65,12 +66,12 @@ package blockly.runtime
 		
 		public function push(value:Object):void
 		{
-			stack[sp++] = value;
+			valueStack[sp++] = value;
 		}
 		
 		internal function pop():*
 		{
-			return stack[--sp];
+			return valueStack[--sp];
 		}
 		
 		internal function loadSlot(index:int):void
@@ -83,6 +84,21 @@ package blockly.runtime
 			register[index] = pop();
 		}
 		
+		private function get varDict():Object
+		{
+			return varDictStack[varDictStack.length-1];
+		}
+		
+		internal function getVar(name:String):void
+		{
+			push(varDict[name]);
+		}
+		
+		internal function setVar(name:String):void
+		{
+			varDict[name] = pop();
+		}
+		
 		internal function loadInvokeContext():void
 		{
 			ip = pop();
@@ -90,6 +106,7 @@ package blockly.runtime
 			while(regCount-- > 0)
 				register[regCount] = pop();
 			sc = sp;
+			varDictStack.pop();
 		}
 		
 		internal function saveInvokeContext(argCount:int, regCount:int):void
@@ -98,8 +115,9 @@ package blockly.runtime
 			for(var i:int=0; i<regCount; ++i)
 				argList.push(register[i]);
 			argList.push(regCount, ip);
-			stack.splice.apply(null, argList);
+			valueStack.splice.apply(null, argList);
 			sc = sp = sp + regCount + 2;
+			varDictStack.push({});
 		}
 	}
 }

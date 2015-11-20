@@ -17,6 +17,11 @@ package blockly
 			return [OpCode.PUSH, value];
 		}
 		
+		static public function Pop(count:int):Array
+		{
+			return (count <= 0) ? Jump(1) : [OpCode.POP, count];
+		}
+		
 		static public function Call(funcName:String, argCount:int, retCount:int):Array
 		{
 			return [OpCode.CALL, funcName, argCount, retCount];
@@ -35,6 +40,16 @@ package blockly
 		static public function Invoke(funcName:String, argCount:int, retCount:int, regCount:int):Array
 		{
 			return [OpCode.INVOKE, funcName, argCount, retCount, regCount];
+		}
+		
+		static public function GetVar(name:String):Array
+		{
+			return [OpCode.GET_VAR, name];
+		}
+		
+		static public function SetVar(name:String):Array
+		{
+			return [OpCode.SET_VAR, name];
 		}
 	}
 }

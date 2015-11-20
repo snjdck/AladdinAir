@@ -1,6 +1,7 @@
 package blockly.runtime
 {
 	import blockly.OpCode;
+	import blockly.OpFactory;
 
 	internal class AssemblyOptimizer
 	{
@@ -17,7 +18,7 @@ package blockly.runtime
 			runPass(codeList, OpCode.JUMP, calcNewJumpIndex);
 			runPass(codeList, OpCode.JUMP, optimizeJump);
 			runPass(codeList, OpCode.JUMP_IF_TRUE, optimizeJumpIfTrue);
-			runPass(codeList, OpCode.INVOKE, optimizeJumpIfTrue);
+			runPass(codeList, OpCode.INVOKE, optimizeInvoke);
 		}
 		
 		private function runPass(codeList:Array, op:String, handler:Function):void
@@ -36,6 +37,23 @@ package blockly.runtime
 			var jumpToCode:Array = codeList[index+code[1]];
 			if(jumpToCode != null && jumpToCode[0] == OpCode.JUMP){
 				code[1] += jumpToCode[1];
+			}
+		}
+		
+		private function optimizeInvoke(codeList:Array, index:int):void
+		{
+			var code:Array = codeList[index];
+			var jumpToCode:Array = codeList[index+code[1]];
+			if(null == jumpToCode){
+				return;
+			}
+			switch(jumpToCode[0]){
+				case OpCode.JUMP:
+					code[1] += jumpToCode[1];
+					break;
+				case OpCode.RETURN:
+					codeList[index] = OpFactory.Pop(code[2]);
+					break;
 			}
 		}
 		
