@@ -8,7 +8,6 @@ package blockly.runtime
 		private var optimizer:AssemblyOptimizer;
 		private var conditionCalculater:ConditionCalculater;
 		private var codeLinker:FunctionLinker;
-		private var tailCallOptimizer:TailCallOptimizer;
 		
 		public function Interpreter(functionProvider:FunctionProvider)
 		{
@@ -18,14 +17,12 @@ package blockly.runtime
 			optimizer = new AssemblyOptimizer();
 			deadCodeCleaner = new DeadCodeCleaner();
 			codeLinker = new FunctionLinker(compiler);
-			tailCallOptimizer = new TailCallOptimizer();
 		}
 		
 		public function compile(blockList:Array, functionDef:Object=null):Array
 		{
 			var codeList:Array = compiler.translate(blockList);
 			codeLinker.link(codeList, functionDef);
-			tailCallOptimizer.optimize(codeList);
 			conditionCalculater.calculate(codeList);
 			optimizer.optimize(codeList);
 			deadCodeCleaner.clean(codeList);
