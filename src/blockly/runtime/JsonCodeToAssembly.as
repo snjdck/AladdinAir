@@ -225,11 +225,29 @@ package blockly.runtime
 		private function genFunctionDefineCode(block:Object):Array
 		{
 			var argList:Array = block["argList"];
+			var argCount:int = argList.length;
 			var result:Array = [];
-			for(var i:int=argList.length-1; i>=0; --i){
-				result.push(OpFactory.SetVar(argList[i]));
+			for(var i:int=argCount-1; i>=0; --i){
+				result.push(OpFactory.SaveSlot(i));
 			}
-			return append(result, translate(block["code"]));
+			slotIndex += argCount;
+			var funcBodyCode:Array = genStatementCode(block["code"]);
+			slotIndex -= argCount;
+			replaceGetVarCode(funcBodyCode, argList);
+			append(result, funcBodyCode);
+			result.push([OpCode.RETURN]);
+			return result;
+		}
+		
+		private function replaceGetVarCode(codeList:Array, argList:Array):void
+		{
+			for(var i:int=codeList.length-1; i>=0; --i){
+				var code:Array = codeList[i];
+				if(code[0] != OpCode.GET_VAR){
+					continue;
+				}
+				codeList[i] = OpFactory.LoadSlot(argList.indexOf(code[1]));
+			}
 		}
 	}
 }

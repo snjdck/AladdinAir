@@ -18,8 +18,6 @@ package blockly.runtime
 			regOpHandler(OpCode.RETURN, __onReturn);
 			regOpHandler(OpCode.LOAD_SLOT, __onLoadSlot);
 			regOpHandler(OpCode.SAVE_SLOT, __onSaveSlot);
-			regOpHandler(OpCode.GET_VAR, __onGetVar);
-			regOpHandler(OpCode.SET_VAR, __onSetVar);
 			
 			this.functionProvider = functionProvider;
 		}
@@ -100,20 +98,6 @@ package blockly.runtime
 		private function __onSaveSlot(thread:Thread, index:int):void
 		{
 			thread.saveSlot(index);
-			--thread.sc;
-			++thread.ip;
-		}
-		
-		private function __onGetVar(thread:Thread, name:String):void
-		{
-			thread.getVar(name);
-			++thread.sc;
-			++thread.ip;
-		}
-		
-		private function __onSetVar(thread:Thread, name:String):void
-		{
-			thread.setVar(name);
 			--thread.sc;
 			++thread.ip;
 		}

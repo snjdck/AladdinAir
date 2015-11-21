@@ -54,7 +54,6 @@ package blockly.runtime
 				functionIndexDict[funcName] = resultCode.length;
 				var functionCode:Array = compiler.translate(functionDict[funcName]);
 				append(resultCode, functionCode);
-				resultCode.push([OpCode.RETURN]);
 				collectInvokedFunctions(functionCode, functionDict, resultCode, functionIndexDict);
 			}
 		}

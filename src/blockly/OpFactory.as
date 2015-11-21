@@ -46,10 +46,5 @@ package blockly
 		{
 			return [OpCode.GET_VAR, name];
 		}
-		
-		static public function SetVar(name:String):Array
-		{
-			return [OpCode.SET_VAR, name];
-		}
 	}
 }

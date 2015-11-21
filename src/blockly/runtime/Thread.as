@@ -12,11 +12,9 @@ package blockly.runtime
 		
 		internal var ip:int;
 		internal var sc:int;
-		private const valueStack:Vector.<Object> = new Vector.<Object>();
+		private const valueStack:Array = [];
 		private var sp:int;
-		
-		private const register:Vector.<int> = new Vector.<int>(8, true);
-		private const varDictStack:Array = [];
+		private const register:Array = [];
 		
 		private var _isSuspend:Boolean;
 		private var _suspendTimestamp:int;
@@ -91,21 +89,6 @@ package blockly.runtime
 			register[index] = pop();
 		}
 		
-		private function get varDict():Object
-		{
-			return varDictStack[varDictStack.length-1];
-		}
-		
-		internal function getVar(name:String):void
-		{
-			push(varDict[name]);
-		}
-		
-		internal function setVar(name:String):void
-		{
-			varDict[name] = pop();
-		}
-		
 		internal function loadInvokeContext():void
 		{
 			ip = pop();
@@ -113,7 +96,6 @@ package blockly.runtime
 			while(regCount-- > 0)
 				register[regCount] = pop();
 			sc = sp;
-			varDictStack.pop();
 		}
 		
 		internal function saveInvokeContext(argCount:int, regCount:int):void
@@ -124,7 +106,6 @@ package blockly.runtime
 			argList.push(regCount, ip);
 			valueStack.splice.apply(null, argList);
 			sc = sp = sp + regCount + 2;
-			varDictStack.push({});
 		}
 		
 		internal function updateSuspendState():void
