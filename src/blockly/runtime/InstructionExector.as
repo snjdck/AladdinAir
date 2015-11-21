@@ -11,7 +11,6 @@ package blockly.runtime
 		{
 			regOpHandler(OpCode.CALL, __onCall);
 			regOpHandler(OpCode.PUSH, __onPush);
-			regOpHandler(OpCode.POP, __onPop);
 			regOpHandler(OpCode.JUMP, __onJump);
 			regOpHandler(OpCode.JUMP_IF_TRUE, __onJumpIfTrue);
 			regOpHandler(OpCode.INVOKE, __onInvoke);
@@ -50,14 +49,6 @@ package blockly.runtime
 		{
 			thread.push(value);
 			++thread.sc;
-			++thread.ip;
-		}
-		
-		private function __onPop(thread:Thread, count:int):void
-		{
-			thread.sc -= count;
-			while(count-- > 0)
-				thread.pop();
 			++thread.ip;
 		}
 		
