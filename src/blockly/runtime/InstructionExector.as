@@ -60,37 +60,44 @@ package blockly.runtime
 		private function __onJumpIfTrue(thread:Thread, count:int):void
 		{
 			--thread.sc;
-			if(thread.pop()){
-				thread.ip += count;
-			}else{
-				++thread.ip;
-			}
+			thread.ip += thread.pop() ? count : 1;
+		}
+		
+		private function __onLoadSlot(thread:Thread, index:int):void
+		{
+			__onPush(thread, thread.getSlot(index));
+		}
+		
+		private function __onSaveSlot(thread:Thread, index:int):void
+		{
+			thread.setSlot(index, thread.pop());
+			--thread.sc;
+			++thread.ip;
 		}
 		
 		private function __onInvoke(thread:Thread, jumpCount:int, argCount:int, retCount:int, regCount:int):void
 		{
-			thread.saveInvokeContext(argCount, regCount);
+			var i:int;
+			if(argCount > 0)
+			for(i=argCount+regCount-1; i>=argCount; --i)
+				thread.setSlot(i, thread.getSlot(i-argCount));
+			for(i=argCount-1; i>=0; --i)
+				thread.setSlot(i, thread.pop());
+			thread.push(thread.ip);
+			for(i=0; i<regCount; ++i)
+				thread.push(thread.getSlot(argCount+i));
+			thread.push(regCount);
+			thread.sc += regCount + 2 - argCount;
 			thread.ip += jumpCount;
 		}
 		
 		private function __onReturn(thread:Thread):void
 		{
-			thread.loadInvokeContext();
-			++thread.ip;
-		}
-		
-		private function __onLoadSlot(thread:Thread, index:int):void
-		{
-			thread.loadSlot(index);
-			++thread.sc;
-			++thread.ip;
-		}
-		
-		private function __onSaveSlot(thread:Thread, index:int):void
-		{
-			thread.saveSlot(index);
-			--thread.sc;
-			++thread.ip;
+			var regCount:int = thread.pop();
+			thread.sc -= regCount + 2;
+			while(regCount-- > 0)
+				thread.setSlot(regCount, thread.pop());
+			thread.ip = thread.pop() + 1;
 		}
 	}
 }

@@ -226,15 +226,10 @@ package blockly.runtime
 		{
 			var argList:Array = block["argList"];
 			var argCount:int = argList.length;
-			var result:Array = [];
-			for(var i:int=argCount-1; i>=0; --i){
-				result.push(OpFactory.SaveSlot(i));
-			}
 			slotIndex += argCount;
-			var funcBodyCode:Array = genStatementCode(block["code"]);
+			var result:Array = genStatementCode(block["code"]);
 			slotIndex -= argCount;
-			replaceGetVarCode(funcBodyCode, argList);
-			append(result, funcBodyCode);
+			replaceGetVarCode(result, argList);
 			result.push([OpCode.RETURN]);
 			return result;
 		}

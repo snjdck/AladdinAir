@@ -79,33 +79,14 @@ package blockly.runtime
 			return valueStack[--sp];
 		}
 		
-		internal function loadSlot(index:int):void
+		internal function getSlot(index:int):*
 		{
-			push(register[index]);
+			return register[index];
 		}
 		
-		internal function saveSlot(index:int):void
+		internal function setSlot(index:int, value:Object):void
 		{
-			register[index] = pop();
-		}
-		
-		internal function loadInvokeContext():void
-		{
-			ip = pop();
-			var regCount:int = pop();
-			while(regCount-- > 0)
-				register[regCount] = pop();
-			sc = sp;
-		}
-		
-		internal function saveInvokeContext(argCount:int, regCount:int):void
-		{
-			var argList:Array = [sp-argCount, 0];
-			for(var i:int=0; i<regCount; ++i)
-				argList.push(register[i]);
-			argList.push(regCount, ip);
-			valueStack.splice.apply(null, argList);
-			sc = sp = sp + regCount + 2;
+			register[index] = value;
 		}
 		
 		internal function updateSuspendState():void
