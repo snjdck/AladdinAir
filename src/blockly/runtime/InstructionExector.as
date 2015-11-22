@@ -77,26 +77,19 @@ package blockly.runtime
 		
 		private function __onInvoke(thread:Thread, jumpCount:int, argCount:int, retCount:int, regCount:int):void
 		{
-			var i:int;
-			if(argCount > 0)
-			for(i=argCount+regCount-1; i>=argCount; --i)
-				thread.setSlot(i, thread.getSlot(i-argCount));
-			for(i=argCount-1; i>=0; --i)
+			thread.increaseRegOffset(regCount);
+			for(var i:int=argCount-1; i>=0; --i)
 				thread.setSlot(i, thread.pop());
 			thread.push(thread.ip);
-			for(i=0; i<regCount; ++i)
-				thread.push(thread.getSlot(argCount+i));
-			thread.push(regCount);
-			thread.sc += regCount + 2 - argCount;
+			thread.push(-regCount);
+			thread.sc += 2 - argCount;
 			thread.ip += jumpCount;
 		}
 		
 		private function __onReturn(thread:Thread):void
 		{
-			var regCount:int = thread.pop();
-			thread.sc -= regCount + 2;
-			while(regCount-- > 0)
-				thread.setSlot(regCount, thread.pop());
+			thread.increaseRegOffset(thread.pop());
+			thread.sc -= 2;
 			thread.ip = thread.pop() + 1;
 		}
 	}

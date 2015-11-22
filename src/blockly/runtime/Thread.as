@@ -15,6 +15,7 @@ package blockly.runtime
 		private const valueStack:Array = [];
 		private var sp:int;
 		private const register:Array = [];
+		private var regOffset:int;
 		
 		private var _isSuspend:Boolean;
 		private var _suspendTimestamp:int;
@@ -81,12 +82,17 @@ package blockly.runtime
 		
 		internal function getSlot(index:int):*
 		{
-			return register[index];
+			return register[regOffset+index];
 		}
 		
 		internal function setSlot(index:int, value:Object):void
 		{
-			register[index] = value;
+			register[regOffset+index] = value;
+		}
+		
+		internal function increaseRegOffset(value:int):void
+		{
+			regOffset += value;
 		}
 		
 		internal function updateSuspendState():void
