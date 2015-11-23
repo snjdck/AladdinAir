@@ -22,7 +22,8 @@ package blockly.runtime
 		private var _suspendTimestamp:int;
 		public var suspendUpdater:Object;
 		
-		private const _finishSignal:Signal = new Signal();
+		private const _finishSignal:Signal = new Signal(Boolean);
+		private var _interruptFlag:Boolean;
 		
 		public var userData:*;
 		
@@ -38,11 +39,12 @@ package blockly.runtime
 		
 		internal function notifyFinish():void
 		{
-			_finishSignal.notify();
+			_finishSignal.notify(_interruptFlag);
 		}
 		
 		public function interrupt():void
 		{
+			_interruptFlag = true;
 			ip = codeList.length;
 		}
 		
@@ -85,6 +87,7 @@ package blockly.runtime
 		
 		internal function pop():*
 		{
+			assert(sp > 0);
 			return valueStack[--sp];
 		}
 		
@@ -105,6 +108,7 @@ package blockly.runtime
 		internal function increaseRegOffset(value:int):void
 		{
 			regOffset += value;
+			assert(regOffset >= 0);
 		}
 		
 		internal function updateSuspendState():void

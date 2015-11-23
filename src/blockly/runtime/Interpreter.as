@@ -51,6 +51,11 @@ package blockly.runtime
 			return virtualMachine.calculate(new Thread(codeList));
 		}
 		
+		public function calculateAssemblyAsynchronous(codeList:Array, handler:Object):void
+		{
+			virtualMachine.calculateAsynchronous(new Thread(codeList), handler);
+		}
+		
 		public function getCopyOfThreadList():Vector.<Thread>
 		{
 			return virtualMachine.getCopyOfThreadList();

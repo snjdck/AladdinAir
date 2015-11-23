@@ -2,6 +2,8 @@ package blockly.runtime
 {
 	import flash.utils.getTimer;
 	import flash.utils.setInterval;
+	
+	import lambda.call;
 
 	internal class VirtualMachine
 	{
@@ -63,6 +65,18 @@ package blockly.runtime
 				thread.execNextCode(instructionExector);
 			}
 			return thread.pop();
+		}
+		
+		public function calculateAsynchronous(thread:Thread, handler:Object):void
+		{
+			thread.finishSignal.add(function(interruptFlag:Boolean):void{
+				if(interruptFlag){
+					call(handler, false, null);
+				}else{
+					call(handler, true, thread.pop());
+				}
+			}, true);
+			startThread(thread);
 		}
 	}
 }
