@@ -11,7 +11,8 @@ package blockly.runtime
 		private var codeList:Array;
 		
 		internal var ip:int;
-		internal var sc:int;
+		private var needCheckStack:Boolean;
+		private var sc:int;
 		private const valueStack:Array = [];
 		private var sp:int;
 		private const register:Array = [];
@@ -52,7 +53,10 @@ package blockly.runtime
 		
 		internal function execNextCode(instructionExcetor:InstructionExector):void
 		{
-			assert(sp == sc);
+			if(needCheckStack){
+				assert(sp == sc, "function return count mismatch!");
+				needCheckStack = false;
+			}
 			var code:Array = codeList[ip];
 			instructionExcetor.execute(this, code[0], code.slice(1));
 		}
@@ -86,11 +90,15 @@ package blockly.runtime
 		
 		internal function getSlot(index:int):*
 		{
+			if(index < 0)
+				return null;
 			return register[regOffset+index];
 		}
 		
 		internal function setSlot(index:int, value:Object):void
 		{
+			if(index < 0)
+				return;
 			register[regOffset+index] = value;
 		}
 		
@@ -107,6 +115,12 @@ package blockly.runtime
 		public function get timeElapsedSinceSuspend():int
 		{
 			return _isSuspend ? (getTimer() - _suspendTimestamp) : 0;
+		}
+		
+		internal function requestCheckStack(count:int):void
+		{
+			needCheckStack = true;
+			sc = sp + count;
 		}
 	}
 }

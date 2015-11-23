@@ -37,18 +37,16 @@ package blockly.runtime
 		private function __onCall(thread:Thread, methodName:String, argCount:int, retCount:int):void
 		{
 			var argList:Array = [];
-			while(argList.length < argCount){
-				argList.push(thread.pop());
-			}
-			functionProvider.execute(thread, methodName, argList.reverse());
-			thread.sc += retCount - argCount;
+			while(argCount-- > 0)
+				argList[argCount] = thread.pop();
+			thread.requestCheckStack(retCount);
+			functionProvider.execute(thread, methodName, argList);
 			++thread.ip;
 		}
 		
 		private function __onPush(thread:Thread, value:Object):void
 		{
 			thread.push(value);
-			++thread.sc;
 			++thread.ip;
 		}
 		
@@ -59,7 +57,6 @@ package blockly.runtime
 		
 		private function __onJumpIfTrue(thread:Thread, count:int):void
 		{
-			--thread.sc;
 			thread.ip += thread.pop() ? count : 1;
 		}
 		
@@ -71,25 +68,22 @@ package blockly.runtime
 		private function __onSaveSlot(thread:Thread, index:int):void
 		{
 			thread.setSlot(index, thread.pop());
-			--thread.sc;
 			++thread.ip;
 		}
 		
 		private function __onInvoke(thread:Thread, jumpCount:int, argCount:int, retCount:int, regCount:int):void
 		{
 			thread.increaseRegOffset(regCount);
-			for(var i:int=argCount-1; i>=0; --i)
-				thread.setSlot(i, thread.pop());
+			while(argCount-- > 0)
+				thread.setSlot(argCount, thread.pop());
 			thread.push(thread.ip);
 			thread.push(-regCount);
-			thread.sc += 2 - argCount;
 			thread.ip += jumpCount;
 		}
 		
 		private function __onReturn(thread:Thread):void
 		{
 			thread.increaseRegOffset(thread.pop());
-			thread.sc -= 2;
 			thread.ip = thread.pop() + 1;
 		}
 	}

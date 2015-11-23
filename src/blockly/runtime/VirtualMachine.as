@@ -62,7 +62,6 @@ package blockly.runtime
 			while(!thread.isFinish()){
 				thread.execNextCode(instructionExector);
 			}
-			assert(thread.sc == 1);
 			return thread.pop();
 		}
 	}
