@@ -21,7 +21,7 @@ package blockly.runtime
 		private var _suspendTimestamp:int;
 		public var suspendUpdater:Object;
 		
-		private const _interruptSignal:Signal = new Signal();
+		private const _finishSignal:Signal = new Signal();
 		
 		public var userData:*;
 		
@@ -30,15 +30,19 @@ package blockly.runtime
 			this.codeList = codeList;
 		}
 		
-		public function get interruptSignal():ISignal
+		public function get finishSignal():ISignal
 		{
-			return _interruptSignal;
+			return _finishSignal;
+		}
+		
+		internal function notifyFinish():void
+		{
+			_finishSignal.notify();
 		}
 		
 		public function interrupt():void
 		{
 			ip = codeList.length;
-			_interruptSignal.notify();
 		}
 		
 		public function isFinish():Boolean

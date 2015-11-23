@@ -14,6 +14,11 @@ package blockly.runtime
 			setInterval(updateThreads, 0);
 		}
 		
+		public function getCopyOfThreadList():Vector.<Thread>
+		{
+			return threadList.slice();
+		}
+		
 		public function startThread(thread:Thread):void
 		{
 			if(threadList.indexOf(thread) < 0){
@@ -39,6 +44,7 @@ package blockly.runtime
 					var thread:Thread = threadList[i];
 					if(thread.isFinish()){
 						threadList.splice(i, 1);
+						thread.notifyFinish();
 						continue;
 					}
 					if(thread.isSuspend()){

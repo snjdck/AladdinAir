@@ -50,5 +50,10 @@ package blockly.runtime
 		{
 			return virtualMachine.calculate(new Thread(codeList));
 		}
+		
+		public function getCopyOfThreadList():Vector.<Thread>
+		{
+			return virtualMachine.getCopyOfThreadList();
+		}
 	}
 }
