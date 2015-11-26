@@ -7,7 +7,7 @@ package blockly.runtime
 
 	internal class JsonCodeToAssembly
 	{
-		private var loopCount:int;
+		private var loopLayer:int;
 		private var slotIndex:int;
 		
 		public function JsonCodeToAssembly()
@@ -16,7 +16,7 @@ package blockly.runtime
 		
 		public function translate(blockList:Array):Array
 		{
-			assert(loopCount == 0 && slotIndex == 0);
+			assert(loopLayer == 0 && slotIndex == 0);
 			return genStatementCode(blockList);
 		}
 		
@@ -28,12 +28,12 @@ package blockly.runtime
 				var block:Object = blockList[i];
 				switch(block["type"]){
 					case "break":
-						if(loopCount > 0){
+						if(loopLayer > 0){
 							result.push([OpCode.BREAK]);
 						}
 						break;
 					case "continue":
-						if(loopCount > 0){
+						if(loopLayer > 0){
 							result.push([OpCode.CONTINUE]);
 						}
 						break;
@@ -115,15 +115,15 @@ package blockly.runtime
 		private function genUntilCode(block:Object):Array
 		{
 			var conditionCode:Array = genExpressionCode(block["condition"]);
-			conditionCode.push([OpFactory.Call("!", 1, 1)]);
+			conditionCode.push(OpFactory.Call("!", 1, 1));
 			return genForCodeImpl([], conditionCode, [], block["code"]);
 		}
 		
 		private function genForCodeImpl(initCode:Array, conditionCode:Array, iterCode:Array, loopBlock:Array):Array
 		{
-			++loopCount;
+			++loopLayer;
 			var loopCode:Array = genStatementCode(loopBlock);
-			--loopCount;
+			--loopLayer;
 			
 			var result:Array = initCode;
 			
