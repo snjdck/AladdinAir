@@ -6,7 +6,7 @@ package blockly.runtime
 	
 	import lambda.call;
 
-	public class Thread
+	final public class Thread
 	{
 		private var codeList:Array;
 		

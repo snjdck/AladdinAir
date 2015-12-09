@@ -16,6 +16,11 @@ package blockly.runtime
 			setInterval(updateThreads, 0);
 		}
 		
+		public function getThreadCount():uint
+		{
+			return threadList.length;
+		}
+		
 		public function getCopyOfThreadList():Vector.<Thread>
 		{
 			return threadList.slice();

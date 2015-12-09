@@ -60,5 +60,10 @@ package blockly.runtime
 		{
 			return virtualMachine.getCopyOfThreadList();
 		}
+		
+		public function getThreadCount():uint
+		{
+			return virtualMachine.getThreadCount();
+		}
 	}
 }

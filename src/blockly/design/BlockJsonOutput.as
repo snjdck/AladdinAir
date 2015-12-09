@@ -1,5 +1,7 @@
 package blockly.design
 {
+	import blockly.SyntaxTreeFactory;
+
 	public class BlockJsonOutput
 	{
 		public function BlockJsonOutput()
@@ -20,10 +22,10 @@ package blockly.design
 		{
 			var argBlock:BlockBase = block.argBlockList[index];
 			if(argBlock != null){
-				return outputCodeSelf(argBlock);
+				return SyntaxTreeFactory.NewExpression(argBlock.cmd, collectArgs(argBlock));
 			}
 			var value:String = block.defaultArgBlockList[index].text;
-			return {"type":"string", "value":value};
+			return SyntaxTreeFactory.NewString(value);
 		}
 		
 		public function outputCodeAll(block:BlockBase):Array
@@ -43,36 +45,19 @@ package blockly.design
 		{
 			switch(block.type){
 				case BlockBase.BLOCK_TYPE_BREAK:
-					return {"type":"break"};
+					return SyntaxTreeFactory.NewBreak();
 				case BlockBase.BLOCK_TYPE_CONTINUE:
-					return {"type":"continue"};
-				case BlockBase.BLOCK_TYPE_EXPRESSION:
-					return outputFunction(block, 1);
+					return SyntaxTreeFactory.NewContinue();
 				case BlockBase.BLOCK_TYPE_STATEMENT:
-					return outputFunction(block, 0);
+					return SyntaxTreeFactory.NewStatement(block.cmd, collectArgs(block));
 				case BlockBase.BLOCK_TYPE_FOR:
-					return {
-						"type":"while",
-						"condition":outputArg(block, 0),
-						"code":outputCodeAll(block.subBlock1)
-					};
+					return SyntaxTreeFactory.NewWhile(outputArg(block, 0), outputCodeAll(block.subBlock1));
 				case BlockBase.BLOCK_TYPE_IF:
-					return {
-						"type":"if",
-						"condition":outputArg(block, 0),
-						"code":outputCodeAll(block.subBlock1)
-					};
+					return SyntaxTreeFactory.NewIf(outputArg(block, 0), outputCodeAll(block.subBlock1));
 				case BlockBase.BLOCK_TYPE_ELSE_IF:
-					return {
-						"type":"else if",
-						"condition":outputArg(block, 0),
-						"code":outputCodeAll(block.subBlock1)
-					};
+					return SyntaxTreeFactory.NewElseIf(outputArg(block, 0), outputCodeAll(block.subBlock1));
 				case BlockBase.BLOCK_TYPE_ELSE:
-					return {
-						"type":"else",
-						"code":outputCodeAll(block.subBlock1)
-					};
+					return SyntaxTreeFactory.NewElse(outputCodeAll(block.subBlock1));
 				case BlockBase.BLOCK_TYPE_ARDUINO:
 					return {
 						"type":"arduino",
@@ -81,16 +66,6 @@ package blockly.design
 					};
 			}
 			return null;
-		}
-		
-		private function outputFunction(block:BlockBase, retCount:int):Object
-		{
-			return {
-				"type":"function",
-				"method":block.cmd,
-				"argList":collectArgs(block),
-				"retCount":retCount
-			};
 		}
 	}
 }
