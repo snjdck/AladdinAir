@@ -23,6 +23,7 @@ package blockly.runtime
 		public var suspendUpdater:Object;
 		
 		private const _finishSignal:Signal = new Signal(Boolean);
+		private var _finishFlag:Boolean;
 		private var _interruptFlag:Boolean;
 		
 		public var userData:*;
@@ -45,12 +46,12 @@ package blockly.runtime
 		public function interrupt():void
 		{
 			_interruptFlag = true;
-			ip = codeList.length;
+			_finishFlag = true;
 		}
 		
 		public function isFinish():Boolean
 		{
-			return ip >= codeList.length;
+			return _finishFlag;
 		}
 		
 		internal function execNextCode(instructionExcetor:InstructionExector):void
@@ -58,6 +59,10 @@ package blockly.runtime
 			if(needCheckStack){
 				assert(sp == sc, "function return count mismatch!");
 				needCheckStack = false;
+			}
+			if(ip >= codeList.length){
+				_finishFlag = true;
+				return;
 			}
 			var code:Array = codeList[ip];
 			instructionExcetor.execute(this, code[0], code.slice(1));
@@ -125,6 +130,13 @@ package blockly.runtime
 		{
 			needCheckStack = true;
 			sc = sp + count;
+		}
+		
+		public function get resultValue():*
+		{
+			if(isFinish() && sp == 1){
+				return valueStack[0];
+			}
 		}
 	}
 }

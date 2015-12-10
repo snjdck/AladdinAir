@@ -51,7 +51,7 @@ package blockly
 			};
 		}
 		
-		static private function NewFunction(name:String, argList:Array, retCount:int):Object
+		static public function NewFunction(name:String, argList:Array, retCount:int):Object
 		{
 			return {
 				"type":"function",
