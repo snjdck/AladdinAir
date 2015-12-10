@@ -134,9 +134,10 @@ package blockly.runtime
 		
 		public function get resultValue():*
 		{
-			if(isFinish() && sp == 1){
+			if(_interruptFlag)
+				return;
+			if(_finishFlag && sp == 1)
 				return valueStack[0];
-			}
 		}
 	}
 }
