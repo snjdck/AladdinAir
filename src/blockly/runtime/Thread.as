@@ -11,7 +11,10 @@ package blockly.runtime
 
 	final public class Thread
 	{
+		private const contextStack:Array = [];
+		private const rootContext:IScriptContext = new ScriptContext();
 		private var context:IScriptContext;
+		
 		private var codeList:Array;
 		
 		internal var ip:int;
@@ -29,13 +32,14 @@ package blockly.runtime
 		private const _finishSignal:Signal = new Signal(Boolean);
 		private var _finishFlag:Boolean;
 		private var _interruptFlag:Boolean;
+		private var _resumeOnNextFrameFlag:Boolean;
 		
 		public var userData:*;
 		
 		public function Thread(codeList:Array)
 		{
 			this.codeList = codeList;
-			context = new ScriptContext();
+			context = rootContext;
 		}
 		
 		public function get finishSignal():ISignal
@@ -123,6 +127,8 @@ package blockly.runtime
 		
 		internal function updateSuspendState():void
 		{
+			if(_resumeOnNextFrameFlag || suspendUpdater == null)
+				return;
 			call(suspendUpdater, this);
 		}
 		
@@ -145,14 +151,33 @@ package blockly.runtime
 				return valueStack[0];
 		}
 		
-		internal function pushScope():void
+		internal function onFrameBegin():void
 		{
-			context = context.createChildContext();
+			if(_resumeOnNextFrameFlag){
+				_isSuspend = false;
+				_resumeOnNextFrameFlag = false;
+			}
+		}
+		
+		public function suspendUntilNextFrame():void
+		{
+			_isSuspend = true;
+			_resumeOnNextFrameFlag = true;
+		}
+		
+		internal function pushScope(isClosure:Boolean):void
+		{
+			contextStack.push(context);
+			if(isClosure){
+				context = context.createChildContext();
+			}else{
+				context = rootContext.createChildContext();
+			}
 		}
 		
 		internal function popScope():void
 		{
-			context = context.parent;
+			context = contextStack.pop();
 		}
 		
 		internal function newVar(varName:String):void

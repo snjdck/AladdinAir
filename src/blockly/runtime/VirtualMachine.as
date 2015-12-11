@@ -1,7 +1,8 @@
 package blockly.runtime
 {
+	import flash.display.Shape;
+	import flash.events.Event;
 	import flash.utils.getTimer;
-	import flash.utils.setInterval;
 	
 	import lambda.call;
 
@@ -9,11 +10,12 @@ package blockly.runtime
 	{
 		private var instructionExector:InstructionExector;
 		private const threadList:Vector.<Thread> = new Vector.<Thread>();
+		private const timer:Shape = new Shape();
 		
 		public function VirtualMachine(functionProvider:FunctionProvider)
 		{
 			instructionExector = new InstructionExector(functionProvider);
-			setInterval(updateThreads, 0);
+			timer.addEventListener(Event.ENTER_FRAME, updateThreads);
 		}
 		
 		public function getThreadCount():uint
@@ -41,8 +43,17 @@ package blockly.runtime
 			}
 		}
 		
-		private function updateThreads():void
+		private function notifyFrameBeginEvent():void
 		{
+			for(var i:int=threadList.length-1; i>=0; --i){
+				var thread:Thread = threadList[i];
+				thread.onFrameBegin();
+			}
+		}
+		
+		private function updateThreads(evt:Event):void
+		{
+			notifyFrameBeginEvent();
 			var endTime:int = getTimer() + 10;
 			var isRunning:Boolean = true;
 			while(isRunning && getTimer() < endTime){
