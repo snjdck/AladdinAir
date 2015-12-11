@@ -36,5 +36,8 @@ package blockly
 		static public const NEW_VAR:String = "newVar";
 		static public const GET_VAR:String = "getVar";
 		static public const SET_VAR:String = "setVar";
+		
+		static public const NEW_FUNCTION:String = "newFunction";
+		static public const RUN_FUNCTION:String = "runFunction";
 	}
 }

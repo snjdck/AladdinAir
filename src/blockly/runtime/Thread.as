@@ -5,9 +5,13 @@ package blockly.runtime
 	import flash.utils.getTimer;
 	
 	import lambda.call;
+	
+	import snjdck.arithmetic.IScriptContext;
+	import snjdck.arithmetic.impl.ScriptContext;
 
 	final public class Thread
 	{
+		private var context:IScriptContext;
 		private var codeList:Array;
 		
 		internal var ip:int;
@@ -31,6 +35,7 @@ package blockly.runtime
 		public function Thread(codeList:Array)
 		{
 			this.codeList = codeList;
+			context = new ScriptContext();
 		}
 		
 		public function get finishSignal():ISignal
@@ -138,6 +143,31 @@ package blockly.runtime
 				return;
 			if(_finishFlag && sp == 1)
 				return valueStack[0];
+		}
+		
+		internal function pushScope():void
+		{
+			context = context.createChildContext();
+		}
+		
+		internal function popScope():void
+		{
+			context = context.parent;
+		}
+		
+		internal function newVar(varName:String):void
+		{
+			context.newKey(varName, null);
+		}
+		
+		internal function getVar(varName:String):*
+		{
+			return context.getValue(varName);
+		}
+		
+		internal function setVar(varName:String, value:Object):void
+		{
+			context.setValue(varName, value);
 		}
 	}
 }

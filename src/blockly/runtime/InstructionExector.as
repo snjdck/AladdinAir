@@ -17,6 +17,9 @@ package blockly.runtime
 			regOpHandler(OpCode.RETURN, __onReturn);
 			regOpHandler(OpCode.LOAD_SLOT, __onLoadSlot);
 			regOpHandler(OpCode.SAVE_SLOT, __onSaveSlot);
+			regOpHandler(OpCode.NEW_VAR, __onNewVar);
+			regOpHandler(OpCode.GET_VAR, __onGetVar);
+			regOpHandler(OpCode.SET_VAR, __onSetVar);
 			
 			this.functionProvider = functionProvider;
 		}
@@ -73,6 +76,7 @@ package blockly.runtime
 		
 		private function __onInvoke(thread:Thread, jumpCount:int, argCount:int, retCount:int, regCount:int):void
 		{
+			thread.pushScope();
 			thread.increaseRegOffset(regCount);
 			while(argCount-- > 0)
 				thread.setSlot(argCount, thread.pop());
@@ -83,8 +87,26 @@ package blockly.runtime
 		
 		private function __onReturn(thread:Thread):void
 		{
+			thread.popScope();
 			thread.increaseRegOffset(thread.pop());
 			thread.ip = thread.pop() + 1;
+		}
+		
+		private function __onNewVar(thread:Thread, varName:String):void
+		{
+			thread.newVar(varName);
+			++thread.ip;
+		}
+		
+		private function __onGetVar(thread:Thread, varName:String):void
+		{
+			__onPush(thread, thread.getVar(varName));
+		}
+		
+		private function __onSetVar(thread:Thread, varName:String):void
+		{
+			thread.setVar(varName, thread.pop());
+			++thread.ip;
 		}
 	}
 }
