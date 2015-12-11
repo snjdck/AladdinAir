@@ -10,9 +10,7 @@ package blockly.runtime
 		private var loopLayer:int;
 		private var slotIndex:int;
 		
-		public function JsonCodeToAssembly()
-		{
-		}
+		public function JsonCodeToAssembly(){}
 		
 		public function translate(blockList:Array):Array
 		{
@@ -62,8 +60,20 @@ package blockly.runtime
 					case "return":
 						result.push([OpCode.RETURN]);
 						break;
-					case "define":
-						append(result, genFunctionDefineCode(block));
+//					case "define":
+//						append(result, genFunctionDefineCode(block));
+//						break;
+					case OpCode.NEW_VAR:
+						result.push([OpCode.NEW_VAR, block["name"]]);
+						break;
+					case OpCode.SET_VAR:
+						result.push([OpCode.SET_VAR, block["name"]]);
+						break;
+					case OpCode.NEW_FUNCTION:
+						append(result, genNewFunctionCode(block));
+						break;
+					case OpCode.RUN_FUNCTION:
+						append(result, genRunFunctionCode(block));
 						break;
 				}
 			}
@@ -245,6 +255,21 @@ package blockly.runtime
 				}
 				codeList[i] = OpFactory.LoadSlot(argList.indexOf(code[1]));
 			}
+		}
+		
+		private function genNewFunctionCode(block:Object):Array
+		{
+			var result:Array = genFunctionDefineCode(block);
+			result.unshift(OpFactory.NewFunction(result.length+1));
+			return result;
+		}
+		
+		private function genRunFunctionCode(block:Object):Array
+		{
+			var argList:Array = block["argList"];
+			var result:Array = genArgListCode(argList);
+			result.push(OpFactory.RunFunction(argList.length, block["retCount"], slotIndex));
+			return result;
 		}
 	}
 }

@@ -76,7 +76,7 @@ package blockly.runtime
 			++thread.ip;
 		}
 		
-		private function __onInvoke(thread:Thread, jumpCount:int, argCount:int, retCount:int, regCount:int):void
+		private function __onInvoke(thread:Thread, name:String, argCount:int, retCount:int, regCount:int):void
 		{
 			thread.pushScope(false);
 			thread.increaseRegOffset(regCount);
@@ -84,7 +84,7 @@ package blockly.runtime
 				thread.setSlot(argCount, thread.pop());
 			thread.push(thread.ip);
 			thread.push(-regCount);
-			thread.ip += jumpCount;
+			thread.ip = thread.getVar(name);
 		}
 		
 		private function __onReturn(thread:Thread):void
@@ -96,7 +96,7 @@ package blockly.runtime
 		
 		private function __onNewVar(thread:Thread, varName:String):void
 		{
-			thread.newVar(varName);
+			thread.newVar(varName, thread.pop());
 			++thread.ip;
 		}
 		
@@ -111,12 +111,22 @@ package blockly.runtime
 			++thread.ip;
 		}
 		
-		private function __onNewFunction(thread:Thread, varName:String):void
+		private function __onNewFunction(thread:Thread, offset:int):void
 		{
+			thread.push(thread.ip + 1);
+			thread.ip += offset;
 		}
 		
-		private function __onRunFunction(thread:Thread, varName:String):void
+		private function __onRunFunction(thread:Thread, argCount:int, retCount:int, regCount:int):void
 		{
+			thread.pushScope(true);
+			thread.increaseRegOffset(regCount);
+			while(argCount-- > 0)
+				thread.setSlot(argCount, thread.pop());
+			var destIp:int = thread.pop();
+			thread.push(thread.ip);
+			thread.push(-regCount);
+			thread.ip = destIp;
 		}
 	}
 }

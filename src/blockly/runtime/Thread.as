@@ -180,9 +180,9 @@ package blockly.runtime
 			context = contextStack.pop();
 		}
 		
-		internal function newVar(varName:String):void
+		internal function newVar(varName:String, varValue:Object):void
 		{
-			context.newKey(varName, null);
+			context.newKey(varName, varValue);
 		}
 		
 		internal function getVar(varName:String):*

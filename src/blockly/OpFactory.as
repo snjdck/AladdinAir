@@ -46,5 +46,15 @@ package blockly
 		{
 			return [OpCode.GET_VAR, name];
 		}
+		
+		static public function NewFunction(jumpOffset:int):Array
+		{
+			return [OpCode.NEW_FUNCTION, jumpOffset];
+		}
+		
+		static public function RunFunction(argCount:int, retCount:int, regCount:int):Array
+		{
+			return [OpCode.RUN_FUNCTION, argCount, retCount, regCount];
+		}
 	}
 }

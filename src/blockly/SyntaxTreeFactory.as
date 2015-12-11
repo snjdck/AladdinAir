@@ -12,40 +12,50 @@ package blockly
 			return {"type":"number", "value":value};
 		}
 		
-		static public function NewBreak():Object
+		static public function Break():Object
 		{
 			return {"type":"break"};
 		}
 		
-		static public function NewContinue():Object
+		static public function Continue():Object
 		{
 			return {"type":"continue"};
 		}
 		
-		static public function NewReturn():Object
+		static public function Return():Object
 		{
 			return {"type":"return"};
 		}
 		
-		static public function NewGetParam(name:String):Object
+		static public function GetParam(name:String):Object
 		{
 			return {"type":OpCode.GET_PARAM, "name":name};
 		}
 		
-		static public function NewGetVar(name:String):Object
+		static public function NewVar(name:String):Object
+		{
+			return {"type":OpCode.NEW_VAR, "name":name};
+		}
+		
+		static public function GetVar(name:String):Object
 		{
 			return {"type":OpCode.GET_VAR, "name":name};
 		}
 		
-		static public function NewDefine(argList:Array, code:Array):Array
+		static public function SetVar(name:String):Object
+		{
+			return {"type":OpCode.SET_VAR, "name":name};
+		}
+		/*
+		static public function NewDefine(argNameList:Array, code:Array):Array
 		{
 			return [{
 				"type":"define",
-				"argList":argList,
+				"argList":argNameList,
 				"code":code
 			}];
 		}
-		
+		*/
 		static public function NewInvoke(name:String, argList:Array, retCount:int):Object
 		{
 			return {
@@ -56,7 +66,7 @@ package blockly
 			};
 		}
 		
-		static public function NewFunction(name:String, argList:Array, retCount:int):Object
+		static public function Call(name:String, argList:Array, retCount:int):Object
 		{
 			return {
 				"type":"function",
@@ -68,12 +78,12 @@ package blockly
 		
 		static public function NewExpression(name:String, argList:Array):Object
 		{
-			return NewFunction(name, argList, 1);
+			return Call(name, argList, 1);
 		}
 		
 		static public function NewStatement(name:String, argList:Array):Object
 		{
-			return NewFunction(name, argList, 0);
+			return Call(name, argList, 0);
 		}
 		
 		static public function NewLoop(count:Object, code:Array):Object
@@ -146,6 +156,24 @@ package blockly
 			return {
 				"type":"else",
 				"code":code
+			};
+		}
+		
+		static public function NewFunction(argNameList:Array, code:Array):Object
+		{
+			return {
+				"type":OpCode.NEW_FUNCTION,
+				"argList":argNameList,
+				"code":code
+			};
+		}
+		
+		static public function RunFunction(argList:Array, retCount:int):Object
+		{
+			return {
+				"type":OpCode.RUN_FUNCTION,
+				"argList":argList,
+				"retCount":retCount
 			};
 		}
 	}

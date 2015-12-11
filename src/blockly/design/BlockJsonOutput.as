@@ -45,9 +45,9 @@ package blockly.design
 		{
 			switch(block.type){
 				case BlockBase.BLOCK_TYPE_BREAK:
-					return SyntaxTreeFactory.NewBreak();
+					return SyntaxTreeFactory.Break();
 				case BlockBase.BLOCK_TYPE_CONTINUE:
-					return SyntaxTreeFactory.NewContinue();
+					return SyntaxTreeFactory.Continue();
 				case BlockBase.BLOCK_TYPE_STATEMENT:
 					return SyntaxTreeFactory.NewStatement(block.cmd, collectArgs(block));
 				case BlockBase.BLOCK_TYPE_FOR:

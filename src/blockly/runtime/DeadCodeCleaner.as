@@ -4,9 +4,7 @@ package blockly.runtime
 
 	internal class DeadCodeCleaner
 	{
-		public function DeadCodeCleaner()
-		{
-		}
+		public function DeadCodeCleaner(){}
 		
 		public function clean(codeList:Array):void
 		{
@@ -30,6 +28,7 @@ package blockly.runtime
 				codeUsage[index] = true;
 				var code:Array = codeList[index];
 				switch(code[0]){
+					case OpCode.NEW_FUNCTION:
 					case OpCode.JUMP_IF_TRUE:
 						calcCodeUsage(codeList, codeUsage, index+1);
 						//fallthrough
@@ -125,6 +124,7 @@ package blockly.runtime
 					case OpCode.JUMP:
 					case OpCode.JUMP_IF_TRUE:
 					case OpCode.INVOKE:
+					case OpCode.NEW_FUNCTION:
 						break;
 					default:
 						continue;
