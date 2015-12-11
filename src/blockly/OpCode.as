@@ -31,6 +31,9 @@ package blockly
 		static public const PUSH_SCOPE:String = "pushScope";
 		static public const POP_SCOPE:String = "popScope";
 		
+		static public const GET_PARAM:String = "getParam";
+		
+		static public const NEW_VAR:String = "newVar";
 		static public const GET_VAR:String = "getVar";
 		static public const SET_VAR:String = "setVar";
 	}

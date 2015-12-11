@@ -78,7 +78,9 @@ package blockly.runtime
 					return [OpFactory.Push(block["value"])];
 				case "function":
 					return genFunctionCode(block);
-				case "getVar":
+				case OpCode.GET_PARAM:
+					return [OpFactory.GetParam(block["name"])];
+				case OpCode.GET_VAR:
 					return [OpFactory.GetVar(block["name"])];
 			}
 			return null;
@@ -229,16 +231,16 @@ package blockly.runtime
 			slotIndex += argCount;
 			var result:Array = genStatementCode(block["code"]);
 			slotIndex -= argCount;
-			replaceGetVarCode(result, argList);
+			replaceGetParamCode(result, argList);
 			result.push([OpCode.RETURN]);
 			return result;
 		}
 		
-		private function replaceGetVarCode(codeList:Array, argList:Array):void
+		private function replaceGetParamCode(codeList:Array, argList:Array):void
 		{
 			for(var i:int=codeList.length-1; i>=0; --i){
 				var code:Array = codeList[i];
-				if(code[0] != OpCode.GET_VAR){
+				if(code[0] != OpCode.GET_PARAM){
 					continue;
 				}
 				codeList[i] = OpFactory.LoadSlot(argList.indexOf(code[1]));

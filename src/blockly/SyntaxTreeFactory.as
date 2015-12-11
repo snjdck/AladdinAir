@@ -27,6 +27,11 @@ package blockly
 			return {"type":"return"};
 		}
 		
+		static public function NewGetParam(name:String):Object
+		{
+			return {"type":OpCode.GET_PARAM, "name":name};
+		}
+		
 		static public function NewGetVar(name:String):Object
 		{
 			return {"type":OpCode.GET_VAR, "name":name};
