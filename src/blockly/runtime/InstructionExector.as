@@ -21,7 +21,6 @@ package blockly.runtime
 			regOpHandler(OpCode.GET_VAR, __onGetVar);
 			regOpHandler(OpCode.SET_VAR, __onSetVar);
 			regOpHandler(OpCode.NEW_FUNCTION, __onNewFunction);
-			regOpHandler(OpCode.RUN_FUNCTION, __onRunFunction);
 			
 			this.functionProvider = functionProvider;
 		}
@@ -78,13 +77,14 @@ package blockly.runtime
 		
 		private function __onInvoke(thread:Thread, name:String, argCount:int, retCount:int, regCount:int):void
 		{
-			thread.pushScope(false);
 			thread.increaseRegOffset(regCount);
 			while(argCount-- > 0)
 				thread.setSlot(argCount, thread.pop());
+			var funcObj:FunctionObject = thread.pop();
 			thread.push(thread.ip);
 			thread.push(-regCount);
-			thread.ip = thread.getVar(name);
+			thread.ip = funcObj.address;
+			thread.pushScope(funcObj.createContext());
 		}
 		
 		private function __onReturn(thread:Thread):void
@@ -113,20 +113,8 @@ package blockly.runtime
 		
 		private function __onNewFunction(thread:Thread, offset:int):void
 		{
-			thread.push(thread.ip + 1);
+			thread.push(new FunctionObject(thread.getContext(), thread.ip + 1));
 			thread.ip += offset;
-		}
-		
-		private function __onRunFunction(thread:Thread, argCount:int, retCount:int, regCount:int):void
-		{
-			thread.pushScope(true);
-			thread.increaseRegOffset(regCount);
-			while(argCount-- > 0)
-				thread.setSlot(argCount, thread.pop());
-			var destIp:int = thread.pop();
-			thread.push(thread.ip);
-			thread.push(-regCount);
-			thread.ip = destIp;
 		}
 	}
 }

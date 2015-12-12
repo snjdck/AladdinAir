@@ -60,20 +60,14 @@ package blockly.runtime
 					case "return":
 						result.push([OpCode.RETURN]);
 						break;
-//					case "define":
-//						append(result, genFunctionDefineCode(block));
-//						break;
-					case OpCode.NEW_VAR:
+					case "newVar":
 						result.push([OpCode.NEW_VAR, block["name"]]);
 						break;
-					case OpCode.SET_VAR:
+					case "setVar":
 						result.push([OpCode.SET_VAR, block["name"]]);
 						break;
-					case OpCode.NEW_FUNCTION:
+					case "newFunction":
 						append(result, genNewFunctionCode(block));
-						break;
-					case OpCode.RUN_FUNCTION:
-						append(result, genRunFunctionCode(block));
 						break;
 				}
 			}
@@ -230,19 +224,7 @@ package blockly.runtime
 		{
 			var argList:Array = block["argList"];
 			var result:Array = genArgListCode(argList);
-			result.push(OpFactory.Invoke(block["method"], argList.length, block["retCount"], slotIndex));
-			return result;
-		}
-		
-		private function genFunctionDefineCode(block:Object):Array
-		{
-			var argList:Array = block["argList"];
-			var argCount:int = argList.length;
-			slotIndex += argCount;
-			var result:Array = genStatementCode(block["code"]);
-			slotIndex -= argCount;
-			replaceGetParamCode(result, argList);
-			result.push([OpCode.RETURN]);
+			result.push(OpFactory.Invoke(argList.length, block["retCount"], slotIndex));
 			return result;
 		}
 		
@@ -259,16 +241,14 @@ package blockly.runtime
 		
 		private function genNewFunctionCode(block:Object):Array
 		{
-			var result:Array = genFunctionDefineCode(block);
-			result.unshift(OpFactory.NewFunction(result.length+1));
-			return result;
-		}
-		
-		private function genRunFunctionCode(block:Object):Array
-		{
 			var argList:Array = block["argList"];
-			var result:Array = genArgListCode(argList);
-			result.push(OpFactory.RunFunction(argList.length, block["retCount"], slotIndex));
+			var argCount:int = argList.length;
+			slotIndex += argCount;
+			var result:Array = genStatementCode(block["code"]);
+			slotIndex -= argCount;
+			replaceGetParamCode(result, argList);
+			result.push([OpCode.RETURN]);
+			result.unshift(OpFactory.NewFunction(result.length+1));
 			return result;
 		}
 	}

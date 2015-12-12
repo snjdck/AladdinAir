@@ -32,9 +32,9 @@ package blockly
 			return [OpCode.SAVE_SLOT, index];
 		}
 		
-		static public function Invoke(funcName:String, argCount:int, retCount:int, regCount:int):Array
+		static public function Invoke(argCount:int, retCount:int, regCount:int):Array
 		{
-			return [OpCode.INVOKE, funcName, argCount, retCount, regCount];
+			return [OpCode.INVOKE, argCount, retCount, regCount];
 		}
 		
 		static public function GetParam(name:String):Array
@@ -50,11 +50,6 @@ package blockly
 		static public function NewFunction(jumpOffset:int):Array
 		{
 			return [OpCode.NEW_FUNCTION, jumpOffset];
-		}
-		
-		static public function RunFunction(argCount:int, retCount:int, regCount:int):Array
-		{
-			return [OpCode.RUN_FUNCTION, argCount, retCount, regCount];
 		}
 	}
 }

@@ -46,21 +46,11 @@ package blockly
 		{
 			return {"type":OpCode.SET_VAR, "name":name};
 		}
-		/*
-		static public function NewDefine(argNameList:Array, code:Array):Array
-		{
-			return [{
-				"type":"define",
-				"argList":argNameList,
-				"code":code
-			}];
-		}
-		*/
-		static public function NewInvoke(name:String, argList:Array, retCount:int):Object
+		
+		static public function NewInvoke(argList:Array, retCount:int):Object
 		{
 			return {
 				"type":"invoke",
-				"method":name,
 				"argList":argList,
 				"retCount":retCount
 			};
@@ -165,15 +155,6 @@ package blockly
 				"type":OpCode.NEW_FUNCTION,
 				"argList":argNameList,
 				"code":code
-			};
-		}
-		
-		static public function RunFunction(argList:Array, retCount:int):Object
-		{
-			return {
-				"type":OpCode.RUN_FUNCTION,
-				"argList":argList,
-				"retCount":retCount
 			};
 		}
 	}

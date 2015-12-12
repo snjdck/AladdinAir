@@ -54,9 +54,9 @@ package blockly.runtime
 		private function updateThreads(evt:Event):void
 		{
 			notifyFrameBeginEvent();
-			var endTime:int = getTimer() + 10;
-			var isRunning:Boolean = true;
-			while(isRunning && getTimer() < endTime){
+			var endTime:int = getTimer() + 1;
+			var isRunning:Boolean;
+			do{
 				isRunning = false;
 				for(var i:int=threadList.length-1; i>=0; --i){
 					var thread:Thread = threadList[i];
@@ -72,7 +72,7 @@ package blockly.runtime
 					isRunning = true;
 					thread.execNextCode(instructionExector);
 				}
-			}
+			}while(isRunning && getTimer() < endTime);
 		}
 		
 		public function calculate(thread:Thread):*

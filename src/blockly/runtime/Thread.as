@@ -12,7 +12,6 @@ package blockly.runtime
 	final public class Thread
 	{
 		private const contextStack:Array = [];
-		private const rootContext:IScriptContext = new ScriptContext();
 		private var context:IScriptContext;
 		
 		private var codeList:Array;
@@ -39,7 +38,7 @@ package blockly.runtime
 		public function Thread(codeList:Array)
 		{
 			this.codeList = codeList;
-			context = rootContext;
+			context = new ScriptContext();
 		}
 		
 		public function get finishSignal():ISignal
@@ -165,14 +164,15 @@ package blockly.runtime
 			_resumeOnNextFrameFlag = true;
 		}
 		
-		internal function pushScope(isClosure:Boolean):void
+		internal function getContext():IScriptContext
+		{
+			return context;
+		}
+		
+		internal function pushScope(newContext:IScriptContext):void
 		{
 			contextStack.push(context);
-			if(isClosure){
-				context = context.createChildContext();
-			}else{
-				context = rootContext.createChildContext();
-			}
+			context = newContext;
 		}
 		
 		internal function popScope():void
