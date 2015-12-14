@@ -6,6 +6,7 @@ package blockly
 		static public const JUMP_IF_TRUE:String = "jumpIfTrue";
 		static public const CALL:String = "call";
 		static public const PUSH:String = "push";
+		
 		static public const BREAK:String = "break";
 		static public const CONTINUE:String = "continue";
 		
@@ -14,9 +15,6 @@ package blockly
 		
 		static public const SAVE_SLOT:String = "saveSlot";
 		static public const LOAD_SLOT:String = "loadSlot";
-		
-		static public const PUSH_SCOPE:String = "pushScope";
-		static public const POP_SCOPE:String = "popScope";
 		
 		static public const GET_PARAM:String = "getParam";
 		
