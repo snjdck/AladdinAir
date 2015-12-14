@@ -63,6 +63,9 @@ package blockly.runtime
 					case "newVar":
 						result.push([OpCode.NEW_VAR, block["name"]]);
 						break;
+					case "getVar":
+						result.push([OpCode.GET_VAR, block["name"]]);
+						break;
 					case "setVar":
 						result.push([OpCode.SET_VAR, block["name"]]);
 						break;

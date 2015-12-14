@@ -75,7 +75,7 @@ package blockly.runtime
 			++thread.ip;
 		}
 		
-		private function __onInvoke(thread:Thread, name:String, argCount:int, retCount:int, regCount:int):void
+		private function __onInvoke(thread:Thread, argCount:int, retCount:int, regCount:int):void
 		{
 			thread.increaseRegOffset(regCount);
 			while(argCount-- > 0)
