@@ -5,17 +5,24 @@ package blockly.runtime
 	internal class FunctionObject
 	{
 		private var context:IScriptContext;
-		public var address:int;
+		private var argList:Array;
+		private var address:int;
 		
-		public function FunctionObject(context:IScriptContext, address:int)
+		public function FunctionObject(context:IScriptContext, argList:Array, address:int)
 		{
 			this.context = context;
+			this.argList = argList;
 			this.address = address;
 		}
 		
-		public function createContext():IScriptContext
+		public function invoke(thread:Thread):void
 		{
-			return context.createChildContext();
+			thread.pushScope(context.createChildContext());
+			for(var i:int=argList.length-1; i>=0; --i){
+				thread.setVar(argList[i], thread.getSlot(i));
+				thread.setSlot(i, null);
+			}
+			thread.ip = address;
 		}
 	}
 }

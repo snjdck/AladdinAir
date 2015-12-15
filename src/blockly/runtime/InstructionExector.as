@@ -83,8 +83,7 @@ package blockly.runtime
 			var funcObj:FunctionObject = thread.pop();
 			thread.push(thread.ip);
 			thread.push(-regCount);
-			thread.ip = funcObj.address;
-			thread.pushScope(funcObj.createContext());
+			funcObj.invoke(thread);
 		}
 		
 		private function __onReturn(thread:Thread):void
@@ -111,9 +110,9 @@ package blockly.runtime
 			++thread.ip;
 		}
 		
-		private function __onNewFunction(thread:Thread, offset:int):void
+		private function __onNewFunction(thread:Thread, offset:int, argList:Array):void
 		{
-			thread.push(new FunctionObject(thread.getContext(), thread.ip + 1));
+			thread.push(new FunctionObject(thread.getContext(), argList, thread.ip + 1));
 			thread.ip += offset;
 		}
 	}

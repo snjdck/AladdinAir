@@ -85,8 +85,6 @@ package blockly.runtime
 					return [OpFactory.Push(block["value"])];
 				case "function":
 					return genFunctionCode(block);
-				case OpCode.GET_PARAM:
-					return [OpFactory.GetParam(block["name"])];
 				case OpCode.GET_VAR:
 					return [OpFactory.GetVar(block["name"])];
 			}
@@ -231,27 +229,11 @@ package blockly.runtime
 			return result;
 		}
 		
-		private function replaceGetParamCode(codeList:Array, argList:Array):void
-		{
-			for(var i:int=codeList.length-1; i>=0; --i){
-				var code:Array = codeList[i];
-				if(code[0] != OpCode.GET_PARAM){
-					continue;
-				}
-				codeList[i] = OpFactory.LoadSlot(argList.indexOf(code[1]));
-			}
-		}
-		
 		private function genNewFunctionCode(block:Object):Array
 		{
-			var argList:Array = block["argList"];
-			var argCount:int = argList.length;
-			slotIndex += argCount;
 			var result:Array = genStatementCode(block["code"]);
-			slotIndex -= argCount;
-			replaceGetParamCode(result, argList);
 			result.push([OpCode.RETURN]);
-			result.unshift(OpFactory.NewFunction(result.length+1));
+			result.unshift(OpFactory.NewFunction(result.length+1, block["argList"]));
 			return result;
 		}
 	}

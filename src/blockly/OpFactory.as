@@ -42,9 +42,9 @@ package blockly
 			return [OpCode.GET_VAR, name];
 		}
 		
-		static public function NewFunction(jumpOffset:int):Array
+		static public function NewFunction(jumpOffset:int, argList:Array):Array
 		{
-			return [OpCode.NEW_FUNCTION, jumpOffset];
+			return [OpCode.NEW_FUNCTION, jumpOffset, argList];
 		}
 	}
 }
