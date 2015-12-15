@@ -37,11 +37,6 @@ package blockly
 			return [OpCode.INVOKE, argCount, retCount, regCount];
 		}
 		
-		static public function GetParam(name:String):Array
-		{
-			return [OpCode.GET_PARAM, name];
-		}
-		
 		static public function GetVar(name:String):Array
 		{
 			return [OpCode.GET_VAR, name];

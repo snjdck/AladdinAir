@@ -7,9 +7,7 @@ package blockly.runtime
 		private const newJumpIndex:Vector.<int> = new Vector.<int>();
 		private const jumpStack:Vector.<int> = new Vector.<int>();
 		
-		public function AssemblyOptimizer()
-		{
-		}
+		public function AssemblyOptimizer(){}
 		
 		public function optimize(codeList:Array):void
 		{
@@ -17,7 +15,6 @@ package blockly.runtime
 			runPass(codeList, OpCode.JUMP, calcNewJumpIndex);
 			runPass(codeList, OpCode.JUMP, optimizeJump);
 			runPass(codeList, OpCode.JUMP_IF_TRUE, optimizeJumpIfTrue);
-			runPass(codeList, OpCode.INVOKE, optimizeJumpIfTrue);
 		}
 		
 		private function runPass(codeList:Array, op:String, handler:Function):void

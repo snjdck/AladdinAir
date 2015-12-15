@@ -16,8 +16,6 @@ package blockly
 		static public const SAVE_SLOT:String = "saveSlot";
 		static public const LOAD_SLOT:String = "loadSlot";
 		
-		static public const GET_PARAM:String = "getParam";
-		
 		static public const NEW_VAR:String = "newVar";
 		static public const GET_VAR:String = "getVar";
 		static public const SET_VAR:String = "setVar";
