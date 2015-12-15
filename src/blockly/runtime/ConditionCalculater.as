@@ -66,6 +66,7 @@ package blockly.runtime
 				var code:Array = codeList[i];
 				switch(code[0]){
 					case OpCode.LOAD_SLOT:
+					case OpCode.GET_VAR:
 					case OpCode.PUSH:
 						--needCount;
 						break;
@@ -89,6 +90,7 @@ package blockly.runtime
 				var code:Array = codeList[i];
 				switch(code[0]){
 					case OpCode.LOAD_SLOT:
+					case OpCode.GET_VAR:
 						return false;
 					case OpCode.CALL:
 						if(!functionProvider.isNativeFunction(code[1])){
