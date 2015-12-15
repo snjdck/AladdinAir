@@ -19,7 +19,7 @@ package blockly.runtime
 		{
 			thread.pushScope(context.createChildContext());
 			for(var i:int=argList.length-1; i>=0; --i){
-				thread.setVar(argList[i], thread.getSlot(i));
+				thread.newVar(argList[i], thread.getSlot(i));
 				thread.setSlot(i, null);
 			}
 			thread.ip = address;
