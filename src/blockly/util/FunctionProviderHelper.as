@@ -23,6 +23,45 @@ package blockly.util
 			provider.registerNative(">=", onGreaterEqual);
 			provider.registerNative("==", onEqual);
 			provider.registerNative("!=", onNotEqual);
+			
+			provider.register("trace", onTrace);
+			provider.register("sleep", onSleep);
+			provider.register("suspendUntilNextFrame", onSuspendUntilNextFrame);
+			provider.register("getProp", onGetProp);
+			provider.register("setProp", onSetProp);
+		}
+		
+		static private function onTrace(thread:Thread, argList:Array):void
+		{
+			trace.apply(null, argList);
+		}
+		
+		static private function onSleep(thread:Thread, argList:Array):void
+		{
+			thread.suspend();
+			thread.suspendUpdater = [_onSleep, argList[0] * 1000];
+		}
+		
+		static private function _onSleep(thread:Thread, timeout:int):void
+		{
+			if(thread.timeElapsedSinceSuspend >= timeout){
+				thread.resume();
+			}
+		}
+		
+		static private function onSuspendUntilNextFrame(thread:Thread, argList:Array):void
+		{
+			thread.suspendUntilNextFrame();
+		}
+		
+		static private function onGetProp(thread:Thread, argList:Array):void
+		{
+			thread.push(argList[0][argList[1]]);
+		}
+		
+		static private function onSetProp(thread:Thread, argList:Array):void
+		{
+			argList[0][argList[1]] = argList[2];
 		}
 		
 		static private function onAdd(thread:Thread, argList:Array):void
