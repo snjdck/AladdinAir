@@ -15,12 +15,11 @@ package blockly.runtime
 			this.address = address;
 		}
 		
-		public function invoke(thread:Thread):void
+		public function invoke(thread:Thread, valueList:Array):void
 		{
 			thread.pushScope(context.createChildContext());
 			for(var i:int=argList.length-1; i>=0; --i){
-				thread.newVar(argList[i], thread.getSlot(i));
-				thread.setSlot(i, null);
+				thread.newVar(argList[i], valueList[i]);
 			}
 			thread.ip = address;
 		}

@@ -40,9 +40,7 @@ package blockly.runtime
 		
 		private function __onCall(thread:Thread, methodName:String, argCount:int, retCount:int):void
 		{
-			var argList:Array = [];
-			while(argCount-- > 0)
-				argList[argCount] = thread.pop();
+			var argList:Array = getArgList(thread, argCount);
 			thread.requestCheckStack(retCount);
 			functionProvider.execute(thread, methodName, argList);
 			++thread.ip;
@@ -77,13 +75,21 @@ package blockly.runtime
 		
 		private function __onInvoke(thread:Thread, argCount:int, retCount:int, regCount:int):void
 		{
+			var argList:Array = getArgList(thread, argCount);
 			thread.increaseRegOffset(regCount);
-			while(argCount-- > 0)
-				thread.setSlot(argCount, thread.pop());
-			var funcObj:FunctionObject = thread.pop();
-			thread.push(thread.ip);
-			thread.push(-regCount);
-			funcObj.invoke(thread);
+			var funcRef:* = thread.pop();
+			if(funcRef is FunctionObject){
+				var funcObj:FunctionObject = funcRef;
+				thread.push(thread.ip);
+				thread.push(-regCount);
+				funcObj.invoke(thread, argList);
+			}else if(funcRef is Function){
+				funcRef(thread, argList);
+				++thread.ip;
+			}else{
+				assert(false);
+				thread.interrupt();
+			}
 		}
 		
 		private function __onReturn(thread:Thread):void
@@ -101,7 +107,13 @@ package blockly.runtime
 		
 		private function __onGetVar(thread:Thread, varName:String):void
 		{
-			__onPush(thread, thread.getVar(varName));
+			var value:Object;
+			if(thread.hasVar(varName)){
+				value = thread.getVar(varName);
+			}else if(functionProvider.hasVar(varName)){
+				value = functionProvider.getVar(varName);
+			}
+			__onPush(thread, value);
 		}
 		
 		private function __onSetVar(thread:Thread, varName:String):void
@@ -114,6 +126,14 @@ package blockly.runtime
 		{
 			thread.push(new FunctionObject(thread.getContext(), argList, thread.ip + 1));
 			thread.ip += offset;
+		}
+		
+		private function getArgList(thread:Thread, argCount:int):Array
+		{
+			var argList:Array = [];
+			while(argCount-- > 0)
+				argList[argCount] = thread.pop();
+			return argList;
 		}
 	}
 }

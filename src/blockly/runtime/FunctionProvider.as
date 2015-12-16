@@ -2,24 +2,34 @@ package blockly.runtime
 {
 	public class FunctionProvider
 	{
-		private const methodDict:Object = {};
+		private const varDict:Object = {};
 		
 		public function FunctionProvider(){}
 		
-		public function register(name:String, handler:Function):void
+		public function register(name:String, value:Object):void
 		{
-			methodDict[name] = handler;
+			varDict[name] = value;
 		}
 		
 		public function alias(name:String, newName:String):void
 		{
-			assert(methodDict[name] != null);
-			methodDict[newName] = methodDict[name];
+			assert(varDict[name] != null);
+			varDict[newName] = varDict[name];
+		}
+		
+		internal function hasVar(name:String):Boolean
+		{
+			return name in varDict;
+		}
+		
+		internal function getVar(name:String):Object
+		{
+			return varDict[name];
 		}
 		
 		internal function execute(thread:Thread, name:String, argList:Array):void
 		{
-			var handler:Function = methodDict[name];
+			var handler:Function = varDict[name] as Function;
 			if(null == handler){
 				onCallUnregisteredFunction(thread, name, argList);
 			}else{
