@@ -12,7 +12,7 @@ package blockly.runtime
 		{
 			virtualMachine = new VirtualMachine(functionProvider);
 			compiler = new JsonCodeToAssembly();
-			conditionCalculater = new ConditionCalculater(this, functionProvider);
+			conditionCalculater = new ConditionCalculater();
 			optimizer = new AssemblyOptimizer();
 			deadCodeCleaner = new DeadCodeCleaner();
 		}

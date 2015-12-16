@@ -7,22 +7,22 @@ package blockly.util
 	{
 		static public function InitMath(provider:FunctionProvider):void
 		{
-			provider.registerNative("+", onAdd);
-			provider.registerNative("-", onSub);
-			provider.registerNative("*", onMul);
-			provider.registerNative("/", onDiv);
-			provider.registerNative("%", onMod);
+			provider.register("+", onAdd);
+			provider.register("-", onSub);
+			provider.register("*", onMul);
+			provider.register("/", onDiv);
+			provider.register("%", onMod);
 			
-			provider.registerNative("!", onNot);
-			provider.registerNative("&&", onAnd);
-			provider.registerNative("||", onOr);
+			provider.register("!", onNot);
+			provider.register("&&", onAnd);
+			provider.register("||", onOr);
 			
-			provider.registerNative("<", onLess);
-			provider.registerNative("<=", onLessEqual);
-			provider.registerNative(">", onGreater);
-			provider.registerNative(">=", onGreaterEqual);
-			provider.registerNative("==", onEqual);
-			provider.registerNative("!=", onNotEqual);
+			provider.register("<", onLess);
+			provider.register("<=", onLessEqual);
+			provider.register(">", onGreater);
+			provider.register(">=", onGreaterEqual);
+			provider.register("==", onEqual);
+			provider.register("!=", onNotEqual);
 			
 			provider.register("trace", onTrace);
 			provider.register("sleep", onSleep);
