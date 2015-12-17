@@ -76,20 +76,19 @@ package blockly.runtime
 		private function __onInvoke(thread:Thread, argCount:int, retCount:int, regCount:int):void
 		{
 			var argList:Array = getArgList(thread, argCount);
-			thread.increaseRegOffset(regCount);
-			var funcRef:* = thread.pop();
-			if(funcRef is FunctionObject){
-				var funcObj:FunctionObject = funcRef;
-				thread.push(thread.ip);
-				thread.push(-regCount);
-				funcObj.invoke(thread, argList);
-			}else if(funcRef is Function){
-				funcRef(thread, argList);
-				++thread.ip;
-			}else{
-				assert(false);
-				thread.interrupt();
+			var funcRef:Function = thread.pop();
+			switch(funcRef.length){
+				case 3: funcRef(thread, argList, regCount);
+					break;
+				case 2: funcRef(thread, argList);
+					break;
+				case 1: funcRef(argList);
+					break;
+				case 0: funcRef();
+					break;
+				default:assert(false);
 			}
+			++thread.ip;
 		}
 		
 		private function __onReturn(thread:Thread):void
@@ -107,13 +106,7 @@ package blockly.runtime
 		
 		private function __onGetVar(thread:Thread, varName:String):void
 		{
-			var value:Object;
-			if(thread.hasVar(varName)){
-				value = thread.getVar(varName);
-			}else if(functionProvider.hasVar(varName)){
-				value = functionProvider.getVar(varName);
-			}
-			__onPush(thread, value);
+			__onPush(thread, thread.getVar(varName));
 		}
 		
 		private function __onSetVar(thread:Thread, varName:String):void
@@ -124,7 +117,7 @@ package blockly.runtime
 		
 		private function __onNewFunction(thread:Thread, offset:int, argList:Array):void
 		{
-			thread.push(new FunctionObject(thread.getContext(), argList, thread.ip + 1));
+			thread.push(new FunctionObject(thread.getContext(), argList, thread.ip).invoke);
 			thread.ip += offset;
 		}
 		

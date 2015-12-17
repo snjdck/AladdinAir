@@ -7,7 +7,6 @@ package blockly.runtime
 	import lambda.call;
 	
 	import snjdck.arithmetic.IScriptContext;
-	import snjdck.arithmetic.impl.ScriptContext;
 
 	final public class Thread
 	{
@@ -35,10 +34,10 @@ package blockly.runtime
 		
 		public var userData:*;
 		
-		public function Thread(codeList:Array)
+		public function Thread(codeList:Array, context:IScriptContext)
 		{
 			this.codeList = codeList;
-			context = new ScriptContext();
+			this.context = context;
 		}
 		
 		public function get finishSignal():ISignal
@@ -193,11 +192,6 @@ package blockly.runtime
 		public function setVar(varName:String, value:Object):void
 		{
 			context.setValue(varName, value);
-		}
-		
-		public function hasVar(varName:String):Boolean
-		{
-			return context.hasKey(varName, true);
 		}
 	}
 }

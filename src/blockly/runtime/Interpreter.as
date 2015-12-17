@@ -1,5 +1,7 @@
 package blockly.runtime
 {
+	import snjdck.arithmetic.IScriptContext;
+
 	public class Interpreter
 	{
 		private var virtualMachine:VirtualMachine;
@@ -7,6 +9,7 @@ package blockly.runtime
 		private var deadCodeCleaner:DeadCodeCleaner;
 		private var optimizer:AssemblyOptimizer;
 		private var conditionCalculater:ConditionCalculater;
+		private var context:IScriptContext;
 		
 		public function Interpreter(functionProvider:FunctionProvider)
 		{
@@ -15,6 +18,7 @@ package blockly.runtime
 			conditionCalculater = new ConditionCalculater();
 			optimizer = new AssemblyOptimizer();
 			deadCodeCleaner = new DeadCodeCleaner();
+			context = functionProvider.getContext();
 		}
 		
 		public function compile(blockList:Array):Array
@@ -33,7 +37,7 @@ package blockly.runtime
 		
 		public function executeAssembly(codeList:Array):Thread
 		{
-			var thread:Thread = new Thread(codeList);
+			var thread:Thread = new Thread(codeList, context.createChildContext());
 			virtualMachine.startThread(thread);
 			return thread;
 		}
@@ -45,12 +49,12 @@ package blockly.runtime
 		
 		public function calculateAssembly(codeList:Array):*
 		{
-			return virtualMachine.calculate(new Thread(codeList));
+			return virtualMachine.calculate(new Thread(codeList, context.createChildContext()));
 		}
 		
 		public function calculateAssemblyAsynchronous(codeList:Array, handler:Object):void
 		{
-			virtualMachine.calculateAsynchronous(new Thread(codeList), handler);
+			virtualMachine.calculateAsynchronous(new Thread(codeList, context.createChildContext()), handler);
 		}
 		
 		public function getCopyOfThreadList():Vector.<Thread>

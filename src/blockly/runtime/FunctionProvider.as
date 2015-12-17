@@ -1,35 +1,33 @@
 package blockly.runtime
 {
+	import snjdck.arithmetic.IScriptContext;
+	import snjdck.arithmetic.impl.ScriptContext;
+
 	public class FunctionProvider
 	{
-		private const varDict:Object = {};
+		private const context:IScriptContext = new ScriptContext();
 		
 		public function FunctionProvider(){}
 		
 		public function register(name:String, value:Object):void
 		{
-			varDict[name] = value;
+			context.newKey(name, value);
 		}
 		
 		public function alias(name:String, newName:String):void
 		{
-			assert(varDict[name] != null);
-			varDict[newName] = varDict[name];
+			assert(context.hasKey(name, false));
+			context.newKey(newName, context.getValue(name));
 		}
 		
-		internal function hasVar(name:String):Boolean
+		internal function getContext():IScriptContext
 		{
-			return name in varDict;
-		}
-		
-		internal function getVar(name:String):Object
-		{
-			return varDict[name];
+			return context;
 		}
 		
 		internal function execute(thread:Thread, name:String, argList:Array):void
 		{
-			var handler:Function = varDict[name] as Function;
+			var handler:Function = context.getValue(name) as Function;
 			if(null == handler){
 				onCallUnregisteredFunction(thread, name, argList);
 			}else{
