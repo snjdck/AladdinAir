@@ -76,18 +76,11 @@ package blockly.runtime
 		private function __onInvoke(thread:Thread, argCount:int, retCount:int, regCount:int):void
 		{
 			var argList:Array = getArgList(thread, argCount);
-			var funcRef:Function = thread.pop();
-			switch(funcRef.length){
-				case 3: funcRef(thread, argList, regCount);
-					break;
-				case 2: funcRef(thread, argList);
-					break;
-				case 1: funcRef(argList);
-					break;
-				case 0: funcRef();
-					break;
-				default:assert(false);
-			}
+			var funcRef:* = thread.pop();
+			if(funcRef is FunctionObjectNative)	(funcRef as FunctionObjectNative).invoke(thread, argList);
+			else if(funcRef is FunctionObject)	(funcRef as FunctionObject).invoke(thread, argList, regCount);
+			else if(funcRef is Function)		(funcRef as Function).apply(null, argList);
+			else assert(false);
 			++thread.ip;
 		}
 		
@@ -117,7 +110,7 @@ package blockly.runtime
 		
 		private function __onNewFunction(thread:Thread, offset:int, argList:Array):void
 		{
-			thread.push(new FunctionObject(thread.getContext(), argList, thread.ip).invoke);
+			thread.push(new FunctionObject(thread.getContext(), argList, thread.ip));
 			thread.ip += offset;
 		}
 		
