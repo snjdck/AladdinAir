@@ -27,9 +27,9 @@ package blockly
 			return {"type":"return"};
 		}
 		
-		static public function NewVar(name:String):Object
+		static public function NewVar(name:String, value:Object):Object
 		{
-			return {"type":OpCode.NEW_VAR, "name":name};
+			return {"type":OpCode.NEW_VAR, "name":name, "value":value};
 		}
 		
 		static public function GetVar(name:String):Object
@@ -37,15 +37,16 @@ package blockly
 			return {"type":OpCode.GET_VAR, "name":name};
 		}
 		
-		static public function SetVar(name:String):Object
+		static public function SetVar(name:String, value:Object):Object
 		{
-			return {"type":OpCode.SET_VAR, "name":name};
+			return {"type":OpCode.SET_VAR, "name":name, "value":value};
 		}
 		
-		static public function NewInvoke(argList:Array, retCount:int):Object
+		static public function NewInvoke(target:Object, argList:Array, retCount:int):Object
 		{
 			return {
 				"type":"invoke",
+				"target":target,
 				"argList":argList,
 				"retCount":retCount
 			};

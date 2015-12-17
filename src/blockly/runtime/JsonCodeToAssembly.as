@@ -61,16 +61,12 @@ package blockly.runtime
 						result.push([OpCode.RETURN]);
 						break;
 					case "newVar":
+						append(result, genExpressionCode(block["value"]));
 						result.push([OpCode.NEW_VAR, block["name"]]);
 						break;
-					case "getVar":
-						result.push([OpCode.GET_VAR, block["name"]]);
-						break;
 					case "setVar":
+						append(result, genExpressionCode(block["value"]));
 						result.push([OpCode.SET_VAR, block["name"]]);
-						break;
-					case "newFunction":
-						append(result, genNewFunctionCode(block));
 						break;
 				}
 			}
@@ -85,8 +81,12 @@ package blockly.runtime
 					return [OpFactory.Push(block["value"])];
 				case "function":
 					return genFunctionCode(block);
-				case OpCode.GET_VAR:
+				case "invoke":
+					return genInvokeCode(block);
+				case "getVar":
 					return [OpFactory.GetVar(block["name"])];
+				case "newFunction":
+					return genNewFunctionCode(block);
 			}
 			return null;
 		}
@@ -224,7 +224,8 @@ package blockly.runtime
 		private function genInvokeCode(block:Object):Array
 		{
 			var argList:Array = block["argList"];
-			var result:Array = genArgListCode(argList);
+			var result:Array = genExpressionCode(block["target"]);
+			append(result, genArgListCode(argList));
 			result.push(OpFactory.Invoke(argList.length, block["retCount"], slotIndex));
 			return result;
 		}
