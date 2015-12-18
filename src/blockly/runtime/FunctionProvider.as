@@ -27,11 +27,11 @@ package blockly.runtime
 		
 		internal function execute(thread:Thread, name:String, argList:Array):void
 		{
-			var handler:Function = context.getValue(name) as Function;
-			if(null == handler){
-				onCallUnregisteredFunction(thread, name, argList);
+			if(context.hasKey(name, false)){
+				var handler:FunctionObjectNative = context.getValue(name);
+				handler.invoke(thread, argList);
 			}else{
-				handler(thread, argList);
+				onCallUnregisteredFunction(thread, name, argList);
 			}
 		}
 		

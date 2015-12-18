@@ -77,10 +77,12 @@ package blockly.runtime
 		{
 			var argList:Array = getArgList(thread, argCount);
 			var funcRef:* = thread.pop();
-			if(funcRef is FunctionObjectNative)	(funcRef as FunctionObjectNative).invoke(thread, argList);
-			else if(funcRef is FunctionObject)	(funcRef as FunctionObject).invoke(thread, argList, regCount);
-			else if(funcRef is Function)		(funcRef as Function).apply(null, argList);
-			else assert(false);
+			if(funcRef is FunctionObjectNative){ (funcRef as FunctionObjectNative).invoke(thread, argList);
+			}else if(funcRef is FunctionObject){ (funcRef as FunctionObject).invoke(thread, argList, regCount);
+			}else if(funcRef is Function){
+				var result:* = (funcRef as Function).apply(null, argList);
+				if(retCount > 0) thread.push(result);
+			}else assert(false);
 			++thread.ip;
 		}
 		
