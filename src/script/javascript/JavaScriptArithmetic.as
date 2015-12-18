@@ -27,6 +27,16 @@ package script.javascript
 			ruleList = LexRuleFactory.CreateScriptArithmeticRuleList();
 		}
 		
+		private function nodeToArray(node:Node):Array
+		{
+			var result:Array = [];
+			while(node != null){
+				result.push(nodeToBlock(node));
+				node = node.nextSibling;
+			}
+			return result;
+		}
+		
 		private function nodeToBlock(node:Node):Object
 		{
 			switch(node.type)
@@ -54,27 +64,27 @@ package script.javascript
 						SyntaxTreeFactory.NewString(node.rightChild.value)
 					]);
 				case NodeType.CALL_METHOD:
-					var argList:Array = [];
-					var testNode:Node = node.rightChild;
-					while(testNode){
-						argList.push(nodeToBlock(testNode));
-						testNode = testNode.nextSibling;
-					}
-					return SyntaxTreeFactory.NewInvoke(nodeToBlock(node.firstChild), argList, 0);
+					return SyntaxTreeFactory.NewInvoke(nodeToBlock(node.firstChild), nodeToArray(node.rightChild), 1);
 			}
 			
 			return null;
+		}
+		
+		private function readStatementBlock(result:Array):Array
+		{
+			nodeList.accept(NodeType.BRACES_LEFT);
+			while(nodeList.first().type != NodeType.BRACES_RIGHT){
+				readStatement(result);
+			}
+			nodeList.next();
+			return result;
 		}
 		
 		private function readStatement(result:Array):Array
 		{
 			switch(nodeList.first().type){
 				case NodeType.BRACES_LEFT:
-					nodeList.next();
-					while(nodeList.first().type != NodeType.BRACES_RIGHT){
-						readStatement(result);
-					}
-					nodeList.next();
+					readStatementBlock(result);
 					break;
 				case NodeType.KEYWORD_VAR:
 					nodeList.next();
@@ -129,8 +139,40 @@ package script.javascript
 					}
 					*/
 					break;
+				case NodeType.KEYWORD_FUNC:
+					nodeList.next();
+					var funcName:String;
+					if(!nodeList.expect(NodeType.PARENTHESES_LEFT)){
+						funcName = nodeList.accept(NodeType.VAR_ID).value;
+					}
+					nodeList.accept(NodeType.PARENTHESES_LEFT);
+					var argNameList:Array = readArgNameList();
+					nodeList.accept(NodeType.PARENTHESES_RIGHT);
+					var funcCode:Array = readStatementBlock([]);
+					if(funcName != null){
+						result.push(SyntaxTreeFactory.NewVar(funcName,
+							SyntaxTreeFactory.NewFunction(argNameList, funcCode))
+						);
+					}
+					break;
 			}
 			return result;
+		}
+		
+		private function readArgNameList():Array
+		{
+			var node:Node = readValueList(NodeType.PARENTHESES_RIGHT, readVarId);
+			var result:Array = [];
+			while(node != null){
+				result.push(node.value);
+				node = node.nextSibling;
+			}
+			return result;
+		}
+		
+		private function readVarId():Node
+		{
+			return nodeList.accept(NodeType.VAR_ID);
 		}
 		
 		override public function parse(source:String):Node
