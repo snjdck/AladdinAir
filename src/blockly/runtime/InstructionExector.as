@@ -86,14 +86,12 @@ package blockly.runtime
 			var funcRef:FunctionObject = thread.pop();
 			funcRef.invoke(thread, argList, regCount);
 			++thread.ip;
-			return true;
+			return thread.isRecursiveInvoke();
 		}
 		
 		private function __onReturn(thread:Thread):void
 		{
 			thread.popScope();
-			thread.increaseRegOffset(thread.pop());
-			thread.ip = thread.pop() + 1;
 		}
 		
 		private function __onNewVar(thread:Thread, varName:String):void

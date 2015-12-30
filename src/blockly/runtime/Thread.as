@@ -12,7 +12,7 @@ package blockly.runtime
 	{
 		static public var EXEC_TIME:int = 4;
 		
-		private const contextStack:Array = [];
+		private const scopeStack:Array = [];
 		private var context:IScriptContext;
 		
 		private var codeList:Array;
@@ -170,15 +170,34 @@ package blockly.runtime
 			return context;
 		}
 		
-		internal function pushScope(newContext:IScriptContext):void
+		internal function pushScope(scope:FunctionScope):void
 		{
-			contextStack.push(context);
-			context = newContext;
+			scope.prevContext = context;
+			scope.returnAddress = ip + 1;
+			context = scope.context;
+			scopeStack.push(scope);
 		}
 		
 		internal function popScope():void
 		{
-			context = contextStack.pop();
+			var scope:FunctionScope = scopeStack.pop();
+			context = scope.prevContext;
+			increaseRegOffset(-scope.regCount);
+			ip = scope.returnAddress;
+		}
+		
+		internal function isRecursiveInvoke():Boolean
+		{
+			for(var i:int=scopeStack.length-1; i>0; --i){
+				for(var j:int=i-1; j>=0; --j){
+					var a:FunctionScope = scopeStack[i];
+					var b:FunctionScope = scopeStack[j];
+					if(a.defineAddress == b.defineAddress){
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 		
 		public function newVar(varName:String, varValue:Object):void

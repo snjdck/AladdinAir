@@ -59,7 +59,7 @@ package blockly.runtime
 						break;
 					}
 					canSuspend = thread.execNextCode(instructionExector);
-					if(canSuspend && getTimer() > endTime){
+					if(canSuspend && getTimer() >= endTime){
 						thread.suspendUntilNextFrame();
 					}
 				}
