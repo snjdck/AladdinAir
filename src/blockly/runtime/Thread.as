@@ -10,6 +10,8 @@ package blockly.runtime
 
 	final public class Thread
 	{
+		static public var EXEC_TIME:int = 4;
+		
 		private const contextStack:Array = [];
 		private var context:IScriptContext;
 		
@@ -61,7 +63,7 @@ package blockly.runtime
 			return _finishFlag;
 		}
 		
-		internal function execNextCode(instructionExcetor:InstructionExector):void
+		internal function execNextCode(instructionExcetor:InstructionExector):Boolean
 		{
 			if(needCheckStack){
 				assert(sp == sc, "function return count mismatch!");
@@ -69,10 +71,10 @@ package blockly.runtime
 			}
 			if(ip >= codeList.length){
 				_finishFlag = true;
-				return;
+				return false;
 			}
 			var code:Array = codeList[ip];
-			instructionExcetor.execute(this, code[0], code.slice(1));
+			return instructionExcetor.execute(this, code[0], code.slice(1));
 		}
 		
 		public function suspend():void

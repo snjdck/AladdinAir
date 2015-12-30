@@ -3,8 +3,6 @@ package blockly.runtime
 	import flash.display.Shape;
 	import flash.events.Event;
 	import flash.utils.getTimer;
-	
-	import lambda.call;
 
 	internal class VirtualMachine
 	{
@@ -43,56 +41,29 @@ package blockly.runtime
 			}
 		}
 		
-		private function notifyFrameBeginEvent():void
-		{
-			for(var i:int=threadList.length-1; i>=0; --i){
-				var thread:Thread = threadList[i];
-				thread.onFrameBegin();
-			}
-		}
-		
 		private function updateThreads(evt:Event):void
 		{
-			notifyFrameBeginEvent();
-			var endTime:int = getTimer() + 1;
-			var isRunning:Boolean;
-			do{
-				isRunning = false;
-				for(var i:int=threadList.length-1; i>=0; --i){
-					var thread:Thread = threadList[i];
+			var canSuspend:Boolean;
+			for(var i:int=threadList.length-1; i>=0; --i){
+				var thread:Thread = threadList[i];
+				var endTime:int = getTimer() + Thread.EXEC_TIME;
+				thread.onFrameBegin();
+				for(;;){
 					if(thread.isFinish()){
 						threadList.splice(i, 1);
 						thread.notifyFinish();
-						continue;
+						break;
 					}
 					if(thread.isSuspend()){
 						thread.updateSuspendState();
-						continue;
+						break;
 					}
-					isRunning = true;
-					thread.execNextCode(instructionExector);
+					canSuspend = thread.execNextCode(instructionExector);
+					if(canSuspend && getTimer() > endTime){
+						thread.suspendUntilNextFrame();
+					}
 				}
-			}while(isRunning && getTimer() < endTime);
-		}
-		
-		public function calculate(thread:Thread):*
-		{
-			while(!thread.isFinish()){
-				thread.execNextCode(instructionExector);
 			}
-			return thread.pop();
-		}
-		
-		public function calculateAsynchronous(thread:Thread, handler:Object):void
-		{
-			thread.finishSignal.add(function(interruptFlag:Boolean):void{
-				if(interruptFlag){
-					call(handler, false, null);
-				}else{
-					call(handler, true, thread.pop());
-				}
-			}, true);
-			startThread(thread);
 		}
 	}
 }

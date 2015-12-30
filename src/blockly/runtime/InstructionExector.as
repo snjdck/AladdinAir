@@ -5,6 +5,7 @@ package blockly.runtime
 	internal class InstructionExector
 	{
 		private var functionProvider:FunctionProvider;
+		private const invokeStack:Vector.<int> = new Vector.<int>();
 		private const opDict:Object = {};
 		
 		public function InstructionExector(functionProvider:FunctionProvider)
@@ -30,12 +31,12 @@ package blockly.runtime
 			opDict[op] = handler;
 		}
 		
-		public function execute(thread:Thread, op:String, argList:Array):void
+		public function execute(thread:Thread, op:String, argList:Array):Boolean
 		{
 			var handler:Function = opDict[op];
 			assert(handler != null);
 			argList.unshift(thread);
-			handler.apply(null, argList);
+			return handler.apply(null, argList);
 		}
 		
 		private function __onCall(thread:Thread, methodName:String, argCount:int, retCount:int):void
@@ -52,14 +53,21 @@ package blockly.runtime
 			++thread.ip;
 		}
 		
-		private function __onJump(thread:Thread, count:int):void
+		private function __onJump(thread:Thread, count:int):*
 		{
 			thread.ip += count;
+			if(count < 0)
+				return true;
+			if(count == 0)
+				thread.suspendUntilNextFrame();
 		}
 		
-		private function __onJumpIfTrue(thread:Thread, count:int):void
+		private function __onJumpIfTrue(thread:Thread, count:int):*
 		{
-			thread.ip += thread.pop() ? count : 1;
+			var condition:Boolean = thread.pop();
+			thread.ip += condition ? count : 1;
+			if(condition && count < 0)
+				return true;
 		}
 		
 		private function __onLoadSlot(thread:Thread, index:int):void
@@ -73,21 +81,20 @@ package blockly.runtime
 			++thread.ip;
 		}
 		
-		private function __onInvoke(thread:Thread, argCount:int, retCount:int, regCount:int):void
+		private function __onInvoke(thread:Thread, argCount:int, retCount:int, regCount:int):Boolean
 		{
 			var argList:Array = getArgList(thread, argCount);
-			var funcRef:* = thread.pop();
-			if(funcRef is FunctionObjectNative){ (funcRef as FunctionObjectNative).invoke(thread, argList);
-			}else if(funcRef is FunctionObject){ (funcRef as FunctionObject).invoke(thread, argList, regCount);
-			}else if(funcRef is Function){
-				var result:* = (funcRef as Function).apply(null, argList);
-				if(retCount > 0) thread.push(result);
-			}else assert(false);
+			var funcRef:FunctionObject = thread.pop();
+			funcRef.invoke(thread, argList, regCount);
 			++thread.ip;
+			var canSuspend:Boolean = invokeStack.indexOf(thread.ip) >= 0;
+			invokeStack.push(thread.ip);
+			return canSuspend;
 		}
 		
 		private function __onReturn(thread:Thread):void
 		{
+			invokeStack.pop();
 			thread.popScope();
 			thread.increaseRegOffset(thread.pop());
 			thread.ip = thread.pop() + 1;

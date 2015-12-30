@@ -47,16 +47,6 @@ package blockly.runtime
 			virtualMachine.stopAllThreads();
 		}
 		
-		public function calculateAssembly(codeList:Array):*
-		{
-			return virtualMachine.calculate(new Thread(codeList, context.createChildContext()));
-		}
-		
-		public function calculateAssemblyAsynchronous(codeList:Array, handler:Object):void
-		{
-			virtualMachine.calculateAsynchronous(new Thread(codeList, context.createChildContext()), handler);
-		}
-		
 		public function getCopyOfThreadList():Vector.<Thread>
 		{
 			return virtualMachine.getCopyOfThreadList();
