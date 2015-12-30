@@ -5,7 +5,6 @@ package blockly.runtime
 	internal class InstructionExector
 	{
 		private var functionProvider:FunctionProvider;
-		private const invokeStack:Vector.<int> = new Vector.<int>();
 		private const opDict:Object = {};
 		
 		public function InstructionExector(functionProvider:FunctionProvider)
@@ -87,14 +86,11 @@ package blockly.runtime
 			var funcRef:FunctionObject = thread.pop();
 			funcRef.invoke(thread, argList, regCount);
 			++thread.ip;
-			var canSuspend:Boolean = invokeStack.indexOf(thread.ip) >= 0;
-			invokeStack.push(thread.ip);
-			return canSuspend;
+			return true;
 		}
 		
 		private function __onReturn(thread:Thread):void
 		{
-			invokeStack.pop();
 			thread.popScope();
 			thread.increaseRegOffset(thread.pop());
 			thread.ip = thread.pop() + 1;
