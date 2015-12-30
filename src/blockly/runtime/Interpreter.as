@@ -10,6 +10,7 @@ package blockly.runtime
 		private var optimizer:AssemblyOptimizer;
 		private var conditionCalculater:ConditionCalculater;
 		private var context:IScriptContext;
+		private var printer:CodeListPrinter;
 		
 		public function Interpreter(functionProvider:FunctionProvider)
 		{
@@ -19,6 +20,7 @@ package blockly.runtime
 			optimizer = new AssemblyOptimizer();
 			deadCodeCleaner = new DeadCodeCleaner();
 			context = functionProvider.getContext();
+			printer = new CodeListPrinter();
 		}
 		
 		public function compile(blockList:Array):Array
@@ -55,6 +57,11 @@ package blockly.runtime
 		public function getThreadCount():uint
 		{
 			return virtualMachine.getThreadCount();
+		}
+		
+		public function castCodeListToString(codeList:Array):String
+		{
+			return printer.castCodeListToString(codeList);
 		}
 	}
 }
