@@ -119,12 +119,6 @@ package blockly.runtime
 			register[regOffset+index] = value;
 		}
 		
-		internal function increaseRegOffset(value:int):void
-		{
-			regOffset += value;
-			assert(regOffset >= 0);
-		}
-		
 		internal function updateSuspendState():void
 		{
 			if(_resumeOnNextFrameFlag || suspendUpdater == null)
@@ -172,18 +166,18 @@ package blockly.runtime
 		
 		internal function pushScope(scope:FunctionScope):void
 		{
-			scope.prevContext = context;
-			scope.returnAddress = ip + 1;
-			context = scope.context;
 			scopeStack.push(scope);
+			context = scope.context;
+			regOffset += scope.regCount;
+			ip = scope.defineAddress + 1;
 		}
 		
 		internal function popScope():void
 		{
 			var scope:FunctionScope = scopeStack.pop();
 			context = scope.prevContext;
-			increaseRegOffset(-scope.regCount);
-			ip = scope.returnAddress;
+			regOffset -= scope.regCount;
+			ip = scope.returnAddress + 1;
 		}
 		
 		internal function isRecursiveInvoke():Boolean

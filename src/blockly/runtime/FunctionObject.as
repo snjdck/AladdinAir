@@ -17,19 +17,18 @@ package blockly.runtime
 		
 		internal function invoke(thread:Thread, valueList:Array, regCount:int):void
 		{
-			thread.pushScope(createScope(regCount));
-			for(var i:int=argList.length-1; i>=0; --i){
+			thread.pushScope(createScope(thread, regCount));
+			for(var i:int=argList.length-1; i>=0; --i)
 				thread.newVar(argList[i], valueList[i]);
-			}
-			thread.increaseRegOffset(regCount);
-			thread.ip = address;
 		}
 		
-		private function createScope(regCount:int):FunctionScope
+		private function createScope(thread:Thread, regCount:int):FunctionScope
 		{
 			var scope:FunctionScope = new FunctionScope();
+			scope.prevContext = thread.getContext();
 			scope.context = context.createChildContext();
 			scope.defineAddress = address;
+			scope.returnAddress = thread.ip;
 			scope.regCount = regCount;
 			return scope;
 		}
