@@ -8,6 +8,8 @@ package blockly.runtime
 		private var argList:Array;
 		private var address:int;
 		
+		internal var invokeCount:int;
+		
 		public function FunctionObject(context:IScriptContext, argList:Array, address:int)
 		{
 			this.context = context;
@@ -15,22 +17,26 @@ package blockly.runtime
 			this.address = address;
 		}
 		
-		internal function invoke(thread:Thread, valueList:Array, regCount:int):void
+		internal function initArgs(thread:Thread, valueList:Array):void
 		{
-			thread.pushScope(createScope(thread, regCount));
 			for(var i:int=argList.length-1; i>=0; --i)
 				thread.newVar(argList[i], valueList[i]);
 		}
 		
-		private function createScope(thread:Thread, regCount:int):FunctionScope
+		internal function createScope(thread:Thread, regCount:int):FunctionScope
 		{
-			var scope:FunctionScope = new FunctionScope();
+			var scope:FunctionScope = new FunctionScope(this);
 			scope.prevContext = thread.getContext();
-			scope.context = context.createChildContext();
+			scope.nextContext = context.createChildContext();
 			scope.defineAddress = address;
 			scope.returnAddress = thread.ip;
 			scope.regCount = regCount;
 			return scope;
+		}
+		
+		internal function isRecursiveInvoke():Boolean
+		{
+			return invokeCount > 1;
 		}
 	}
 }

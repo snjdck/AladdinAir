@@ -84,8 +84,9 @@ package blockly.runtime
 		{
 			var argList:Array = getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
-			funcRef.invoke(thread, argList, regCount);
-			return thread.isRecursiveInvoke();
+			thread.pushScope(funcRef.createScope(thread, regCount));
+			funcRef.initArgs(thread, argList);
+			return funcRef.isRecursiveInvoke();
 		}
 		
 		private function __onReturn(thread:Thread):void

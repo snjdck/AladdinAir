@@ -167,7 +167,8 @@ package blockly.runtime
 		internal function pushScope(scope:FunctionScope):void
 		{
 			scopeStack.push(scope);
-			context = scope.context;
+			scope.onInvoke();
+			context = scope.nextContext;
 			regOffset += scope.regCount;
 			ip = scope.defineAddress + 1;
 		}
@@ -175,23 +176,10 @@ package blockly.runtime
 		internal function popScope():void
 		{
 			var scope:FunctionScope = scopeStack.pop();
+			scope.onReturn();
 			context = scope.prevContext;
 			regOffset -= scope.regCount;
 			ip = scope.returnAddress + 1;
-		}
-		
-		internal function isRecursiveInvoke():Boolean
-		{
-			for(var i:int=scopeStack.length-1; i>0; --i){
-				for(var j:int=i-1; j>=0; --j){
-					var a:FunctionScope = scopeStack[i];
-					var b:FunctionScope = scopeStack[j];
-					if(a.defineAddress == b.defineAddress){
-						return true;
-					}
-				}
-			}
-			return false;
 		}
 		
 		public function newVar(varName:String, varValue:Object):void
