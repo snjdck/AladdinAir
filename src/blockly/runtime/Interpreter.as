@@ -1,7 +1,5 @@
 package blockly.runtime
 {
-	import snjdck.arithmetic.IScriptContext;
-
 	public class Interpreter
 	{
 		private var virtualMachine:VirtualMachine;
@@ -9,7 +7,6 @@ package blockly.runtime
 		private var deadCodeCleaner:DeadCodeCleaner;
 		private var optimizer:AssemblyOptimizer;
 		private var conditionCalculater:ConditionCalculater;
-		private var context:IScriptContext;
 		private var printer:CodeListPrinter;
 		
 		public function Interpreter(functionProvider:FunctionProvider)
@@ -19,7 +16,6 @@ package blockly.runtime
 			conditionCalculater = new ConditionCalculater();
 			optimizer = new AssemblyOptimizer();
 			deadCodeCleaner = new DeadCodeCleaner();
-			context = functionProvider.getContext();
 			printer = new CodeListPrinter();
 		}
 		
@@ -39,7 +35,7 @@ package blockly.runtime
 		
 		public function executeAssembly(codeList:Array):Thread
 		{
-			var thread:Thread = new Thread(codeList, context.createChildContext());
+			var thread:Thread = new Thread(codeList);
 			virtualMachine.startThread(thread);
 			return thread;
 		}

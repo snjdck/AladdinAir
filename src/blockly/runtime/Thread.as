@@ -7,6 +7,7 @@ package blockly.runtime
 	import lambda.call;
 	
 	import snjdck.arithmetic.IScriptContext;
+	import snjdck.arithmetic.impl.ScriptContext;
 
 	final public class Thread
 	{
@@ -36,10 +37,10 @@ package blockly.runtime
 		
 		public var userData:*;
 		
-		public function Thread(codeList:Array, context:IScriptContext)
+		public function Thread(codeList:Array)
 		{
 			this.codeList = codeList;
-			this.context = context;
+			this.context = new ScriptContext();
 		}
 		
 		public function get finishSignal():ISignal
@@ -167,7 +168,7 @@ package blockly.runtime
 		internal function pushScope(scope:FunctionScope):void
 		{
 			scopeStack.push(scope);
-			scope.onInvoke();
+			++scope.funcRef.invokeCount;
 			context = scope.nextContext;
 			regOffset += scope.regCount;
 			ip = scope.defineAddress + 1;
@@ -176,7 +177,7 @@ package blockly.runtime
 		internal function popScope():void
 		{
 			var scope:FunctionScope = scopeStack.pop();
-			scope.onReturn();
+			--scope.funcRef.invokeCount;
 			context = scope.prevContext;
 			regOffset -= scope.regCount;
 			ip = scope.returnAddress + 1;
