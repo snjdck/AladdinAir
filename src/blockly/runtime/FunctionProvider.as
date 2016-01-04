@@ -25,19 +25,19 @@ package blockly.runtime
 			return context;
 		}
 		
-		internal function execute(thread:Thread, name:String, argList:Array):void
+		internal function execute(thread:Thread, name:String, argList:Array, retCount:int):void
 		{
 			if(context.hasKey(name, false)){
 				var handler:FunctionObjectNative = context.getValue(name);
 				handler.invoke(thread, argList);
 			}else{
-				onCallUnregisteredFunction(thread, name, argList);
+				onCallUnregisteredFunction(thread, name, argList, retCount);
 			}
 		}
 		
-		protected function onCallUnregisteredFunction(thread:Thread, name:String, argList:Array):void
+		protected function onCallUnregisteredFunction(thread:Thread, name:String, argList:Array, retCount:int):void
 		{
-			trace("interpreter invoke method:", name, argList);
+			trace("interpreter invoke method:", name, argList, retCount);
 		}
 	}
 }

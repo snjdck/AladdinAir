@@ -42,7 +42,7 @@ package blockly.runtime
 		{
 			var argList:Array = getArgList(thread, argCount);
 			thread.requestCheckStack(retCount);
-			functionProvider.execute(thread, methodName, argList);
+			functionProvider.execute(thread, methodName, argList, retCount);
 			++thread.ip;
 		}
 		
