@@ -13,7 +13,7 @@ package blockly.runtime
 		public function VirtualMachine(functionProvider:FunctionProvider)
 		{
 			instructionExector = new InstructionExector(functionProvider);
-			timer.addEventListener(Event.ENTER_FRAME, updateThreads);
+			timer.addEventListener(Event.ENTER_FRAME, onUpdateThreads);
 		}
 		
 		public function getThreadCount():uint
@@ -41,30 +41,47 @@ package blockly.runtime
 			}
 		}
 		
-		private function updateThreads(evt:Event):void
+		private function onUpdateThreads(evt:Event):void
 		{
+			notifyFrameBeginEvent();
+			var endTime:int = getTimer() + Thread.EXEC_TIME;
+			while(updateThreads() && getTimer() < endTime);
+		}
+		
+		private function notifyFrameBeginEvent():void
+		{
+			for(var i:int=threadList.length-1; i >= 0; --i){
+				var thread:Thread = threadList[i];
+				thread.onFrameBegin();
+			}
+		}
+		
+		private function updateThreads():Boolean
+		{
+			var hasActiveThread:Boolean = false;
 			var canSuspend:Boolean;
+			loop:
 			for(var index:int=0; index<threadList.length;){
 				var thread:Thread = threadList[index];
-				var endTime:int = getTimer() + Thread.EXEC_TIME;
-				thread.onFrameBegin();
 				for(;;){
 					if(thread.isFinish()){
 						threadList.splice(index, 1);
 						thread.notifyFinish();
-						break;
+						continue loop;
 					}
 					if(thread.isSuspend()){
 						thread.updateSuspendState();
-						++index;
 						break;
 					}
 					canSuspend = thread.execNextCode(instructionExector);
-					if(canSuspend && getTimer() >= endTime){
-						thread.suspendUntilNextFrame();
+					if(canSuspend){
+						hasActiveThread = true;
+						break;
 					}
 				}
+				++index;
 			}
+			return hasActiveThread;
 		}
 	}
 }
