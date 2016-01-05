@@ -59,22 +59,19 @@ package blockly.runtime
 		private function updateThreads():Boolean
 		{
 			var hasActiveThread:Boolean = false;
-			var canSuspend:Boolean;
-			loop:
-			for(var index:int=0; index<threadList.length;){
+			out:for(var index:int=0; index<threadList.length;){
 				var thread:Thread = threadList[index];
 				for(;;){
 					if(thread.isFinish()){
 						threadList.splice(index, 1);
 						thread.notifyFinish();
-						continue loop;
+						continue out;
 					}
 					if(thread.isSuspend()){
 						thread.updateSuspendState();
 						break;
 					}
-					canSuspend = thread.execNextCode(instructionExector);
-					if(canSuspend){
+					if(thread.execNextCode(instructionExector)){
 						hasActiveThread = true;
 						break;
 					}

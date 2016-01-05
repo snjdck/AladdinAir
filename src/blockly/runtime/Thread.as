@@ -11,7 +11,7 @@ package blockly.runtime
 
 	final public class Thread
 	{
-		static public var EXEC_TIME:int = 4;
+		static public var EXEC_TIME:int = 0;
 		
 		private const scopeStack:Array = [];
 		private var context:IScriptContext;
