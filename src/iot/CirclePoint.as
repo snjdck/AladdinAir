@@ -6,9 +6,7 @@ package iot
 	/**
 	 * 一个out可以连接到多个in
 	 * 一个in只能连接一个out
-	 * 每个box
-	 * @author dell
-	 * 
+	 * 每个box有多个in,多个out
 	 */	
 	public class CirclePoint extends Sprite
 	{
