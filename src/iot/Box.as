@@ -8,8 +8,6 @@ package iot
 	{
 		public const ptListIn:Vector.<CirclePoint> = new Vector.<CirclePoint>();
 		public const ptListOut:Vector.<CirclePoint> = new Vector.<CirclePoint>();
-//		public var pIn:CirclePointIn;
-//		public var pOut:CirclePointOut;
 		
 		public function Box()
 		{
@@ -42,29 +40,15 @@ package iot
 			
 		}
 		
-		public function hideSelf(dragPt:CirclePoint):void
-		{
-			for each(var ptIn:CirclePoint in ptListIn){
-				if(dragPt != ptIn){
-					ptIn.visible = false;
-				}
-			}
-			for each(var ptOut:CirclePoint in ptListOut){
-				if(dragPt != ptOut){
-					ptOut.visible = false;
-				}
-			}
-		}
-		
 		public function hidePt(dragPt:CirclePoint):void
 		{
 			for each(var ptIn:CirclePoint in ptListIn){
-				if(dragPt.isIn || ptIn.hasPt(dragPt)){
+				if(ptIn != dragPt && (dragPt.isIn || ptIn.hasPt(dragPt))){
 					ptIn.visible = false;
 				}
 			}
 			for each(var ptOut:CirclePoint in ptListOut){
-				if(!dragPt.isIn || ptOut.hasPt(dragPt)){
+				if(ptOut != dragPt && (!dragPt.isIn || ptOut.hasPt(dragPt))){
 					ptOut.visible = false;
 				}
 			}

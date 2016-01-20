@@ -42,12 +42,8 @@ package iot
 			stage.addEventListener(Event.ENTER_FRAME, __onEnterFrame);
 			stage.addEventListener(MouseEvent.MOUSE_UP, __onMouseUp);
 			for each(var item:Box in boxList){
-				if(item == dragBox){
-					continue;
-				}
 				item.hidePt(dragTarget);
 			}
-			dragBox.hideSelf(dragTarget);
 		}
 		
 		private function __onMouseUp(evt:MouseEvent):void
