@@ -6,8 +6,10 @@ package iot
 	
 	public class Box extends Sprite
 	{
-		public var pIn:CirclePoint;
-		public var pOut:CirclePoint;
+		public const ptListIn:Vector.<CirclePointIn> = new Vector.<CirclePointIn>();
+		public const ptListOut:Vector.<CirclePointOut> = new Vector.<CirclePointOut>();
+//		public var pIn:CirclePointIn;
+//		public var pOut:CirclePointOut;
 		
 		public function Box()
 		{
@@ -16,8 +18,18 @@ package iot
 			g.drawRect(0,0,100,80);
 			g.endFill();
 			
-			pIn = addPt(40, true);
-			pOut = addPt(40, false);
+			addInPt(addPt(40, true) as CirclePointIn);
+			addOutPt(addPt(40, false) as CirclePointOut);
+		}
+		
+		public function addInPt(ptIn:CirclePointIn):void
+		{
+			ptListIn.push(ptIn);
+		}
+		
+		public function addOutPt(ptOut:CirclePointOut):void
+		{
+			ptListOut.push(ptOut);
 		}
 		
 		public function addOutLinker():void
@@ -33,27 +45,48 @@ package iot
 		public function hidePt(isIn:Boolean):void
 		{
 			if(isIn){
-				pIn.visible = false;
+				for each(var ptIn:CirclePointIn in ptListIn){
+					ptIn.visible = false;
+				}
 			}else{
-				pOut.visible = false;
+				for each(var ptOut:CirclePointOut in ptListOut){
+					ptOut.visible = false;
+				}
+			}
+		}
+		
+		public function hideLinkedInPts():void
+		{
+			for each(var ptIn:CirclePointIn in ptListIn){
+				if(ptIn.hasOutPt()){
+					ptIn.visible = false;
+				}
 			}
 		}
 		
 		public function showPt():void
 		{
-			pIn.visible = true;
-			pOut.visible = true;
+			for each(var ptIn:CirclePointIn in ptListIn){
+				ptIn.visible = true;
+			}
+			for each(var ptOut:CirclePointOut in ptListOut){
+				ptOut.visible = true;
+			}
 		}
 		
 		public function addPtListener(inHandler:Function, outHandler:Function):void
 		{
-			pIn.addEventListener(MouseEvent.MOUSE_DOWN, inHandler);
-			pOut.addEventListener(MouseEvent.MOUSE_DOWN, outHandler);
+			for each(var ptIn:CirclePointIn in ptListIn){
+				ptIn.addEventListener(MouseEvent.MOUSE_DOWN, inHandler);
+			}
+			for each(var ptOut:CirclePointOut in ptListOut){
+				ptOut.addEventListener(MouseEvent.MOUSE_DOWN, outHandler);
+			}
 		}
 		
 		private function addPt(py:int, isIn:Boolean):CirclePoint
 		{
-			var pt:CirclePoint = new CirclePoint(isIn);
+			var pt:CirclePoint = isIn ? new CirclePointIn() : new CirclePointOut();
 			pt.y = py;
 			addChild(pt);
 			var g:Graphics = graphics;

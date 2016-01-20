@@ -35,14 +35,26 @@ package iot
 		
 		private function __onMouseDown(evt:MouseEvent):void
 		{
-			dragFlag = true;
 			dragTarget = evt.target as CirclePoint;
+			
+			if(dragTarget.isIn && (dragTarget as CirclePointIn).hasOutPt()){
+				dragTarget = null;
+				return;
+			}
+			
+			dragFlag = true;
 			var dragBox:Box = dragTarget.parent as Box;
 			stage.addEventListener(Event.ENTER_FRAME, __onEnterFrame);
 			stage.addEventListener(MouseEvent.MOUSE_UP, __onMouseUp);
 			for each(var item:Box in boxList){
-				if(item != dragBox){
-					item.hidePt(dragTarget.isIn);
+				if(item == dragBox){
+					continue;
+				}
+				if(dragTarget.isIn){
+					item.hidePt(true);
+				}else{
+					item.hidePt(false);
+					item.hideLinkedInPts();
 				}
 			}
 			dragBox.hidePt(!dragTarget.isIn);
@@ -52,9 +64,8 @@ package iot
 		{
 			if(dropTarget != null){
 				addChild(new PtLinker(dragTarget, dropTarget));
-			}else{
-				graphics.clear();
 			}
+			graphics.clear();
 			
 			dragFlag = false;
 			dragTarget = null;
@@ -81,14 +92,18 @@ package iot
 			var item:Box;
 			if(dragTarget.isIn){
 				for each(item in boxList){
-					if(item.pOut.hitTestPoint(mouseX, mouseY, true)){
-						dropTarget = item.pOut;
+					for each(var ptOut:CirclePointOut in item.ptListOut){
+						if(ptOut.visible && ptOut.hitTestPoint(mouseX, mouseY, true)){
+							dropTarget = ptOut;
+						}
 					}
 				}
 			}else{
 				for each(item in boxList){
-					if(item.pIn.hitTestPoint(mouseX, mouseY, true)){
-						dropTarget = item.pIn;
+					for each(var ptIn:CirclePointIn in item.ptListIn){
+						if(ptIn.visible &&　ptIn.hitTestPoint(mouseX, mouseY, true)){
+							dropTarget = ptIn;
+						}
 					}
 				}
 			}
