@@ -10,6 +10,7 @@ package iot
 	 */	
 	public class CirclePoint extends Sprite
 	{
+		public const linkedInPtList:Vector.<CirclePoint> = new Vector.<CirclePoint>();
 		public var isIn:Boolean;
 		
 		public function CirclePoint(isIn:Boolean)
@@ -36,6 +37,24 @@ package iot
 		public function get globalY():Number
 		{
 			return parent.y + y;
+		}
+		
+		public function hasPt(value:CirclePoint):Boolean
+		{
+			return linkedInPtList.indexOf(value) >= 0;
+		}
+		
+		public function addPt(value:CirclePoint):void
+		{
+			linkedInPtList.push(value);
+		}
+		
+		public function removePt(value:CirclePoint):void
+		{
+			var index:int = linkedInPtList.indexOf(value);
+			if(index >= 0){
+				linkedInPtList.splice(index, 1);
+			}
 		}
 	}
 }

@@ -9,8 +9,8 @@ package iot
 	
 	public class PtLinker extends Sprite
 	{
-		public var outPt:CirclePointOut;
-		public var inPt:CirclePointIn;
+		public var outPt:CirclePoint;
+		public var inPt:CirclePoint;
 		
 		public function PtLinker(from:CirclePoint, to:CirclePoint)
 		{
@@ -22,16 +22,16 @@ package iot
 			g.moveTo(from.globalX, from.globalY);
 			g.lineTo(to.globalX, to.globalY);
 			
-			if(from is CirclePointOut){
-				outPt = from as CirclePointOut;
-				inPt = to as CirclePointIn;
+			if(from.isIn){
+				outPt = to;
+				inPt = from;
 			}else{
-				outPt = to as CirclePointOut;
-				inPt = from as CirclePointIn;
+				outPt = from;
+				inPt = to;
 			}
 			
-			outPt.addInPt(inPt);
-			inPt.linkedOutPt = outPt;
+			outPt.addPt(inPt);
+			inPt.addPt(outPt);
 			
 //			addEventListener(MouseEvent.RIGHT_CLICK, __onRightClick);
 			
@@ -51,7 +51,7 @@ package iot
 			if(item.caption == "delete line"){
 				parent.removeChild(this);
 				outPt.removePt(inPt);
-				inPt.linkedOutPt = null;
+				inPt.removePt(outPt);
 			}
 		}
 		

@@ -6,8 +6,8 @@ package iot
 	
 	public class Box extends Sprite
 	{
-		public const ptListIn:Vector.<CirclePointIn> = new Vector.<CirclePointIn>();
-		public const ptListOut:Vector.<CirclePointOut> = new Vector.<CirclePointOut>();
+		public const ptListIn:Vector.<CirclePoint> = new Vector.<CirclePoint>();
+		public const ptListOut:Vector.<CirclePoint> = new Vector.<CirclePoint>();
 //		public var pIn:CirclePointIn;
 //		public var pOut:CirclePointOut;
 		
@@ -18,16 +18,16 @@ package iot
 			g.drawRect(0,0,100,80);
 			g.endFill();
 			
-			addInPt(addPt(40, true) as CirclePointIn);
-			addOutPt(addPt(40, false) as CirclePointOut);
+			addInPt(addPt(40, true));
+			addOutPt(addPt(40, false));
 		}
 		
-		public function addInPt(ptIn:CirclePointIn):void
+		public function addInPt(ptIn:CirclePoint):void
 		{
 			ptListIn.push(ptIn);
 		}
 		
-		public function addOutPt(ptOut:CirclePointOut):void
+		public function addOutPt(ptOut:CirclePoint):void
 		{
 			ptListOut.push(ptOut);
 		}
@@ -42,51 +42,57 @@ package iot
 			
 		}
 		
-		public function hidePt(isIn:Boolean):void
+		public function hideSelf(dragPt:CirclePoint):void
 		{
-			if(isIn){
-				for each(var ptIn:CirclePointIn in ptListIn){
+			for each(var ptIn:CirclePoint in ptListIn){
+				if(dragPt != ptIn){
 					ptIn.visible = false;
 				}
-			}else{
-				for each(var ptOut:CirclePointOut in ptListOut){
+			}
+			for each(var ptOut:CirclePoint in ptListOut){
+				if(dragPt != ptOut){
 					ptOut.visible = false;
 				}
 			}
 		}
 		
-		public function hideLinkedInPts():void
+		public function hidePt(dragPt:CirclePoint):void
 		{
-			for each(var ptIn:CirclePointIn in ptListIn){
-				if(ptIn.hasOutPt()){
+			for each(var ptIn:CirclePoint in ptListIn){
+				if(dragPt.isIn || ptIn.hasPt(dragPt)){
 					ptIn.visible = false;
+				}
+			}
+			for each(var ptOut:CirclePoint in ptListOut){
+				if(!dragPt.isIn || ptOut.hasPt(dragPt)){
+					ptOut.visible = false;
 				}
 			}
 		}
 		
 		public function showPt():void
 		{
-			for each(var ptIn:CirclePointIn in ptListIn){
+			for each(var ptIn:CirclePoint in ptListIn){
 				ptIn.visible = true;
 			}
-			for each(var ptOut:CirclePointOut in ptListOut){
+			for each(var ptOut:CirclePoint in ptListOut){
 				ptOut.visible = true;
 			}
 		}
 		
 		public function addPtListener(inHandler:Function, outHandler:Function):void
 		{
-			for each(var ptIn:CirclePointIn in ptListIn){
+			for each(var ptIn:CirclePoint in ptListIn){
 				ptIn.addEventListener(MouseEvent.MOUSE_DOWN, inHandler);
 			}
-			for each(var ptOut:CirclePointOut in ptListOut){
+			for each(var ptOut:CirclePoint in ptListOut){
 				ptOut.addEventListener(MouseEvent.MOUSE_DOWN, outHandler);
 			}
 		}
 		
 		private function addPt(py:int, isIn:Boolean):CirclePoint
 		{
-			var pt:CirclePoint = isIn ? new CirclePointIn() : new CirclePointOut();
+			var pt:CirclePoint = new CirclePoint(isIn);
 			pt.y = py;
 			addChild(pt);
 			var g:Graphics = graphics;
