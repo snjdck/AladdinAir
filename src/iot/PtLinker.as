@@ -15,12 +15,22 @@ package iot
 		public function PtLinker(from:CirclePoint, to:CirclePoint)
 		{
 			var g:Graphics = graphics;
-			g.lineStyle(10, 0, 0);
-			g.moveTo(from.globalX, from.globalY);
-			g.lineTo(to.globalX, to.globalY);
+//			g.lineStyle(10, 0, 0);
 			g.lineStyle(2, 0xFF00);
-			g.moveTo(from.globalX, from.globalY);
-			g.lineTo(to.globalX, to.globalY);
+			
+			var centerX:Number = (to.globalX + from.globalX) * 0.5;
+			var centerY:Number = (to.globalY + from.globalY) * 0.5;
+			if(from.isIn == from.x > to.x){
+				g.moveTo(from.globalX, from.globalY);
+				g.cubicCurveTo(centerX, from.globalY, centerX, to.globalY, to.globalX, to.globalY);
+			}else{
+				var dx:Number = (to.globalX - from.globalX) * 0.5;
+				var dy:Number = (to.globalY - from.globalY) * 0.5;
+				g.moveTo(from.globalX, from.globalY);
+//				g.curveTo(from.globalX+dx, from.globalY, centerX, centerY);
+				g.lineTo(to.globalX, to.globalY);
+			}
+			
 			
 			if(from.isIn){
 				outPt = to;
