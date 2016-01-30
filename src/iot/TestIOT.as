@@ -7,6 +7,7 @@ package iot
 	public class TestIOT extends Sprite
 	{
 		private var boxList:Array = [];
+		private var linkList:Array = [];
 		
 		public function TestIOT()
 		{
@@ -20,13 +21,38 @@ package iot
 			var b:Box = new Box();
 			addChild(b);
 			
-			b.x = 200;
-			b.y = 200;
+			b.x = 400;
+			b.y = 300;
 			
 			boxList.push(a, b);
 			for each(var item:Box in boxList){
 				item.addPtListener(__onMouseDown, __onMouseDown);
+				item.addEventListener(MouseEvent.MOUSE_DOWN, __onDrag);
 			}
+		}
+		
+		private var dragBox:Box;
+		
+		private function __onDrag(evt:MouseEvent):void
+		{
+			dragBox = evt.currentTarget as Box;
+			stage.addEventListener(MouseEvent.MOUSE_UP, __onDrop);
+			stage.addEventListener(Event.ENTER_FRAME, __updateLinker);
+			dragBox.startDrag();
+		}
+		
+		private function __updateLinker(event:Event):void
+		{
+			for each(var linker:PtLinker in linkList){
+				linker.redraw();
+			}
+		}
+		
+		private function __onDrop(evt:MouseEvent):void
+		{
+			stage.removeEventListener(Event.ENTER_FRAME, __updateLinker);
+			stage.removeEventListener(MouseEvent.MOUSE_UP, __onDrop);
+			dragBox.stopDrag();
 		}
 		
 		private var dragFlag:Boolean;
@@ -35,6 +61,7 @@ package iot
 		
 		private function __onMouseDown(evt:MouseEvent):void
 		{
+			evt.stopPropagation();
 			dragTarget = evt.target as CirclePoint;
 			
 			dragFlag = true;
@@ -49,7 +76,9 @@ package iot
 		private function __onMouseUp(evt:MouseEvent):void
 		{
 			if(dropTarget != null){
-				addChild(new PtLinker(dragTarget, dropTarget));
+				var linker:PtLinker = new PtLinker(dragTarget, dropTarget);
+				linkList.push(linker);
+				addChild(linker);
 			}
 			graphics.clear();
 			

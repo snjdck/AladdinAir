@@ -14,13 +14,14 @@ package iot
 		
 		public function PtLinker(from:CirclePoint, to:CirclePoint)
 		{
+			/*
 			var g:Graphics = graphics;
 //			g.lineStyle(10, 0, 0);
 			g.lineStyle(2, 0xFF00);
 			
 			var centerX:Number = (to.globalX + from.globalX) * 0.5;
 			var centerY:Number = (to.globalY + from.globalY) * 0.5;
-			if(from.isIn == from.x > to.x){
+			if(from.isIn == from.globalX > to.globalX){
 				g.moveTo(from.globalX, from.globalY);
 				g.cubicCurveTo(centerX, from.globalY, centerX, to.globalY, to.globalX, to.globalY);
 			}else{
@@ -30,7 +31,7 @@ package iot
 //				g.curveTo(from.globalX+dx, from.globalY, centerX, centerY);
 				g.lineTo(to.globalX, to.globalY);
 			}
-			
+			*/
 			
 			if(from.isIn){
 				outPt = to;
@@ -43,6 +44,8 @@ package iot
 			outPt.addPt(inPt);
 			inPt.addPt(outPt);
 			
+			redraw();
+			
 //			addEventListener(MouseEvent.RIGHT_CLICK, __onRightClick);
 			
 			var menu:ContextMenu = new ContextMenu();
@@ -53,6 +56,27 @@ package iot
 			}
 	
 			contextMenu = menu;
+		}
+		
+		public function redraw():void
+		{
+			var g:Graphics = graphics;
+			g.clear();
+			//			g.lineStyle(10, 0, 0);
+			g.lineStyle(2, 0xFF00);
+			
+			var centerX:Number = (inPt.globalX + outPt.globalX) * 0.5;
+			var centerY:Number = (inPt.globalY + outPt.globalY) * 0.5;
+			if(outPt.globalX < inPt.globalX){
+				g.moveTo(inPt.globalX, inPt.globalY);
+				g.cubicCurveTo(centerX, inPt.globalY, centerX, outPt.globalY, outPt.globalX, outPt.globalY);
+			}else{
+//				var dx:Number = (to.globalX - from.globalX) * 0.5;
+//				var dy:Number = (to.globalY - from.globalY) * 0.5;
+				g.moveTo(inPt.globalX, inPt.globalY);
+				//				g.curveTo(from.globalX+dx, from.globalY, centerX, centerY);
+				g.lineTo(outPt.globalX, outPt.globalY);
+			}
 		}
 		
 		private function __onMenuSelect(evt:ContextMenuEvent):void
