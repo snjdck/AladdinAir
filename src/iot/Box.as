@@ -76,7 +76,7 @@ package iot
 		
 		private function addPt(py:int, isIn:Boolean):CirclePoint
 		{
-			var pt:CirclePoint = new CirclePoint(isIn);
+			var pt:CirclePoint = new CirclePoint(this, isIn);
 			pt.y = py;
 			addChild(pt);
 			var g:Graphics = graphics;
@@ -91,6 +91,13 @@ package iot
 				pt.x = 120;
 			}
 			return pt;
+		}
+		
+		public function calculate():void
+		{
+			for each(var ptOut:CirclePoint in ptListOut){
+				ptOut.addData(0);
+			}
 		}
 	}
 }

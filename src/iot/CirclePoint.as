@@ -12,11 +12,13 @@ package iot
 	 */	
 	public class CirclePoint extends Sprite
 	{
-		public const linkedInPtList:Vector.<CirclePoint> = new Vector.<CirclePoint>();
+		public const linkedPtList:Vector.<CirclePoint> = new Vector.<CirclePoint>();
 		public var isIn:Boolean;
+		public var box:Box;
 		
-		public function CirclePoint(isIn:Boolean)
+		public function CirclePoint(box:Box, isIn:Boolean)
 		{
+			this.box = box;
 			this.isIn = isIn;
 			var g:Graphics = graphics;
 			
@@ -24,11 +26,6 @@ package iot
 			g.beginFill(0,0);
 			g.drawCircle(0,0,8);
 			g.endFill();
-		}
-		
-		public function get box():Box
-		{
-			return parent as Box;
 		}
 		
 		public function get globalX():Number
@@ -43,19 +40,30 @@ package iot
 		
 		public function hasPt(value:CirclePoint):Boolean
 		{
-			return linkedInPtList.indexOf(value) >= 0;
+			return linkedPtList.indexOf(value) >= 0;
 		}
 		
 		public function addPt(value:CirclePoint):void
 		{
-			linkedInPtList.push(value);
+			linkedPtList.push(value);
 		}
 		
 		public function removePt(value:CirclePoint):void
 		{
-			var index:int = linkedInPtList.indexOf(value);
+			var index:int = linkedPtList.indexOf(value);
 			if(index >= 0){
-				linkedInPtList.splice(index, 1);
+				linkedPtList.splice(index, 1);
+			}
+		}
+		
+		public function addData(data:Object):void
+		{
+			if(isIn){
+				box.calculate();
+			}else{
+				for each(var inPt:CirclePoint in linkedPtList){
+					inPt.addData(data);
+				}
 			}
 		}
 	}
