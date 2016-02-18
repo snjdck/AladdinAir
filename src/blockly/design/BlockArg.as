@@ -2,30 +2,46 @@ package blockly.design
 {
 	import flash.display.Graphics;
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.events.FocusEvent;
 	import flash.events.MouseEvent;
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFieldType;
 	
-	import blockly.BlockContextMenuMgr;
-	
 	public class BlockArg extends Sprite implements IBlockArg
 	{
 		public var block:BlockBase;
 		private var tf:TextField;
 		private var type:Array;
+		private var argIndex:int;
 		
-		public function BlockArg(block:BlockBase, type:Array)
+		public function BlockArg(block:BlockBase, type:Array, argIndex:int)
 		{
 			this.block = block;
 			this.type = type;
+			this.argIndex = argIndex;
 			tf = new TextField();
+			tf.tabEnabled = false;
 			tf.autoSize = TextFieldAutoSize.LEFT;
 			tf.doubleClickEnabled = true;
 			tf.addEventListener(MouseEvent.DOUBLE_CLICK, __onMouseDown);
+			tf.addEventListener(Event.CHANGE, __onTextChange);
+			tf.addEventListener(FocusEvent.FOCUS_IN, __onFocusIn);
+			tf.addEventListener(FocusEvent.FOCUS_OUT, __onFocusOut);
 			addEventListener(MouseEvent.CLICK, __onClick);
 			addChild(tf);
+		}
+		
+		private function __onTextChange(evt:Event):void
+		{
+			onRedraw();
+			var testBlock:BlockBase = block;
+			do{
+				testBlock.layoutChildren();
+				testBlock.drawBg();
+				testBlock = testBlock.parentBlock;
+			}while(testBlock != null);
 		}
 		
 		private function __onClick(evt:MouseEvent):void
@@ -33,14 +49,23 @@ package blockly.design
 			if(evt.target != this){
 				return;
 			}
-			BlockContextMenuMgr.Instance.show(this, type[2]);
+//			BlockContextMenuMgr.Instance.show(this, type[2]);
 		}
 		
 		private function __onMouseDown(evt:MouseEvent):void
 		{
+			focusOn();
+		}
+		
+		public function setNextFocus():void
+		{
+			block.setNextFocus(argIndex);
+		}
+		
+		private function __onFocusIn(evt:FocusEvent):void
+		{
 			tf.type = TextFieldType.INPUT;
-			tf.setSelection(0, 0);
-			tf.addEventListener(FocusEvent.FOCUS_OUT, __onFocusOut);
+			tf.setSelection(0, tf.text.length);
 		}
 		
 		private function __onFocusOut(evt:FocusEvent):void
@@ -91,17 +116,22 @@ package blockly.design
 			
 			if(hasArrow()){
 				g.beginFill(0);
-				drarTri(g, tf.textWidth+4, 6);
+				drawTri(g, tf.textWidth+4, 6);
 				g.endFill();
 			}
 		}
 		
-		private function drarTri(g:Graphics, px:Number, py:Number):void
+		private function drawTri(g:Graphics, px:Number, py:Number):void
 		{
 			g.moveTo(px, py);
 			g.lineTo(px+8, py);
 			g.lineTo(px+4, py+4);
 			g.lineTo(px, py);
+		}
+		
+		public function focusOn():void
+		{
+			stage.focus = tf;
 		}
 	}
 }

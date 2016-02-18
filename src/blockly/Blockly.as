@@ -2,8 +2,11 @@ package blockly
 {
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.FocusEvent;
 	import flash.events.MouseEvent;
+	
 	import blockly.design.ArduinoOutputEx;
+	import blockly.design.BlockArg;
 	import blockly.design.BlockBase;
 	import blockly.design.BlockJsonOutput;
 	import blockly.design.InsertPtIndicator;
@@ -21,13 +24,21 @@ package blockly
 		
 		public function Blockly()
 		{
-			create("showFace", "show face %d.port x:%1 y:%n characters:%s", BlockBase.BLOCK_TYPE_STATEMENT, BlockFlag.PORT_BLUE);
+//			var jsonObj:Array = [];
+//			jsonObj.push(SyntaxTreeFactory.NewFunction(["a"], [SyntaxTreeFactory.NewStatement("trace", [SyntaxTreeFactory.GetParam("a")])]));
+//			jsonObj.push(SyntaxTreeFactory.RunFunction([SyntaxTreeFactory.NewString("shaokai")], 0));
+//			var assembly:Array = interpreter.compile(jsonObj);
+//			trace(assembly.join("\n"));
+//			trace("interpreter");
+//			interpreter.execute(jsonObj);
+//			return;
+			create("showFace", "show face %d.port x:%1 y:%n characters:%s", BlockBase.BLOCK_TYPE_STATEMENT);
 //			create("showFace", "show face %d.port x:%2 y:%n characters:%s", BlockBase.BLOCK_TYPE_STATEMENT, BlockFlag.PORT_BLUE);
 //			create("showFace", "show face %d.port x:%3 y:%n characters:%s", BlockBase.BLOCK_TYPE_STATEMENT, BlockFlag.PORT_BLUE);
 			
-			create("runMotor", "set motor%d.motorPort speed %d.motorvalue", BlockBase.BLOCK_TYPE_STATEMENT, BlockFlag.PORT_RED);
-			create("runServo", "set servo %d.servoPort %d.slot angle %d.servovalue", BlockBase.BLOCK_TYPE_STATEMENT, BlockFlag.PORT_RED);
-			create("getUltrasonic", "ultrasonic sensor %d.normalPort distance", BlockBase.BLOCK_TYPE_EXPRESSION, BlockFlag.PORT_YELLOW);
+			create("runMotor", "set motor%d.motorPort speed %d.motorvalue", BlockBase.BLOCK_TYPE_STATEMENT);
+			create("runServo", "set servo %d.servoPort %d.slot angle %d.servovalue", BlockBase.BLOCK_TYPE_STATEMENT);
+			create("getUltrasonic", "ultrasonic sensor %d.normalPort distance", BlockBase.BLOCK_TYPE_EXPRESSION);
 			
 			create("+", "%d + %d", BlockBase.BLOCK_TYPE_EXPRESSION);
 			create(null, "forever %0", BlockBase.BLOCK_TYPE_FOR);
@@ -40,8 +51,19 @@ package blockly
 			
 			addChild(blockDock);
 			addChild(indicator);
+			
+			stage.addEventListener(FocusEvent.KEY_FOCUS_CHANGE, __onFocusChange);
 		}
-		
+		//*
+		private function __onFocusChange(evt:FocusEvent):void
+		{
+			var blockArg:BlockArg = evt.target.parent as BlockArg;
+			if(blockArg == null){
+				return;
+			}
+			blockArg.setNextFocus();
+		}
+		//*/
 		private function create(cmd:String, spec:String, type:int, flag:uint=0):MyBlock
 		{
 			var exp:MyBlock = new MyBlock();
