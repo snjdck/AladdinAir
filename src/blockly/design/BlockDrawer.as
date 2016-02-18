@@ -4,7 +4,6 @@ package blockly.design
 
 	public class BlockDrawer
 	{
-		static public var gapX:int = 2;
 		static public var a:int = 10;
 		static public var b:int = 4;
 		static public var len:int = 20;
@@ -40,11 +39,11 @@ package blockly.design
 			drawTop(w);
 			lineTo(w, h);
 			if(hasNext){
-				drawBottom(h, gapX);
+				drawBottom(h, 0);
 			}else{
-				lineTo(gapX, h);
+				lineTo(0, h);
 			}
-			lineTo(gapX, 0);
+			lineTo(0, 0);
 		}
 		
 		public function drawFor(w:int, h:int, childHeight:int):void
@@ -55,8 +54,8 @@ package blockly.design
 			lineTo(w, h);
 			drawMiddle(h, w-armW, childHeight);
 			lineTo(w, y1);
-			drawBottom(y1, gapX);
-			lineTo(gapX, 0);
+			drawBottom(y1, 0);
+			lineTo(0, 0);
 		}
 		
 		public function drawIfElse(w:int, h:int, child1Height:int, child2Height:int):void
@@ -71,18 +70,17 @@ package blockly.design
 			lineTo(w, y1);
 			drawMiddle(y1, w-armW, child2Height);
 			lineTo(w, y2);
-			drawBottom(y2, gapX);
-			lineTo(gapX, 0);
+			drawBottom(y2, 0);
+			lineTo(0, 0);
 		}
 		
 		private function drawTop(w:int):void
 		{
-			var x:int = gapX;
-			moveTo(x,		0);
-			lineTo(x + a,	0);
-			lineTo(x + a,	b);
-			lineTo(x + a + len, b);
-			lineTo(x + a + len, 0);
+			moveTo(0,		0);
+			lineTo(a,		0);
+			lineTo(a,		b);
+			lineTo(a + len, b);
+			lineTo(a + len, 0);
 			lineTo(w, 0);
 		}
 		

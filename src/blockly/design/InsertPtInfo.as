@@ -66,6 +66,7 @@ package blockly.design
 					target.layoutChildren();
 					target.drawBg();
 					target.layoutAfterInsertBelow();
+					target.swapToTopLayer();
 					break;
 			}
 		}

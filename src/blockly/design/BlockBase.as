@@ -495,30 +495,61 @@ package blockly.design
 			swapToTopLayer();
 		}
 		
-		private function getArgCount():int
+		private function getArgLayerCount():int
 		{
 			var result:int = 0;
 			for(var i:int=0; i<defaultArgBlockList.length; ++i){
 				var argBlock:BlockBase = argBlockList[i];
 				if(argBlock != null){
-					result += 1 + argBlock.getArgCount();
+					result += 1 + argBlock.getArgLayerCount();
 				}
 			}
 			return result;
 		}
 		
-		private function swapToTopLayer():void
+		private function getChildLayerCount():int
+		{
+			var result:int = getArgLayerCount();
+			var block:BlockBase;
+			
+			block = _subBlock1;
+			while(block != null){
+				result += 1 + block.getChildLayerCount();
+				block = block.nextBlock;
+			}
+			
+			block = _subBlock2;
+			while(block != null){
+				result += 1 + block.getChildLayerCount();
+				block = block.nextBlock;
+			}
+			
+			return result;
+		}
+		
+		public function swapToTopLayer():void
 		{
 			var topIndex:int = parent.numChildren - 1;
-			if(parent.getChildIndex(this) + getArgCount() == topIndex){
+			if(parent.getChildIndex(this) + getChildLayerCount() == topIndex){
 				return;
 			}
 			parent.setChildIndex(this, topIndex);
+			var block:BlockBase;
 			for(var i:int=0; i<defaultArgBlockList.length; ++i){
-				var argBlock:BlockBase = argBlockList[i];
-				if(argBlock != null){
-					argBlock.swapToTopLayer();
+				block = argBlockList[i];
+				if(block != null){
+					block.swapToTopLayer();
 				}
+			}
+			block = _subBlock1;
+			while(block != null){
+				block.swapToTopLayer();
+				block = block.nextBlock;
+			}
+			block = _subBlock2;
+			while(block != null){
+				block.swapToTopLayer();
+				block = block.nextBlock;
 			}
 		}
 		
@@ -541,6 +572,16 @@ package blockly.design
 		public function isNearTo(px:Number, py:Number):Boolean
 		{
 			return Math.abs(x - px) <= 10 && Math.abs(y - py) <= 10;
+		}
+		
+		override public function get height():Number
+		{
+			switch(type){
+				case BLOCK_TYPE_BREAK:
+				case BLOCK_TYPE_CONTINUE:
+					return super.height;
+			}
+			return super.height - BlockDrawer.b;
 		}
 	}
 }
