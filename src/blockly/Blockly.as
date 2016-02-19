@@ -6,7 +6,6 @@ package blockly
 	import flash.events.MouseEvent;
 	
 	import blockly.design.ArduinoOutputEx;
-	import blockly.design.BlockArg;
 	import blockly.design.BlockBase;
 	import blockly.design.BlockJsonOutput;
 	import blockly.design.FocusMgr;
@@ -25,6 +24,7 @@ package blockly
 		
 		public function Blockly()
 		{
+			addChild(new MenuPart()).x = 300;
 //			var jsonObj:Array = [];
 //			jsonObj.push(SyntaxTreeFactory.NewFunction(["a"], [SyntaxTreeFactory.NewStatement("trace", [SyntaxTreeFactory.GetParam("a")])]));
 //			jsonObj.push(SyntaxTreeFactory.RunFunction([SyntaxTreeFactory.NewString("shaokai")], 0));
