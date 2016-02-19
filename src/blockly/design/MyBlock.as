@@ -38,13 +38,6 @@ package blockly.design
 			
 			startDrag();
 			dispatchEvent(new Event("drag_begin"));
-			addEventListener(MouseEvent.MOUSE_MOVE, __onMouseMove);
-		}
-		
-		private function __onMouseMove(evt:MouseEvent):void
-		{
-			relayout();
-			layoutAfterInsertBelow();
 		}
 		
 		private function __onMouseUp(evt:MouseEvent):void
@@ -52,7 +45,6 @@ package blockly.design
 			stopDrag();
 			stage.removeEventListener(MouseEvent.MOUSE_UP, __onMouseUp);
 			dispatchEvent(new Event("drag_end"));
-			removeEventListener(MouseEvent.MOUSE_MOVE, __onMouseMove);
 		}
 		
 		public function execute():*

@@ -96,6 +96,8 @@ package blockly
 		
 		private function __onMouseMove(evt:MouseEvent):void
 		{
+			dragTarget.relayout();
+			dragTarget.layoutAfterInsertBelow();
 			dropTarget = findDropTarget();
 			indicator.indicate(dragTarget, dropTarget);
 		}
