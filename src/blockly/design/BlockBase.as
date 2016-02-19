@@ -583,29 +583,5 @@ package blockly.design
 			}
 			return super.height - BlockDrawer.b;
 		}
-		
-		internal function setNextFocus(argIndex:int):void
-		{
-			trace("focus change", argIndex);
-			if(argIndex < defaultArgBlockList.length - 1){
-				var blockArg:BlockArg = defaultArgBlockList[argIndex+1];
-				blockArg.focusOn();
-			}else if(subBlock1 != null){
-				subBlock1.setNextFocus(-1);
-			}else if(subBlock2 != null){
-				subBlock2.setNextFocus(-1);
-			}else if(nextBlock != null){
-				nextBlock.setNextFocus(-1);
-			}else{
-				var topParent:BlockBase = topBlock.parentBlock;
-				if(topParent == null){
-					stage.focus = null;
-					return;
-				}
-				if(topParent.nextBlock != null){
-					topParent.nextBlock.setNextFocus(-1);
-				}
-			}
-		}
 	}
 }

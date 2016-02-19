@@ -12,9 +12,9 @@ package blockly.design
 	public class BlockArg extends Sprite implements IBlockArg
 	{
 		public var block:BlockBase;
+		public var argIndex:int;
 		private var tf:TextField;
 		private var type:Array;
-		private var argIndex:int;
 		
 		public function BlockArg(block:BlockBase, type:Array, argIndex:int)
 		{
@@ -55,11 +55,6 @@ package blockly.design
 		private function __onMouseDown(evt:MouseEvent):void
 		{
 			focusOn();
-		}
-		
-		public function setNextFocus():void
-		{
-			block.setNextFocus(argIndex);
 		}
 		
 		private function __onFocusIn(evt:FocusEvent):void

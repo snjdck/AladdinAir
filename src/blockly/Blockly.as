@@ -9,6 +9,7 @@ package blockly
 	import blockly.design.BlockArg;
 	import blockly.design.BlockBase;
 	import blockly.design.BlockJsonOutput;
+	import blockly.design.FocusMgr;
 	import blockly.design.InsertPtIndicator;
 	import blockly.design.InsertPtInfo;
 	import blockly.design.MyBlock;
@@ -52,18 +53,9 @@ package blockly
 			addChild(blockDock);
 			addChild(indicator);
 			
-			stage.addEventListener(FocusEvent.KEY_FOCUS_CHANGE, __onFocusChange);
+			new FocusMgr(stage);
 		}
-		//*
-		private function __onFocusChange(evt:FocusEvent):void
-		{
-			var blockArg:BlockArg = evt.target.parent as BlockArg;
-			if(blockArg == null){
-				return;
-			}
-			blockArg.setNextFocus();
-		}
-		//*/
+		
 		private function create(cmd:String, spec:String, type:int, flag:uint=0):MyBlock
 		{
 			var exp:MyBlock = new MyBlock();
