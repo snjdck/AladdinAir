@@ -2,7 +2,6 @@ package blockly
 {
 	import flash.display.Sprite;
 	import flash.events.Event;
-	import flash.events.FocusEvent;
 	import flash.events.MouseEvent;
 	
 	import blockly.design.ArduinoOutputEx;
@@ -21,54 +20,55 @@ package blockly
 	public class Blockly extends Sprite
 	{
 		private var blockDock:Sprite = new Sprite();
+		private var blockDict:Object = {};
+		
+		[Embed(source="blockDef.xml", mimeType="application/octet-stream")]
+		static public const BIN:Class;
 		
 		public function Blockly()
 		{
-			addChild(new MenuPart()).x = 300;
-//			var jsonObj:Array = [];
-//			jsonObj.push(SyntaxTreeFactory.NewFunction(["a"], [SyntaxTreeFactory.NewStatement("trace", [SyntaxTreeFactory.GetParam("a")])]));
-//			jsonObj.push(SyntaxTreeFactory.RunFunction([SyntaxTreeFactory.NewString("shaokai")], 0));
-//			var assembly:Array = interpreter.compile(jsonObj);
-//			trace(assembly.join("\n"));
-//			trace("interpreter");
-//			interpreter.execute(jsonObj);
-//			return;
-			create("showFace", "show face %d.port x:%1 y:%n characters:%s", BlockBase.BLOCK_TYPE_STATEMENT);
-//			create("showFace", "show face %d.port x:%2 y:%n characters:%s", BlockBase.BLOCK_TYPE_STATEMENT, BlockFlag.PORT_BLUE);
-//			create("showFace", "show face %d.port x:%3 y:%n characters:%s", BlockBase.BLOCK_TYPE_STATEMENT, BlockFlag.PORT_BLUE);
+			var blockDef:XML = XML(new BIN().toString());
 			
-			create("runMotor", "set motor%d.motorPort speed %d.motorvalue", BlockBase.BLOCK_TYPE_STATEMENT);
-			create("runServo", "set servo %d.servoPort %d.slot angle %d.servovalue", BlockBase.BLOCK_TYPE_STATEMENT);
-			create("getUltrasonic", "ultrasonic sensor %d.normalPort distance", BlockBase.BLOCK_TYPE_EXPRESSION);
+			for each(var group:XML in blockDef.children()){
+				var dock:Sprite = new Sprite();
+				blockDict[group.@name] = dock;
+				blockDock.addChild(dock);
+				for each(var item:XML in group.children()){
+					var blockFlag:int = item.name().localName == "statement" ?　BlockBase.BLOCK_TYPE_STATEMENT　:　BlockBase.BLOCK_TYPE_EXPRESSION;
+					create(item.@id, item.@spec, blockFlag, dock);
+				}
+			}
 			
-			create("+", "%d + %d", BlockBase.BLOCK_TYPE_EXPRESSION);
-			create(null, "forever %0", BlockBase.BLOCK_TYPE_FOR);
-			create(null, "if %d    ", BlockBase.BLOCK_TYPE_IF);
-			create(null, "else if %d  ", BlockBase.BLOCK_TYPE_ELSE_IF);
-			create(null, "else        ", BlockBase.BLOCK_TYPE_ELSE);
-			create(null, "break", BlockBase.BLOCK_TYPE_BREAK);
-			create(null, "continue", BlockBase.BLOCK_TYPE_CONTINUE);
-			create(null, "arduino", BlockBase.BLOCK_TYPE_ARDUINO);
+			dock = new Sprite();
+			blockDict["Control"] = dock;
+			blockDock.addChild(dock);
+			create("+", "%d + %d", BlockBase.BLOCK_TYPE_EXPRESSION, dock);
+			create(null, "forever %0", BlockBase.BLOCK_TYPE_FOR, dock);
+			create(null, "if %d    ", BlockBase.BLOCK_TYPE_IF, dock);
+			create(null, "else if %d  ", BlockBase.BLOCK_TYPE_ELSE_IF, dock);
+			create(null, "else        ", BlockBase.BLOCK_TYPE_ELSE, dock);
+			create(null, "break", BlockBase.BLOCK_TYPE_BREAK, dock);
+			create(null, "continue", BlockBase.BLOCK_TYPE_CONTINUE, dock);
+			create(null, "arduino", BlockBase.BLOCK_TYPE_ARDUINO, dock);
 			
 			addChild(blockDock);
 			addChild(indicator);
 			
 			new FocusMgr(stage);
+			addChild(new MenuPart(blockDict)).x = 300;
 		}
 		
-		private function create(cmd:String, spec:String, type:int, flag:uint=0):MyBlock
+		private function create(cmd:String, spec:String, type:int, viewParent:Sprite):void
 		{
 			var exp:MyBlock = new MyBlock();
-			exp.flag = flag;
 			exp.type = type;
 			exp.addEventListener("drag_begin", __onDragBegin);
 			exp.addEventListener("drag_end", __onDragEnd);
 			exp.cmd = cmd;
 			exp.setSpec(spec);
-			blockDock.addChild(exp);
-			exp.y = 10 + 50 * blockList.length;
+			exp.y = 10 + 50 * viewParent.numChildren;
 			blockList.push(exp);
-			return exp;
+			viewParent.addChild(exp);
 		}
 		
 		private var blockList:Array = [];

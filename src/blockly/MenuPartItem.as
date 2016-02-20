@@ -19,8 +19,11 @@ package blockly
 		private var color:uint;
 		private var isSelected:Boolean;
 		
-		public function MenuPartItem(title:String, color:uint)
+		private var view:Sprite;
+		
+		public function MenuPartItem(title:String, color:uint, view:Sprite)
 		{
+			this.view = view;
 			mouseChildren = false;
 			tf = new TextField();
 			tf.x = minW + 2;
@@ -70,6 +73,9 @@ package blockly
 				g.drawRect(minW, 0, maxW-minW, HEIGHT);
 				g.endFill();
 			}
+			
+			if(view != null)
+			view.visible = value;
 		}
 	}
 }

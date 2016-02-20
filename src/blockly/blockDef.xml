@@ -1,0 +1,8 @@
+<xml>
+	<group name="Motion">
+		<statement  id="showFace" spec="show face %d.port x:%1 y:%n characters:%s" />
+		<statement  id="runMotor" spec="set motor%d.motorPort speed %d.motorvalue" />
+		<statement  id="runServo" spec="set servo %d.servoPort %d.slot angle %d.servovalue" />
+		<expression id="getUltrasonic" spec="ultrasonic sensor %d.normalPort distance" />
+	</group>
+</xml>

@@ -7,12 +7,12 @@ package blockly
 	{
 		private var selectItem:MenuPartItem;
 		
-		public function MenuPart()
+		public function MenuPart(blockDict:Object)
 		{
-			init();
+			init(blockDict);
 		}
 		
-		private function init():void
+		private function init(blockDict:Object):void
 		{
 			var xml:XMLList = <xml>
 <category id="1" name="Motion" color="0x4a6cd4"/>
@@ -29,7 +29,7 @@ package blockly
 			
 			for(var i:int=0; i<10; ++i){
 				var itemData:XML = xml[i];
-				var item:MenuPartItem = new MenuPartItem(itemData.@name, parseInt(itemData.@color));
+				var item:MenuPartItem = new MenuPartItem(itemData.@name, parseInt(itemData.@color), blockDict[itemData.@name]);
 				if(i == 0){
 					selectItem = item;
 					item.setSelected(true);
