@@ -74,6 +74,16 @@ package blockly.design
 			lineTo(0, 0);
 		}
 		
+		private function drawHat(w:int):void
+		{
+			moveTo(0,		0);
+			g.curveTo(
+				offsetX + 40, offsetY - 20,
+				offsetX + 80, offsetY
+			);
+			lineTo(w, 0);
+		}
+		
 		private function drawTop(w:int):void
 		{
 			moveTo(0,		0);
