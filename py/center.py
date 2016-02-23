@@ -14,52 +14,77 @@ PORT = 7410
 
 class Dispatcher:
 	def __init__(self):
+		self.lock = _thread.allocate_lock()
 		self.notifyDict = {}
 
-	def dispatch(self, msgId, data):
+	def dispatch(self, sock, packet):
+		self.lock.acquire()
+		if controlFlag == 0:
+			self.send(msgId, data)
+		elif controlFlag == 1:
+			self.regHandler(msgId, sock)
+		elif controlFlag == 2:
+			self.delHandler(msgId, sock)
+		self.lock.release()
+
+	def send(self, msgId, data)
 		handlerList = self.notifyDict[msgId]
 		if not handlerList:
 			return
-		for client in handlerList:
-			client.sendall(data)
+		for sock in handlerList:
+			sock.sendall(data)
 
-	def addHandler(self, msgId, sock):
+	def regHandler(self, msgId, sock):
 		handlerList = self.notifyDict[msgId]
 		if not handlerList:
 			handlerList = set()
 			self.notifyDict[msgId] = handlerList
 		handlerList.add(sock)
 
-	def removeHandler(self, msgId, sock):
+	def delHandler(self, msgId, sock):
 		handlerList = self.notifyDict[msgId]
 		if not handlerList:
 			return
 		handlerList.remove(sock)
 
 
-def client_read_loop(sock, address):
+def client_loop(sock, address):
+	recvBuff = bytes()
+	headLen = 4
+	begin = 0
 	while True:
-		data = sock.recv(0x10000)
+		try:
+			data = sock.recv(0x10000)
+		except ConnectionResetError:
+			return
 		if not data:
 			return
-		print(data)
-		return
-		lock.acquire()
-		if controlFlag == 0:
-			dispatcher.dispatch(msgId, data)
-		elif controlFlag == 1:
-			dispatcher.addHandler(msgId, sock)
-		elif controlFlag == 2:
-			dispatcher.removeHandler(msgId, sock)
-		lock.release()
+
+		recvBuff += data
+		end = len(recvBuff)
+
+		while True:
+			if end - begin < headLen:
+				break
+			packetLen = read_ushort(recvBuff, begin)
+			if end - begin < packetLen:
+				break;
+			packet = recvBuff[begin+headLen:begin+packetLen]
+			dispatcher.dispatch(sock, packet)
+			begin += packetLen
+
+		if begin > 0:
+			recvBuff = recvBuff[begin:]
+			begin = 0
 
 
-lock = _thread.allocate_lock()
+
 dispatcher = Dispatcher()
 
 server = socket.socket()
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.bind((HOST, PORT))
 server.listen(5)
+
 while True:
-	_thread.start_new_thread(client_read_loop, server.accept())
+	_thread.start_new_thread(client_loop, server.accept())
