@@ -4,9 +4,12 @@ center - nodejs or python
 gate - nodejs
 heartbeat -python
 843 - python
+
+total_len(2) + control(1) + msgId(2) + msgBody
 '''
 
 import socket
+import struct
 import _thread
 
 HOST = "127.0.0.1"
@@ -18,21 +21,22 @@ class Dispatcher:
 		self.notifyDict = {}
 
 	def dispatch(self, sock, packet):
+		_, controlFlag, msgId = struct.unpack(">HBH", packet)
 		self.lock.acquire()
 		if controlFlag == 0:
-			self.send(msgId, data)
+			self.send(msgId, packet)
 		elif controlFlag == 1:
 			self.regHandler(msgId, sock)
 		elif controlFlag == 2:
 			self.delHandler(msgId, sock)
 		self.lock.release()
 
-	def send(self, msgId, data)
+	def send(self, msgId, packet)
 		handlerList = self.notifyDict[msgId]
 		if not handlerList:
 			return
 		for sock in handlerList:
-			sock.sendall(data)
+			sock.sendall(packet)
 
 	def regHandler(self, msgId, sock):
 		handlerList = self.notifyDict[msgId]
@@ -50,7 +54,6 @@ class Dispatcher:
 
 def client_loop(sock, address):
 	recvBuff = bytes()
-	headLen = 4
 	begin = 0
 	while True:
 		try:
@@ -64,12 +67,12 @@ def client_loop(sock, address):
 		end = len(recvBuff)
 
 		while True:
-			if end - begin < headLen:
+			if end - begin < 2:
 				break
-			packetLen = read_ushort(recvBuff, begin)
+			packetLen = struct.unpack_from(">H", recvBuff, begin)[0]
 			if end - begin < packetLen:
 				break;
-			packet = recvBuff[begin+headLen:begin+packetLen]
+			packet = recvBuff[begin:begin+packetLen]
 			dispatcher.dispatch(sock, packet)
 			begin += packetLen
 
