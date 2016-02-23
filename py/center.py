@@ -31,25 +31,34 @@ class Dispatcher:
 			self.delHandler(msgId, sock)
 		self.lock.release()
 
-	def send(self, msgId, packet)
-		handlerList = self.notifyDict[msgId]
-		if not handlerList:
+	def send(self, msgId, packet):
+		if msgId not in self.notifyDict:
 			return
-		for sock in handlerList:
-			sock.sendall(packet)
+		handlerList = self.notifyDict[msgId]
+		for sock in handlerList.copy():
+			try:
+				sock.sendall(packet)
+			except ConnectionResetError:
+				self.delAllHandlers(sock)
 
 	def regHandler(self, msgId, sock):
-		handlerList = self.notifyDict[msgId]
-		if not handlerList:
+		if msgId in self.notifyDict:
+			handlerList = self.notifyDict[msgId]
+		else:
 			handlerList = set()
 			self.notifyDict[msgId] = handlerList
 		handlerList.add(sock)
 
 	def delHandler(self, msgId, sock):
-		handlerList = self.notifyDict[msgId]
-		if not handlerList:
+		if msgId not in self.notifyDict:
 			return
+		handlerList = self.notifyDict[msgId]
 		handlerList.remove(sock)
+
+	def delAllHandlers(self, sock):
+		for msgId in self.notifyDict:
+			handlerList = self.notifyDict[msgId]
+			handlerList.remove(sock)
 
 
 def client_loop(sock, address):
