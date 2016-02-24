@@ -1,12 +1,9 @@
-import socket
+from python_modules import *
 
 HOST = "127.0.0.1"
 PORT = 843
 
-server = socket.socket()
-server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-server.bind((HOST, PORT))
-server.listen(5)
+server = create_server(HOST, PORT)
 
 packet = b'<cross-domain-policy><allow-access-from domain="*" to-ports="*" /></cross-domain-policy>'
 

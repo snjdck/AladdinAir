@@ -1,14 +1,13 @@
-import socket
+from python_modules import *
+
 import struct
 import time
 
 HOST = "127.0.0.1"
 PORT = 7410
 
-client = socket.socket()
-client.connect((HOST, PORT))
-
-packet = struct.pack(">HBH", 5, 0, 0)
+client = create_client_with_name(HOST, PORT, "heartbeat")
+packet = struct.pack(">HH", 4, 0)
 
 while True:
 	client.sendall(packet)
