@@ -1,6 +1,7 @@
 import _thread
 import socket
 import struct
+import os
 
 start_new_thread	= _thread.start_new_thread
 allocate_lock		= _thread.allocate_lock
@@ -32,7 +33,8 @@ def read_sock_forever(sock, handler):
 			recvBuff = recvBuff[begin:]
 			begin = 0
 
-def create_client_with_name(host, port, name):
+def create_client_with_name(host, port, path):
+	name = os.path.basename(path)[0:-3]
 	sock = create_client(host, port)
 	sock.sendall(pack_ushort(len(name) + 2) + name.encode())
 	return sock
