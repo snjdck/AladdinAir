@@ -7,41 +7,19 @@ var center_host = "127.0.0.1";
 var center_port = 7410;
 
 var net = require("net");
-
-function handleRecvData(socket, handler){
-	var recvBuffer = new Buffer(0);
-	var begin = 0;
-	socket.on("data", function(chunk){
-		recvBuffer = Buffer.concat([recvBuffer, chunk]);
-		var end = recvBuffer.length;
-		for(;;){
-			if(end - begin < 2)
-				break;
-			var packetLen = recvBuffer.readUInt16BE(begin);
-			if(end - begin < packetLen)
-				break;
-			handler(socket, recvBuffer.slice(begin, begin+packetLen));
-			begin += packetLen;
-		}
-		if(begin > 0){
-			recvBuffer = recvBuffer.slice(begin);
-			begin = 0;
-		}
-	});
-}
+var Packet = require("Packet");
+require("Socket");
 
 var socketDict = {};
 var nextSocketId = 0;
 
 var centerSocket = new net.Socket();
+centerSocket.connect(center_port, center_host);
+
 centerSocket.on("connect", function(){
-	var name = "gate";
-	var packet = new Buffer(name.length + 2);
-	packet.writeUInt16BE(name.length + 2);
-	packet.write(name, 2);
-	centerSocket.write(packet);
+	centerSocket.write(Packet.CreateNamePacket("gate"));
 });
-handleRecvData(centerSocket, function(_, packet){
+centerSocket.readForever(function(_, packet){
 	var msgId = packet.readUInt16BE(2);
 	console.log("msgid", msgId);
 	return;
@@ -50,8 +28,6 @@ handleRecvData(centerSocket, function(_, packet){
 	var socket = socketDict[socketId];
 	socket.write(packet);
 });
-centerSocket.connect(center_port, center_host);
-
 
 var server = new net.Server();
 server.on("connection", __onServerAccept);
@@ -65,7 +41,7 @@ function __onServerAccept(socket){
 		//centerSocket.write("quit);
 	});
 	//centerSocket.write("connect);
-	handleRecvData(socket, forwardClientPacket);
+	socket.readForever(forwardClientPacket);
 
 	socket.uid = nextSocketId;
 	socketDict[nextSocketId] = socket;
