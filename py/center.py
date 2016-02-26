@@ -8,6 +8,9 @@ notifyDict = {}
 socketDict = {}
 
 notifyDict[0] = ["test", "gate"]
+notifyDict[1] = ["test"]
+notifyDict[2] = ["test"]
+notifyDict[101] = ["test"]
 
 def dispatch(sock, packet):
 	if sock not in socketDict:
@@ -29,7 +32,8 @@ def dispatch(sock, packet):
 def client_loop(sock, address):
 	read_sock_forever(sock, dispatch)
 	with lock:
-		del socketDict[sock]
+		if sock in socketDict:
+			del socketDict[sock]
 
 server = create_server(HOST, PORT)
 while True:

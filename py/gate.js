@@ -13,6 +13,9 @@ require("Socket");
 var socketDict = {};
 var nextSocketId = 0;
 
+var server = new net.Server();
+server.listen(gate_port, gate_host);
+
 var centerSocket = new net.Socket();
 centerSocket.connect(center_port, center_host);
 
@@ -28,32 +31,19 @@ centerSocket.readForever(function(_, packet){
 	var socket = socketDict[socketId];
 	socket.write(packet);
 });
-
-var server = new net.Server();
-server.on("connection", __onServerAccept);
-server.on("error", __onServerError);
-server.listen(gate_port, gate_host);
-
-function __onServerAccept(socket){
-	socket.on("close", function(){
-		socket.removeAllListeners();
-		delete socketDict[socket.uid];
-		//centerSocket.write("quit);
-	});
-	//centerSocket.write("connect);
+server.on("connection", function(socket){
+	socket.uid = nextSocketId++;
+	socketDict[socket.uid] = socket;
+	centerSocket.write(Packet.CreateClientConnectPacket(socket.uid));
 	socket.readForever(forwardClientPacket);
-
-	socket.uid = nextSocketId;
-	socketDict[nextSocketId] = socket;
-	++nextSocketId;
-}
-
-function forwardClientPacket(socket, packet){
-	packet.writeUInt16BE(socket.uid, 4);
-	centerSocket.write(packet);
-}
-
-function __onServerError(err){
+	socket.on("close", function(){
+		closeClient(socket);
+	});
+	socket.on("error", function(err){
+		//closeClient(socket);
+	});
+});
+server.on("error", function(err){
 	switch(err.code){
 		case "EADDRINUSE":
 			console.error('Address in use, retrying...');
@@ -61,5 +51,13 @@ function __onServerError(err){
 		default:
 			console.error("socket server error!", err);
 	}
+});
+function forwardClientPacket(socket, packet){
+	//packet.writeUInt16BE(socket.uid, 4);
+	centerSocket.write(packet);
 }
-
+function closeClient(socket){
+	socket.removeAllListeners();
+	centerSocket.write(Packet.CreateClientClosePacket(socket.uid));
+	delete socketDict[socket.uid];
+}
