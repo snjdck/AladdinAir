@@ -4,9 +4,8 @@ import struct
 import os
 
 start_new_thread	= _thread.start_new_thread
-allocate_lock		= _thread.allocate_lock
 
-def read_sock_forever(sock, handler):
+def read_sock_forever(sock, queue):
 	recvBuff = bytes()
 	begin = 0
 	while True:
@@ -26,7 +25,7 @@ def read_sock_forever(sock, handler):
 			packetLen = read_ushort(recvBuff, begin)
 			if end - begin < packetLen:
 				break
-			handler(sock, recvBuff[begin:begin+packetLen])
+			queue.put((sock, recvBuff[begin:begin+packetLen]))
 			begin += packetLen
 
 		if begin > 0:
