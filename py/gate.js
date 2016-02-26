@@ -24,12 +24,10 @@ centerSocket.on("connect", function(){
 });
 centerSocket.readForever(function(_, packet){
 	var msgId = packet.readUInt16BE(2);
-	console.log("msgid", msgId);
-	return;
-	
 	var socketId = packet.readUInt16BE(4);
 	var socket = socketDict[socketId];
-	socket.write(packet);
+	if(socket != null)
+		socket.write(packet);
 });
 server.on("connection", function(socket){
 	socket.uid = nextSocketId++;
@@ -53,7 +51,7 @@ server.on("error", function(err){
 	}
 });
 function forwardClientPacket(socket, packet){
-	//packet.writeUInt16BE(socket.uid, 4);
+	packet.writeUInt16BE(socket.uid, 4);
 	centerSocket.write(packet);
 }
 function closeClient(socket){

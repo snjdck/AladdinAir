@@ -12,6 +12,7 @@ notifyDict[0] = ["test", "gate"]
 notifyDict[1] = ["test"]
 notifyDict[2] = ["test"]
 notifyDict[101] = ["test"]
+notifyDict[102] = ["gate"]
 
 def handle_packet(sock, packet):
 	if not packet:

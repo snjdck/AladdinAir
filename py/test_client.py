@@ -11,6 +11,6 @@ packet = struct.pack(">HHH", 6, 101, 0)
 
 while True:
 	client.sendall(packet)
-	#data = client.recv(0x10000)
-	#print(data)
+	data = client.recv(0x10000)
+	print(data)
 	time.sleep(1)
