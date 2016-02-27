@@ -2,13 +2,12 @@ from python_modules.socket_ex import *
 from python_modules.struct_ex import *
 from python_modules.thread_ex import *
 
+from python_configs.server_address import *
+
 import struct
 import time
 
-HOST = "127.0.0.1"
-PORT = 7411
-
-client = create_client(HOST, PORT)
+client = create_client(address_server_gate)
 packet = struct.pack(">HHH", 6, 101, 0)
 
 while True:

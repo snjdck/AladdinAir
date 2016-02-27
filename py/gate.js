@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 
 var gate_host = "127.0.0.1";
 var gate_port = 7411;
@@ -34,28 +34,15 @@ server.on("connection", function(socket){
 	socketDict[socket.uid] = socket;
 	centerSocket.write(Packet.CreateClientConnectPacket(socket.uid));
 	socket.readForever(forwardClientPacket);
-	socket.on("close", function(){
-		closeClient(socket);
-	});
-	socket.on("error", function(err){
-		//closeClient(socket);
-	});
-});
-server.on("error", function(err){
-	switch(err.code){
-		case "EADDRINUSE":
-			console.error('Address in use, retrying...');
-			break;
-		default:
-			console.error("socket server error!", err);
+	function onClose(err){
+		socket.removeAllListeners();
+		centerSocket.write(Packet.CreateClientClosePacket(socket.uid));
+		delete socketDict[socket.uid];
 	}
+	socket.on("close", onClose);
+	socket.on("error", onClose);
 });
 function forwardClientPacket(socket, packet){
 	packet.writeUInt16BE(socket.uid, 4);
 	centerSocket.write(packet);
-}
-function closeClient(socket){
-	socket.removeAllListeners();
-	centerSocket.write(Packet.CreateClientClosePacket(socket.uid));
-	delete socketDict[socket.uid];
 }

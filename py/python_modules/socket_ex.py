@@ -3,22 +3,22 @@ from os.path import basename
 
 from .struct_ex import *
 
-def create_server(host, port):
+def create_server(address):
 	sock = socket.socket()
 	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-	sock.bind((host, port))
+	sock.bind(address)
 	sock.listen(0)
 	return sock
 
-def create_client(host, port):
+def create_client(address):
 	sock = socket.socket()
-	sock.connect((host, port))
+	sock.connect(address)
 	return sock
 
-def create_client_with_name(host, port, path):
+def create_client_with_name(address, path):
 	name = basename(path)[0:-3]
 	packet = pack_ushort(2+len(name)) + name.encode()
-	sock = create_client(host, port)
+	sock = create_client(address)
 	sock.sendall(packet)
 	return sock
 

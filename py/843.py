@@ -1,9 +1,7 @@
 from python_modules.socket_ex import *
+from python_configs.server_address import *
 
-HOST = "127.0.0.1"
-PORT = 843
-
-server = create_server(HOST, PORT)
+server = create_server(address_server_843)
 
 packet = b'<cross-domain-policy><allow-access-from domain="*" to-ports="*" /></cross-domain-policy>'
 

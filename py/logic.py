@@ -4,12 +4,10 @@ from python_modules.thread_ex import *
 from python_modules import handlerMgr
 
 from python_handlers import logic_handlers
+from python_configs.server_address import *
 
 from queue import Queue
 import json
-
-HOST = "127.0.0.1"
-PORT = 7410
 
 packetRecvQueue = Queue()
 packetSendQueue = Queue()
@@ -23,7 +21,7 @@ def handle_packet(sock, packet):
 	msgData = json.loads(packet[6:]) if packetLen > 6 else None
 	handlerMgr.handleMsg(msgId, clientId, msgData)
 
-client = create_client_with_name(HOST, PORT, __file__)
+client = create_client_with_name(address_server_center, __file__)
 start_packet_send_thread(client.sendall, packetSendQueue)
 start_packet_recv_thread(handle_packet,  packetRecvQueue)
 read_sock_forever(client, packetRecvQueue)
