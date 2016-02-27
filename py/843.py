@@ -1,4 +1,4 @@
-from python_modules import *
+from python_modules.socket_ex import *
 
 HOST = "127.0.0.1"
 PORT = 843

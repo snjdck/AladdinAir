@@ -1,4 +1,6 @@
-from python_modules import *
+from python_modules.socket_ex import *
+from python_modules.struct_ex import *
+from python_modules.thread_ex import *
 
 import struct
 import time

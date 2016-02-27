@@ -1,4 +1,8 @@
-from python_modules import *
+
+from python_modules.socket_ex import *
+from python_modules.struct_ex import *
+from python_modules.thread_ex import *
+
 from queue import Queue
 
 HOST = "127.0.0.1"
@@ -8,10 +12,10 @@ packetQueue = Queue()
 notifyDict = {}
 socketDict = {}
 
-notifyDict[0] = ["test", "gate"]
-notifyDict[1] = ["test"]
-notifyDict[2] = ["test"]
-notifyDict[101] = ["test"]
+notifyDict[0] = ["logic", "gate"]
+notifyDict[1] = ["logic"]
+notifyDict[2] = ["logic"]
+notifyDict[101] = ["logic"]
 notifyDict[102] = ["gate"]
 
 def handle_packet(sock, packet):
@@ -34,15 +38,11 @@ def handle_packet(sock, packet):
 		except ConnectionResetError:
 			packetQueue.put((sock, None))
 
-def packet_loop():
-	while True:
-		handle_packet(*packetQueue.get())
-
-def client_loop(sock, address):
+def thread_client(sock, address):
 	read_sock_forever(sock, packetQueue)
 	packetQueue.put((sock, None))
 
 server = create_server(HOST, PORT)
-start_new_thread(packet_loop, ())
+start_packet_recv_thread(handle_packet, packetQueue)
 while True:
-	start_new_thread(client_loop, server.accept())
+	start_new_thread(thread_client, server.accept())
