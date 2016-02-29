@@ -1,7 +1,7 @@
 "use strict";
 
-var gate_host = "127.0.0.1";
-var gate_port = 7411;
+var gate_host = "192.168.1.103";
+var gate_port = 2560;
 
 var center_host = "127.0.0.1";
 var center_port = 7410;

@@ -7,7 +7,6 @@ from python_handlers import logic_handlers
 from python_configs.server_address import *
 
 from queue import Queue
-import json
 
 packetRecvQueue = Queue()
 packetSendQueue = Queue()
@@ -18,7 +17,7 @@ def handle_packet(sock, packet):
 	packetLen = read_ushort(packet, 0)
 	msgId = read_ushort(packet, 2)
 	clientId = read_ushort(packet, 4)
-	msgData = json.loads(packet[6:]) if packetLen > 6 else None
+	msgData = packet[6:] if packetLen > 6 else None
 	handlerMgr.handleMsg(msgId, clientId, msgData)
 
 client = create_client_with_name(address_server_center, __file__)
