@@ -8,7 +8,7 @@ import struct
 import time
 
 client = create_client(address_server_gate)
-packet = struct.pack(">HHH", 6, 101, 0)
+packet = pack_packet(101, 0)
 
 while True:
 	client.sendall(packet)
