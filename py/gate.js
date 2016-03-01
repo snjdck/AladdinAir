@@ -1,36 +1,13 @@
 "use strict";
 
-var gate_host = "192.168.1.103";
-gate_host = "127.0.0.1";
-var gate_port = 2560;
-
-var center_host = "127.0.0.1";
-var center_port = 7410;
-
-var net = require("net");
-var Packet = require("Packet");
+const serverPort = require("./node_configs/serverPort");
+const net = require("net");
+const Packet = require("Packet");
 require("Socket");
-
-var socketDict = {};
+const socketDict = {};
 var nextSocketId = 0;
 
-var server = new net.Server();
-server.listen(gate_port, gate_host);
-
-var centerSocket = new net.Socket();
-centerSocket.connect(center_port, center_host);
-
-centerSocket.on("connect", function(){
-	centerSocket.write(Packet.CreateNamePacket("gate"));
-});
-centerSocket.readForever(function(_, packet){
-	var msgId = packet.readUInt16BE(2);
-	var socketId = packet.readUInt16BE(4);
-	var socket = socketDict[socketId];
-	if(socket != null)
-		socket.write(packet);
-});
-server.on("connection", function(socket){
+const server = net.createServer(function(socket){
 	socket.uid = nextSocketId++;
 	socketDict[socket.uid] = socket;
 	centerSocket.write(Packet.CreateClientConnectPacket(socket.uid));
@@ -42,6 +19,18 @@ server.on("connection", function(socket){
 	}
 	socket.on("close", onClose);
 	socket.on("error", onClose);
+});
+server.listen(serverPort.gate_port, serverPort.gate_host);
+
+const centerSocket = net.connect(serverPort.center_port, serverPort.center_host, function(){
+	centerSocket.write(Packet.CreateNamePacket("gate"));
+});
+centerSocket.readForever(function(_, packet){
+	var msgId = packet.readUInt16BE(2);
+	var socketId = packet.readUInt16BE(4);
+	var socket = socketDict[socketId];
+	if(socket != null)
+		socket.write(packet);
 });
 function forwardClientPacket(socket, packet){
 	packet.writeUInt16BE(socket.uid, 4);

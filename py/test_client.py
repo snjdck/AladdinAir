@@ -4,7 +4,6 @@ from python_modules.thread_ex import *
 
 from python_configs.server_address import *
 
-import struct
 import time
 
 client = create_client(address_server_gate)

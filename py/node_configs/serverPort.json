@@ -1,0 +1,6 @@
+{
+	"gate_host":"127.0.0.1",
+	"gate_port":2560,
+	"center_host":"127.0.0.1",
+	"center_port":7410
+}
