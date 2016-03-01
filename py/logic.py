@@ -14,11 +14,7 @@ packetSendQueue = Queue()
 logic_handlers.sendPacket = packetSendQueue.put
 
 def handle_packet(sock, packet):
-	packetLen = read_ushort(packet, 0)
-	msgId = read_ushort(packet, 2)
-	clientId = read_ushort(packet, 4)
-	msgData = packet[6:] if packetLen > 6 else None
-	handlerMgr.handleMsg(msgId, clientId, msgData)
+	handlerMgr.handleMsg(*read_packet(packet))
 
 client = create_client_with_name(address_server_center, __file__)
 start_packet_send_thread(client.sendall, packetSendQueue)
