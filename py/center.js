@@ -5,13 +5,12 @@ const notifyDict = require("./node_configs/notifyDict");
 const net = require("net");
 require("Socket");
 const socketList = [];
-const server = net.createServer(function(socket){
+const server = net.createServer(socket => {
 	function onClose(err){
 		socket.removeAllListeners();
 		var index = socketList.indexOf(socket);
-		if(index >= 0){
+		if(index >= 0)
 			socketList.splice(index, 1);
-		}
 	}
 	socket.on("close", onClose);
 	socket.on("error", onClose);
@@ -25,10 +24,12 @@ function onRecvPacket(socket, packet){
 	}
 	var msgId = packet.readUInt16BE(2);
 	var handlerList = notifyDict[msgId];
+	if(handlerList == null || handlerList.length <= 0)
+		return;
 	for(var i=socketList.length-1; i>=0; --i){
-		var client = socketList[i];
-		if(handlerList.indexOf(client.name) >= 0)
-			client.write(packet);
+		socket = socketList[i];
+		if(handlerList.indexOf(socket.name) >= 0)
+			socket.write(packet);
 	}
 }
 server.listen(serverPort.center_port, serverPort.center_host);

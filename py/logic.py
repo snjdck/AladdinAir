@@ -4,9 +4,13 @@ from python_modules.thread_ex import *
 from python_modules import handlerMgr
 
 from python_handlers import logic_handlers
-from python_configs.server_address import *
 
 from queue import Queue
+import json
+
+with open("./node_configs/serverPort.json") as f:
+	serverPort = json.load(f)
+address_server_center = (serverPort["center_host"], serverPort["center_port"])
 
 packetRecvQueue = Queue()
 packetSendQueue = Queue()
