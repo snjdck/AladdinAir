@@ -1,16 +1,14 @@
 from python_modules.socket_ex import *
 from python_modules.struct_ex import *
 from python_modules.thread_ex import *
+from python_modules.file_ex import *
 from python_modules import handlerMgr
 
 from python_handlers import logic_handlers
 
 from queue import Queue
-import json
 
-with open("./node_configs/serverPort.json") as f:
-	serverPort = json.load(f)
-address_server_center = (serverPort["center_host"], serverPort["center_port"])
+address_server_center = load_socket_address("./node_configs/serverPort.json", "center_host", "center_port")
 
 packetRecvQueue = Queue()
 packetSendQueue = Queue()
