@@ -4,18 +4,17 @@ const serverPort = require("./node_configs/serverPort");
 const net = require("net");
 const Packet = require("Packet");
 require("Socket");
-const socketDict = {};
-var nextSocketId = 0;
+const SocketDict = require("SocketDict");
+const socketDict = new SocketDict();
 
 const server = net.createServer(function(socket){
-	socket.uid = nextSocketId++;
-	socketDict[socket.uid] = socket;
+	socketDict.add(socket);
 	centerSocket.write(Packet.CreateClientConnectPacket(socket.uid));
 	socket.readForever(forwardClientPacket);
 	function onClose(err){
 		socket.removeAllListeners();
 		centerSocket.write(Packet.CreateClientClosePacket(socket.uid));
-		delete socketDict[socket.uid];
+		socketDict.remove(socket);
 	}
 	socket.on("close", onClose);
 	socket.on("error", onClose);
@@ -28,9 +27,7 @@ const centerSocket = net.connect(serverPort.center_port, serverPort.center_host,
 centerSocket.readForever(function(_, packet){
 	var msgId = packet.readUInt16BE(2);
 	var socketId = packet.readUInt16BE(4);
-	var socket = socketDict[socketId];
-	if(socket != null)
-		socket.write(packet);
+	socketDict.send(socketId, packet);
 });
 function forwardClientPacket(socket, packet){
 	packet.writeUInt16BE(socket.uid, 4);
