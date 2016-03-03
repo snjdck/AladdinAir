@@ -2,6 +2,7 @@
 
 const serverPort = require("./node_configs/serverPort");
 const net = require("net");
+require("Socket");
 
 const text = '<cross-domain-policy><allow-access-from domain="*" to-ports="*" /></cross-domain-policy>';
 const packet = new Buffer(text);
@@ -13,5 +14,6 @@ const server = net.createServer(socket => {
 			socket.removeAllListeners();
 		});
 	});
+	socket.listenCloseEvent(10000, null);
 });
 server.listen(843, serverPort.gate_host);

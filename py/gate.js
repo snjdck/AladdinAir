@@ -7,17 +7,19 @@ require("Socket");
 const SocketDict = require("SocketDict");
 const socketDict = new SocketDict();
 
+function onClientClose(socket){
+	centerSocket.write(Packet.CreateClientClosePacket(socket.uid));
+	socketDict.remove(socket);
+}
+function forwardClientPacket(socket, packet){
+	packet.writeUInt16BE(socket.uid, 4);
+	centerSocket.write(packet);
+}
 const server = net.createServer(function(socket){
 	socketDict.add(socket);
 	centerSocket.write(Packet.CreateClientConnectPacket(socket.uid));
 	socket.readForever(forwardClientPacket);
-	function onClose(err){
-		socket.removeAllListeners();
-		centerSocket.write(Packet.CreateClientClosePacket(socket.uid));
-		socketDict.remove(socket);
-	}
-	socket.on("close", onClose);
-	socket.on("error", onClose);
+	socket.listenCloseEvent(90000, onClientClose);
 });
 server.listen(serverPort.gate_port, serverPort.gate_host);
 
@@ -29,7 +31,3 @@ centerSocket.readForever(function(_, packet){
 	var socketId = packet.readUInt16BE(4);
 	socketDict.send(socketId, packet);
 });
-function forwardClientPacket(socket, packet){
-	packet.writeUInt16BE(socket.uid, 4);
-	centerSocket.write(packet);
-}
