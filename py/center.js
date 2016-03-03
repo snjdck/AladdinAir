@@ -6,18 +6,18 @@ const net = require("net");
 require("Socket");
 const socketList = [];
 const server = net.createServer(socket => {
-	function onClose(err){
-		socket.removeAllListeners();
-		var index = socketList.indexOf(socket);
-		if(index >= 0)
-			socketList.splice(index, 1);
-	}
-	socket.on("close", onClose);
-	socket.on("error", onClose);
 	socket.readForever(onRecvPacket);
+	socket.listenCloseEvent(1000, onSocketClose);
 });
+server.listen(serverPort.center_port, serverPort.center_host);
+function onSocketClose(socket){
+	var index = socketList.indexOf(socket);
+	if(index >= 0)
+		socketList.splice(index, 1);
+}
 function onRecvPacket(socket, packet){
 	if(socketList.indexOf(socket) < 0){
+		socket.setTimeout(0);
 		socket.name = packet.toString("utf8", 2);
 		socketList.push(socket);
 		return;
@@ -32,4 +32,3 @@ function onRecvPacket(socket, packet){
 			socket.write(packet);
 	}
 }
-server.listen(serverPort.center_port, serverPort.center_host);
