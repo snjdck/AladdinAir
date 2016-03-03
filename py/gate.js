@@ -1,5 +1,6 @@
 "use strict";
 
+const serviceName = require("path").basename(__filename, ".js");
 const serverPort = require("./node_configs/serverPort");
 const net = require("net");
 const Packet = require("Packet");
@@ -21,10 +22,9 @@ const server = net.createServer(function(socket){
 	socket.readForever(forwardClientPacket);
 	socket.listenCloseEvent(90000, onClientClose);
 });
-server.listen(serverPort.gate_port, serverPort.gate_host);
-
 const centerSocket = net.connect(serverPort.center_port, serverPort.center_host, function(){
-	centerSocket.write(Packet.CreateNamePacket("gate"));
+	centerSocket.write(Packet.CreateNamePacket(serviceName));
+	server.listen(serverPort.gate_port, serverPort.gate_host);
 });
 centerSocket.readForever(function(_, packet){
 	var msgId = packet.readUInt16BE(2);
