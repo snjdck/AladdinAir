@@ -2,19 +2,21 @@
 
 const serverPort = require("./node_configs/serverPort");
 const notifyDict = require("./node_configs/notifyDict");
-const net = require("net");
 require("Socket");
-const socketList = [];
-const server = net.createServer(socket => {
+
+require("net").createServer(socket => {
 	socket.readForever(onRecvPacket);
 	socket.listenCloseEvent(1000, onSocketClose);
-});
-server.listen(serverPort.center_port, serverPort.center_host);
+}).listen(serverPort.center_port, serverPort.center_host);
+
+const socketList = [];
+
 function onSocketClose(socket){
 	var index = socketList.indexOf(socket);
 	if(index >= 0)
 		socketList.splice(index, 1);
 }
+
 function onRecvPacket(socket, packet){
 	if(socketList.indexOf(socket) < 0){
 		socket.setTimeout(0);
