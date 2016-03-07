@@ -3,7 +3,7 @@
 const serverPort = require("./node_configs/serverPort");
 require("Socket");
 
-const text = '<cross-domain-policy><allow-access-from domain="*" to-ports="*" /></cross-domain-policy>';
+const text = `<cross-domain-policy><allow-access-from domain="*" to-ports="${serverPort.gate_port}" /></cross-domain-policy>`;
 const packet = new Buffer(text);
 
 require("net").createServer(socket => {
