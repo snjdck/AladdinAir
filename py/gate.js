@@ -29,5 +29,6 @@ const centerSocket = net.connect(serverPort.center_port, serverPort.center_host,
 centerSocket.readForever(function(_, packet){
 	var msgId = packet.readUInt16BE(2);
 	var socketId = packet.readUInt16BE(4);
+	packet.writeUInt16BE(0, 4);
 	socketDict.send(socketId, packet);
 });
