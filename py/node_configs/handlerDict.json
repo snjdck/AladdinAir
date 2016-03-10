@@ -1,0 +1,7 @@
+{
+	"0": "logic_handlers.onHeartBeart",
+	"1": "logic_handlers.onClientConnect",
+	"2": "logic_handlers.onClientDisconnect",
+	"101": "logic_handlers.onTest",
+	"1001": "logic_handlers.onTest2"
+}
