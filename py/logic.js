@@ -14,8 +14,9 @@ const centerSocket = net.connect(serverPort.center_port, serverPort.center_host,
 	centerSocket.write(Packet.CreateNamePacket(serviceName));
 	centerSocket.readForever(dispatcher.dispatch.bind(dispatcher));
 	for(var msgId in handlerDict){
-		var list = handlerDict[msgId].split(".");
-		var handler = require("./node_handlers/"+list[0])[list[1]];
+		var path = handlerDict[msgId];
+		var index = path.lastIndexOf(".");
+		var handler = require(path.slice(0, index))[path.slice(index+1)];
 		dispatcher.addHandler(parseInt(msgId), handler);
 	}
 });
