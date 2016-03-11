@@ -1,7 +1,7 @@
 "use strict";
 
 const serverPort = require("./node_configs/serverPort");
-const notifyDict = require("./node_configs/notifyDict");
+const notifyDict = require("./node_configs/config").notifyDict;
 require("Socket");
 
 require("net").createServer(socket => {

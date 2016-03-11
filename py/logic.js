@@ -5,7 +5,7 @@ const serverPort = require("./node_configs/serverPort");
 const net = require("net");
 const Packet = require("Packet");
 require("Socket");
-const handlerDict = require("./node_configs/handlerDict");
+const handlerDict = require("./node_configs/config").handlerDict;
 const PacketDispatcher = require("PacketDispatcher");
 
 const dispatcher = new PacketDispatcher();

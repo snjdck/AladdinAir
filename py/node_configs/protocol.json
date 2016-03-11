@@ -1,0 +1,10 @@
+{
+	"heartbeat"			:[0,	["logic"],	"./node_handlers/logic_handlers.onHeartBeart"],
+	"client_connect"	:[1,	["logic"],	"./node_handlers/logic_handlers.onClientConnect"],
+	"client_disconnect"	:[2,	["logic"],	"./node_handlers/logic_handlers.onClientDisconnect"],
+	"test1"				:[101,	["logic"],	"./node_handlers/logic_handlers.onTest"],
+	"test1_reply"		:[102,	["gate"]],
+	"test2"				:[1001,	["logic"],	"./node_handlers/logic_handlers.onTest2"],
+	"test2_reply"		:[1002,	["gate"]],
+	"null":null
+}

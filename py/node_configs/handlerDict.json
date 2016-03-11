@@ -1,7 +1,0 @@
-{
-	"0":		"./node_handlers/logic_handlers.onHeartBeart",
-	"1":		"./node_handlers/logic_handlers.onClientConnect",
-	"2":		"./node_handlers/logic_handlers.onClientDisconnect",
-	"101":		"./node_handlers/logic_handlers.onTest",
-	"1001": 	"./node_handlers/logic_handlers.onTest2"
-}
