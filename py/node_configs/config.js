@@ -1,5 +1,15 @@
 "use strict";
 
+const Socket = require("net").Socket;
+const Packet = require("Packet");
+
+Socket.prototype.sendPacketByName = function(msgName, usrId, msgData){
+	if(msgName in nameDict)
+		this.sendPacket(nameDict[msgName], usrId, msgData);
+	else
+		console.error(`msgName "${msgName}" not exist!`);
+};
+
 const config = require("./protocol");
 
 const handlerDict = [];

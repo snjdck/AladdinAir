@@ -2,6 +2,7 @@
 	"heartbeat"			:[0,	["logic"],	"./node_handlers/logic_handlers.onHeartBeart"],
 	"client_connect"	:[1,	["logic"],	"./node_handlers/logic_handlers.onClientConnect"],
 	"client_disconnect"	:[2,	["logic"],	"./node_handlers/logic_handlers.onClientDisconnect"],
+	"force_client_off"	:[10,	["gate"]],
 	"test1"				:[101,	["logic"],	"./node_handlers/logic_handlers.onTest"],
 	"test1_reply"		:[102,	["gate"]],
 	"test2"				:[1001,	["logic"],	"./node_handlers/logic_handlers.onTest2"],

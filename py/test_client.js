@@ -9,6 +9,9 @@ const socket = net.connect(serverPort.gate_port, serverPort.gate_host, function(
 	socket.readForever((_, packet) => {
 		console.log(packet);
 	});
+	socket.on("error", function(err){
+		console.error(err);
+	});
 	var packet = Packet.CreatePacket(101, 0);
 	setInterval(function(){
 		socket.write(packet);
