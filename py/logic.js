@@ -16,10 +16,6 @@ const centerSocket = net.connect(serverPort.center_port, serverPort.center_host,
 	for(var msgId in handlerDict){
 		var list = handlerDict[msgId].split(".");
 		var handler = require("./node_handlers/"+list[0])[list[1]];
-		if(null == handler){
-			console.error("handler not set:" + msgId);
-			continue;
-		}
-		dispatcher.addHandler(parseInt(msgId), handler.bind(centerSocket));
+		dispatcher.addHandler(parseInt(msgId), handler);
 	}
 });
