@@ -86,6 +86,8 @@ package blockly.runtime
 		
 		public function resume():void
 		{
+			if(needCheckStack)
+				assert(sp == sc);
 			_isSuspend = false;
 			suspendUpdater = null;
 		}
@@ -97,6 +99,8 @@ package blockly.runtime
 		
 		public function push(value:Object):void
 		{
+			if(needCheckStack && sp >= sc)
+				return;
 			valueStack[sp++] = value;
 		}
 		
