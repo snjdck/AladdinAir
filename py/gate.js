@@ -13,8 +13,8 @@ function onClientClose(socket){
 	centerSocket.sendPacketByName("client_disconnect", socket.uid);
 	socketDict.remove(socket);
 }
-function forwardClientPacket(socket, packet){
-	packet.writeUInt16BE(socket.uid, 4);
+function forwardClientPacket(packet){
+	packet.writeUInt16BE(this.uid, 4);
 	centerSocket.write(packet);
 }
 const server = net.createServer(function(socket){
@@ -27,7 +27,7 @@ const centerSocket = net.connect(serverPort.center_port, serverPort.center_host,
 	centerSocket.write(Packet.CreateNamePacket(serviceName));
 	server.listen(serverPort.gate_port, serverPort.gate_host);
 });
-centerSocket.readForever(function(_, packet){
+centerSocket.readForever(packet => {
 	var msgId = packet.readUInt16BE(2);
 	var usrId = packet.readUInt16BE(4);
 	var socket = socketDict.findById(usrId);

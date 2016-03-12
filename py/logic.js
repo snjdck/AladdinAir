@@ -12,7 +12,9 @@ const dispatcher = new PacketDispatcher();
 
 const centerSocket = net.connect(serverPort.center_port, serverPort.center_host, function(){
 	centerSocket.write(Packet.CreateNamePacket(serviceName));
-	centerSocket.readForever(dispatcher.dispatch.bind(dispatcher));
+	centerSocket.readForever(packet => {
+		dispatcher.dispatch(centerSocket, packet);
+	});
 	for(var msgId in handlerDict){
 		var path = handlerDict[msgId];
 		var index = path.lastIndexOf(".");

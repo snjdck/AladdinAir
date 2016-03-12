@@ -17,11 +17,11 @@ function onSocketClose(socket){
 		socketList.splice(index, 1);
 }
 
-function onRecvPacket(socket, packet){
-	if(socketList.indexOf(socket) < 0){
-		socket.setTimeout(0);
-		socket.name = packet.toString("utf8", 2);
-		socketList.push(socket);
+function onRecvPacket(packet){
+	if(socketList.indexOf(this) < 0){
+		this.setTimeout(0);
+		this.name = packet.toString("utf8", 2);
+		socketList.push(this);
 		return;
 	}
 	var msgId = packet.readUInt16BE(2);
@@ -29,7 +29,7 @@ function onRecvPacket(socket, packet){
 	if(handlerList == null || handlerList.length <= 0)
 		return;
 	for(var i=socketList.length-1; i>=0; --i){
-		socket = socketList[i];
+		var socket = socketList[i];
 		if(handlerList.indexOf(socket.name) >= 0)
 			socket.write(packet);
 	}
