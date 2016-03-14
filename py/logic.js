@@ -7,7 +7,9 @@ const Packet = require("Packet");
 require("Socket");
 const handlerDict = require("./node_configs/config").handlerDict;
 const PacketDispatcher = require("PacketDispatcher");
+const ClientMgr = require("ClientMgr");
 
+global.clientMgr = new ClientMgr();
 const dispatcher = new PacketDispatcher();
 
 const centerSocket = net.connect(serverPort.center_port, serverPort.center_host, function(){
