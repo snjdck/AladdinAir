@@ -9,14 +9,11 @@ const handlerDict = require("./node_configs/config").handlerDict;
 const PacketDispatcher = require("PacketDispatcher");
 const ClientMgr = require("ClientMgr");
 
-global.clientMgr = new ClientMgr();
 const dispatcher = new PacketDispatcher();
 
-const centerSocket = net.connect(serverPort.center_port, serverPort.center_host, function(){
-	centerSocket.write(Packet.CreateNamePacket(serviceName));
-	centerSocket.readForever(packet => {
-		dispatcher.dispatch(centerSocket, packet);
-	});
+const socket = net.connect(serverPort.center_port, serverPort.center_host, function(){
+	socket.write(Packet.CreateNamePacket(serviceName));
+	socket.readForever(dispatcher.dispatch.bind(dispatcher));
 	for(var msgId in handlerDict){
 		var path = handlerDict[msgId];
 		var index = path.lastIndexOf(".");
@@ -24,3 +21,5 @@ const centerSocket = net.connect(serverPort.center_port, serverPort.center_host,
 		dispatcher.addHandler(parseInt(msgId), handler);
 	}
 });
+global.clientMgr = new ClientMgr();
+global.socket = socket;

@@ -16,7 +16,7 @@ exports.onClientDisconnect = function(usrId, msgData){
 };
 
 exports.onTest = function(usrId, msgData){
-	this.sendPacketByName("test1_reply", usrId);
+	global.socket.sendPacketByName("test1_reply", usrId);
 	/*
 	setTimeout(() => {
 		this.write(Packet.CreatePacket(nameDict["force_client_off"], usrId));
