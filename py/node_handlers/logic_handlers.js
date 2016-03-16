@@ -1,8 +1,5 @@
 "use strict";
 
-const Packet = require("Packet");
-const nameDict = require("../node_configs/config").nameDict;
-
 exports.onHeartBeart = function(usrId, msgData){
 	console.log("heart beat");
 };
