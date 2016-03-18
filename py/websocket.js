@@ -7,6 +7,7 @@ const server = new http.Server();
 server.listen(8081, "127.0.0.1");
 
 server.on("upgrade", function(request, socket, head){
+	console.log(request.url, request.headers);
 	if(request.method != "GET"){
 		return;
 	}
@@ -43,7 +44,7 @@ function handleSockRecv(socket){
 			const byte2 = buffer.readUInt8(begin+1);
 
 			const finFlag	= byte1 >> 7 == 1;
-			const opCode	= byte1 & 0x7F;
+			const opCode	= byte1 & 0xF;
 			const hasMask	= byte2 >> 7 == 1;
 			var payloadLen	= byte2 & 0x7F;
 			
@@ -86,6 +87,8 @@ function handleSockRecv(socket){
 function parsePayload(socket, opCode, buffer, begin, payloadLen){
 	var payload = null;
 	switch(opCode){
+		case 0:
+			break;
 		case 1://text
 			payload = buffer.toString("utf8", begin, begin+payloadLen);
 			break;
@@ -94,7 +97,51 @@ function parsePayload(socket, opCode, buffer, begin, payloadLen){
 			break;
 		case 8://close
 			console.log("close reason:", buffer.readUInt16BE(begin));
+			return;
+		case 9://ping
+			break;
+		case 10://pong
 			break;
 	}
 	console.log(payload);
+	socket.write(reply("reply:" + payload));
+}
+
+function reply(data){
+	const isBuffer = Buffer.isBuffer(data);
+	var opCode;
+	var payloadLen;
+	var packetLen;
+	if(isBuffer){
+		opCode = 2;
+		payloadLen = data.length;
+	}else{
+		opCode = 1;
+		payloadLen = Buffer.byteLength(data);
+	}
+	if(payloadLen < 126){
+		packetLen = 2 + payloadLen;
+	}else if(payloadLen < 0x10000){
+		packetLen = 4 + payloadLen;
+	}else{
+		packetLen = 10 + payloadLen;
+	}
+	const packet = new Buffer(packetLen);
+	packet.writeUInt8(0x80 | opCode, 0);
+	if(payloadLen < 126){
+		packet.writeUInt8(payloadLen, 1);
+	}else if(payloadLen < 0x10000){
+		packet.writeUInt8(126, 1);
+		packet.writeUInt16BE(payloadLen, 2);
+	}else{
+		packet.writeUInt8(127, 1);
+		packet.writeUInt32BE(0, 2);
+		packet.writeUInt32BE(payloadLen, 6);
+	}
+	if(isBuffer){
+		data.copy(packet, packetLen - payloadLen);
+	}else{
+		packet.write(data, packetLen - payloadLen);
+	}
+	return packet;
 }

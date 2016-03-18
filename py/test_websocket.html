@@ -1,12 +1,15 @@
 <html>
 <head>
 	<script type="text/javascript">
-	var socket = new WebSocket('ws://127.0.0.1:8081');
+	var socket = new WebSocket('ws://127.0.0.1:8081/chat');
 	socket.onopen = function(){
 		console.log("open");
 		socket.send('I am the client and I\'m listening!');
 		socket.onmessage = function(event) { 
-    		console.log('Client received a message',event); 
+    		console.log('Client received a message',event.data);
+    		setTimeout(function(){
+    			socket.send('I am the client and I\'m listening!');
+    		}, 1000);
 		};
 		socket.onclose = function(event){
 			console.log('Client notified socket has closed',event);
