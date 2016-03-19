@@ -14,12 +14,7 @@ server.listen(8888);
 
 server.on("request", function(request, response){
 	console.log(request.url);
-	var ext = path.extname(request.url).slice(1);
-	console.log(ext);
-	var ContentType = "text/html";
-	if(ext in mime){
-		ContentType = mime[ext];
-	}
+	const extName = path.extname(request.url).slice(1);
 	const pathname = url.parse(request.url).pathname;
 	const filePath = docRoot + pathname;
 	fs.readFile(filePath, function(err, data){
@@ -27,12 +22,16 @@ server.on("request", function(request, response){
 			response.endWithError(404);
 			return;
 		}
-		response.setHeader('Content-Type', ContentType);
+		response.setHeader('Content-Type', findContentType(extName));
 		response.setHeader('Content-Length', data.length);
 		response.statusCode = 200;
 		response.end(data);
 	});
 });
+
+function findContentType(extName){
+	return (extName in mime) ? mime[extName] : "unknow";
+}
 
 http.ServerResponse.prototype.endWithError = function(errorCode){
 	this.statusCode = errorCode;
