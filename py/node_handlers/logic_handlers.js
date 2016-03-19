@@ -12,6 +12,10 @@ exports.onClientDisconnect = function(usrId, msgData){
 	console.log("disconnect");
 };
 
+exports.onClientLogin = function(usrId, msgData){
+	console.log("login");
+};
+
 exports.onTest = function(usrId, msgData){
 	global.socket.sendPacketByName("test1_reply", usrId);
 	/*
