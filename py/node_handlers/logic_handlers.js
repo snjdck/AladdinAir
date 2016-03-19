@@ -1,23 +1,24 @@
 "use strict";
 
-exports.onHeartBeart = function(usrId, msgData){
+exports.onHeartBeart = function(packet){
 	console.log("heart beat");
 };
 
-exports.onClientConnect = function(usrId, msgData){
+exports.onClientConnect = function(packet){
 	console.log("connect");
+	console.log(JSON.stringify(packet));
 };
 
-exports.onClientDisconnect = function(usrId, msgData){
+exports.onClientDisconnect = function(packet){
 	console.log("disconnect");
 };
 
-exports.onClientLogin = function(usrId, msgData){
+exports.onClientLogin = function(packet){
 	console.log("login");
 };
 
-exports.onTest = function(usrId, msgData){
-	global.socket.sendPacketByName("test1_reply", usrId);
+exports.onTest = function(packet){
+	global.socket.sendPacketByName("test1_reply", packet.usrId);
 	/*
 	setTimeout(() => {
 		this.write(Packet.CreatePacket(nameDict["force_client_off"], usrId));
@@ -25,7 +26,7 @@ exports.onTest = function(usrId, msgData){
 */
 };
 
-exports.onTest2 = function(usrId, msgData){
+exports.onTest2 = function(packet){
 	/*
 	var packet = new Buffer(6);
 	packet.writeUInt16BE(packet.length);

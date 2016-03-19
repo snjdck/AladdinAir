@@ -20,18 +20,18 @@ dispatcher.addHandler(nameDict["client_register"],			onRegister);
 dispatcher.addHandler(nameDict["client_login"],				onLogin);
 dispatcher.addHandler(nameDict["client_check_name_valid"],	onCheckNameValid);
 
-function onRegister(usrId, msgData){
-	socket.sendPacketByName("client_register_reply", usrId, {result:true});
+function onRegister(packet){
+	socket.sendPacketByName("client_register_reply", packet.usrId, {result:true});
 }
 
-function onLogin(usrId, msgData){
+function onLogin(packet){
 	if(false){
-		socket.sendPacketByName("client_login_notify", usrId);
+		socket.sendPacketByName("client_login_notify", packet.usrId);
 	}else{
-		socket.sendPacketByName("client_login_reply", usrId, {result:false});
+		socket.sendPacketByName("client_login_reply", packet.usrId, {result:false});
 	}
 }
 
-function onCheckNameValid(usrId, msgData){
-	socket.sendPacketByName("client_check_name_valid_reply", usrId, {result:true});
+function onCheckNameValid(packet){
+	socket.sendPacketByName("client_check_name_valid_reply", packet.usrId, {result:true});
 }
