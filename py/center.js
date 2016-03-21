@@ -1,8 +1,9 @@
 "use strict";
 
 const serverPort = require("./node_configs/serverPort");
-const notifyDict = require("./node_configs/config").notifyDict;
+const nameDict = require("./node_configs/serverId").nameDict;
 const Packet = require("Packet");
+const assert = require('assert');
 require("Socket");
 
 require("net").createServer(socket => {
@@ -13,25 +14,26 @@ require("net").createServer(socket => {
 const socketList = [];
 
 function onSocketClose(socket){
-	var index = socketList.indexOf(socket);
-	if(index >= 0)
-		socketList.splice(index, 1);
+	if(socketList.indexOf(socket) >= 0)
+		socketList[socket.id] = null;
 }
 
 function onRecvPacket(packet){
 	if(socketList.indexOf(this) < 0){
 		this.setTimeout(0);
-		this.name = packet.toString("utf8", 2);
-		socketList.push(this);
+		var name = packet.toString("utf8", 2);
+		this.id = nameDict[name];
+		console.log(`${name}\t\t${this.id}`);
+		assert(this.id > 0 && socketList[this.id] == null);
+		socketList[this.id] = this;
 		return;
 	}
-	var msgId = Packet.ReadMsgId(packet);
-	var handlerList = notifyDict[msgId];
-	if(handlerList == null || handlerList.length <= 0)
-		return;
-	for(var i=socketList.length-1; i>=0; --i){
-		var socket = socketList[i];
-		if(handlerList.indexOf(socket.name) >= 0)
-			socket.write(packet);
+	var svrId = Packet.ReadSvrId(packet);
+	var socket = socketList[svrId];
+	if(socket != null){
+		Packet.WriteSvrId(packet, this.id);
+		socket.write(packet);
+	}else{
+		console.log(this.id, "dispatch failed!");
 	}
 }

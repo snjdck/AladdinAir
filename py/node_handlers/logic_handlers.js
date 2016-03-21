@@ -18,7 +18,7 @@ exports.onClientLogin = function(packet){
 };
 
 exports.onTest = function(packet){
-	global.socket.sendPacketByName("test1_reply", packet.usrId);
+	global.socket.sendPacketByName("test1_reply", packet.usrId, packet.svrId);
 	/*
 	setTimeout(() => {
 		this.write(Packet.CreatePacket(nameDict["force_client_off"], usrId));
