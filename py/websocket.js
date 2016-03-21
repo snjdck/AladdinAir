@@ -1,12 +1,36 @@
 "use strict";
 
+const EventEmitter = require('events');
 const http = require("http");
 const crypto = require('crypto');
 
-const server = new http.Server();
-server.listen(8081, "127.0.0.1");
+class WebSocketClient extends EventEmitter
+{
+	constructor(socket){
+		super();
+		this.socket = socket;
+		handleSockRecv.call(this, socket);
+	}
 
-server.on("upgrade", function(request, socket, head){
+	write(data){
+		this.socket.write(createPacket(data));
+	}
+}
+
+class WebSocketServer extends EventEmitter
+{
+	constructor(){
+		super();
+		this.server = new http.Server();
+		this.server.on("upgrade", onUpgrade.bind(this));
+	}
+
+	listen(port, host){
+		this.server.listen(port, host || "127.0.0.1");
+	}
+}
+
+function onUpgrade(request, socket, head){
 	console.log(request.url, request.headers);
 	if(request.method != "GET"){
 		return;
@@ -25,14 +49,14 @@ server.on("upgrade", function(request, socket, head){
 	responseText += "\r\n";
 
 	socket.write(responseText);
-	handleSockRecv(socket);
-});
+	this.emit("connection", new WebSocketClient(socket));
+}
 
 function handleSockRecv(socket){
 	const mask = new Array(4);
 	var buffer = new Buffer(0);
 	var begin = 0;
-	socket.on("data", function(chunk){
+	socket.on("data", chunk => {
 		console.log(chunk);
 		const end = buffer.length + chunk.length;
 		buffer = Buffer.concat([buffer, chunk], end);
@@ -74,7 +98,7 @@ function handleSockRecv(socket){
 					break;
 				begin += offset;
 			}
-			parsePayload(socket, opCode, buffer, begin, payloadLen);
+			parsePayload.call(this, socket, opCode, buffer, begin, payloadLen);
 			begin += payloadLen;
 		}
 		if(begin > 0){
@@ -96,18 +120,19 @@ function parsePayload(socket, opCode, buffer, begin, payloadLen){
 			payload = buffer.slice(begin, begin+payloadLen);
 			break;
 		case 8://close
-			console.log("close reason:", buffer.readUInt16BE(begin));
+			this.emit("close", buffer.readUInt16BE(begin));
 			return;
 		case 9://ping
 			break;
 		case 10://pong
 			break;
+		default:
+			return;
 	}
-	console.log(payload);
-	socket.write(reply("reply:" + payload));
+	this.emit("data", payload);
 }
 
-function reply(data){
+function createPacket(data){
 	const isBuffer = Buffer.isBuffer(data);
 	var opCode;
 	var payloadLen;
@@ -145,3 +170,5 @@ function reply(data){
 	}
 	return packet;
 }
+
+module.exports = {WebSocketServer, WebSocketClient};
