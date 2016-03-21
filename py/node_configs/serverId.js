@@ -1,5 +1,8 @@
 "use strict";
 
+const Socket = require("net").Socket;
+const assert = require("assert");
+
 const idDict = [];
 const nameDict = {
 	heartbeat	: 1,
@@ -10,7 +13,11 @@ const nameDict = {
 };
 
 for(var name in nameDict){
-	idDict[nameDict[name]] = name;
+	let id = nameDict[name];
+	idDict[id] = name;
+	Socket.prototype[`send_to_${name}`] = function(msgName, usrId, msgData){
+		this.sendPacketByName(msgName, usrId, id, msgData);
+	};
 }
 
 exports.idDict = idDict;

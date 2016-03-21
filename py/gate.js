@@ -10,7 +10,7 @@ const SocketDict = require("SocketDict");
 const socketDict = new SocketDict();
 
 function onClientClose(socket){
-	centerSocket.sendPacketByName("client_disconnect", socket.uid, "logic");
+	centerSocket.send_to_logic("client_disconnect", socket.uid);
 	socketDict.remove(socket);
 }
 function forwardClientPacket(packet){
@@ -21,7 +21,7 @@ function forwardClientPacket(packet){
 }
 const server = net.createServer(function(socket){
 	socketDict.add(socket);
-	centerSocket.sendPacketByName("client_connect", socket.uid, "logic");
+	centerSocket.send_to_logic("client_connect", socket.uid);
 	socket.readForever(forwardClientPacket);
 	socket.listenCloseEvent(90000, onClientClose);
 });
