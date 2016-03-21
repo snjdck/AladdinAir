@@ -14,7 +14,7 @@ function onClientClose(socket){
 	socketDict.remove(socket);
 }
 function forwardClientPacket(packet){
-	packet.writeUInt16BE(this.uid, 4);
+	Packet.WriteUsrId(packet, this.uid);
 	centerSocket.write(packet);
 }
 const server = net.createServer(function(socket){
@@ -28,8 +28,8 @@ const centerSocket = net.connect(serverPort.center_port, serverPort.center_host,
 	server.listen(serverPort.gate_port, serverPort.gate_host);
 });
 centerSocket.readForever(packet => {
-	var msgId = packet.readUInt16BE(2);
-	var usrId = packet.readUInt16BE(4);
+	var msgId = Packet.ReadMsgId(packet);
+	var usrId = Packet.ReadUsrId(packet);
 	var socket = socketDict.findById(usrId);
 	if(socket == null)
 		return;
@@ -38,7 +38,7 @@ centerSocket.readForever(packet => {
 			socket.destroy();
 			break;
 		default:
-			packet.writeUInt16BE(0, 4);
+			Packet.WriteUsrId(packet, 0);
 			socket.write(packet);
 	}
 });

@@ -2,6 +2,7 @@
 
 const serverPort = require("./node_configs/serverPort");
 const notifyDict = require("./node_configs/config").notifyDict;
+const Packet = require("Packet");
 require("Socket");
 
 require("net").createServer(socket => {
@@ -24,7 +25,7 @@ function onRecvPacket(packet){
 		socketList.push(this);
 		return;
 	}
-	var msgId = packet.readUInt16BE(2);
+	var msgId = Packet.ReadMsgId(packet);
 	var handlerList = notifyDict[msgId];
 	if(handlerList == null || handlerList.length <= 0)
 		return;
