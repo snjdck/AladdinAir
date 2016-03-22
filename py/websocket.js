@@ -62,8 +62,7 @@ function handleSockRecv(){
 		const end = buffer.length + chunk.length;
 		buffer = Buffer.concat([buffer, chunk], end);
 		for(;;){
-			var offset = 2;
-			if(end - begin < offset)
+			if(end - begin < 2)
 				break;
 			const byte1 = buffer.readUInt8(begin);
 			const byte2 = buffer.readUInt8(begin+1);
@@ -72,29 +71,18 @@ function handleSockRecv(){
 			const opCode	= byte1 & 0xF;
 			const hasMask	= byte2 >> 7 == 1;
 			var payloadLen	= byte2 & 0x7F;
-			
-			if(payloadLen == 126){
-				offset += 2;
-				if(end - begin < offset)
-					break;
-				payloadLen = buffer.readUInt16BE(begin+2);
-			}else if(payloadLen == 127){
-				offset += 8;
-				if(end - begin < offset)
-					break;
-				payloadLen = buffer.readUInt32BE(begin+6);
-			}
+
+			const headLen = calcHeadLen(hasMask, payloadLen);
+			if(end - begin < headLen)
+				break;
+			payloadLen = readPayloadLen(buffer, payloadLen, begin);
+			if(end - begin < headLen + payloadLen)
+				break;
+			begin += headLen;
+
 			if(hasMask){
-				if(end - begin < offset + 4 + payloadLen)
-					break;
-				begin += offset;
-				readMask(buffer, begin);
-				begin += 4;
+				readMask(buffer, begin - 4);
 				decodePayload(buffer, begin, payloadLen);
-			}else{
-				if(end - begin < offset + payloadLen)
-					break;
-				begin += offset;
 			}
 			parsePayload.call(this, opCode, buffer, begin, payloadLen);
 			begin += payloadLen;
@@ -146,12 +134,36 @@ function decodePayload(packet, offset, payloadLen){
 	}
 }
 
-function calcPacketLen(payloadLen){
+function calcHeadLen(hasMask, payloadLen){
+	var headLen;
 	if(payloadLen < 126)
-		return 2 + payloadLen;
-	if(payloadLen < 0x10000)
-		return 4 + payloadLen;
-	return 10 + payloadLen;
+		headLen = 2;
+	else if(payloadLen == 126)
+		headLen = 4;
+	else
+		headLen = 10;
+	if(hasMask)
+		headLen += 4;
+	return headLen;
+}
+
+function calcPacketLen(payloadLen, hasMask){
+	var packetLen;
+	if(payloadLen < 126)
+		packetLen = 2 + payloadLen;
+	else if(payloadLen < 0x10000)
+		packetLen = 4 + payloadLen;
+	else
+		packetLen = 10 + payloadLen;
+	if(hasMask)
+		packetLen += 4;
+	return packetLen;
+}
+
+function readPayloadLen(packet, payloadLen, offset){
+	if(payloadLen <  126)	return payloadLen;
+	if(payloadLen == 126)	return packet.readUInt16BE(offset+2);
+	return packet.readUInt32BE(offset+6);
 }
 
 function writePayloadLen(packet, payloadLen){
