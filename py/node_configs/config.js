@@ -1,24 +1,10 @@
 "use strict";
 
+const serverNameDict = require("./serverId").nameDict;
+const config = require("./protocol");
 const Socket = require("net").Socket;
 const Packet = require("Packet");
-const serverNameDict = require("./serverId").nameDict;
 const assert = require("assert");
-
-Socket.prototype.sendPacketByName = function(msgName, usrId, svrName, msgData){
-	assert(msgName in nameDict,	`msgName "${msgName}" not exist!`);
-	var svrId;
-	if(typeof svrName == "string"){
-		assert(svrName in serverNameDict, `serverName "${svrName}" not exist!`);
-		svrId = serverNameDict[svrName];
-	}else{
-		svrId = svrName;
-	}
-	
-	this.sendPacket(nameDict[msgName], usrId, svrId, msgData);
-};
-
-const config = require("./protocol");
 
 const handlerDict = [];
 const notifyDict = [];
@@ -46,3 +32,24 @@ exports.notifyDict = notifyDict;
 exports.idDict = idDict;
 exports.nameDict = nameDict;
 exports.clientMsgIdList = clientMsgIdList;
+
+
+function castMsgId(msgId){
+	if(typeof msgId == "string"){
+		assert(msgId in nameDict, `msgName "${msgId}" not exist!`);
+		msgId = nameDict[msgId];
+	}
+	return msgId;
+}
+
+function castSvrId(svrId){
+	if(typeof svrId == "string"){
+		assert(svrId in serverNameDict, `serverName "${svrId}" not exist!`);
+		svrId = serverNameDict[svrId];
+	}
+	return svrId;
+}
+
+Socket.prototype.sendPacket = function(msgId, usrId, svrId, msgData){
+	this.write(Packet.CreatePacket(castMsgId(msgId), usrId, castSvrId(svrId), msgData));
+};

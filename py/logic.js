@@ -23,3 +23,4 @@ const socket = net.connect(serverPort.center_port, serverPort.center_host, funct
 });
 global.clientMgr = new ClientMgr();
 global.socket = socket;
+global.createPacket = socket.createPacket.bind(socket);

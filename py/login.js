@@ -21,17 +21,17 @@ dispatcher.addHandler(nameDict["client_login"],				onLogin);
 dispatcher.addHandler(nameDict["client_check_name_valid"],	onCheckNameValid);
 
 function onRegister(packet){
-	socket.sendPacketByName("client_register_reply", packet.usrId, packet.svrId, {result:true});
+	socket.createPacket("client_register_reply", {result:true}).forward(packet);
 }
 
 function onLogin(packet){
 	if(false){
-		socket.sendPacketByName("client_login_notify", packet.usrId, "logic");
+		socket.createPacket("client_login_notify").sendTo("logic", packet.usrId);
 	}else{
-		socket.sendPacketByName("client_login_reply", packet.usrId, packet.svrId, {result:false});
+		socket.createPacket("client_login_reply", {result:true}).forward(packet);
 	}
 }
 
 function onCheckNameValid(packet){
-	socket.sendPacketByName("client_check_name_valid_reply", packet.usrId, packet.svrId, {result:true});
+	socket.createPacket("client_check_name_valid_reply", {result:true}).forward(packet);
 }
