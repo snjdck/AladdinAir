@@ -82,18 +82,15 @@ function handleSockRecv(){
 				offset += 8;
 				if(end - begin < offset)
 					break;
-				payloadLen = (buffer.readUInt32BE(begin+2) << 32) | buffer.readUInt32BE(begin+6);
+				payloadLen = buffer.readUInt32BE(begin+6);
 			}
 			if(hasMask){
 				if(end - begin < offset + 4 + payloadLen)
 					break;
 				begin += offset;
-				for(var i=0; i<4; ++i)
-					mask[i] = buffer.readUInt8(begin++);
-				for(var i=0; i<payloadLen; ++i){
-					var index = begin + i;
-					buffer.writeUInt8(buffer.readUInt8(index) ^ mask[i % 4], index);
-				}
+				readMask(buffer, begin);
+				begin += 4;
+				decodePayload(buffer, begin, payloadLen);
 			}else{
 				if(end - begin < offset + payloadLen)
 					break;
@@ -134,27 +131,30 @@ function parsePayload(opCode, buffer, begin, payloadLen){
 	
 }
 
-function createPacket(data){
-	const isBuffer = Buffer.isBuffer(data);
-	var opCode;
-	var payloadLen;
-	var packetLen;
-	if(isBuffer){
-		opCode = 2;
-		payloadLen = data.length;
-	}else{
-		opCode = 1;
-		payloadLen = Buffer.byteLength(data);
+function readMask(packet, offset){
+	for(var i=0; i<4; ++i){
+		mask[i] = packet.readUInt8(offset+i);
 	}
-	if(payloadLen < 126){
-		packetLen = 2 + payloadLen;
-	}else if(payloadLen < 0x10000){
-		packetLen = 4 + payloadLen;
-	}else{
-		packetLen = 10 + payloadLen;
+}
+
+function decodePayload(packet, offset, payloadLen){
+	for(var i=0; i<payloadLen; ++i){
+		var index = offset + i;
+		var value = packet.readUInt8(index);
+		value ^= mask[i % 4];
+		packet.writeUInt8(value, index);
 	}
-	const packet = new Buffer(packetLen);
-	packet.writeUInt8(0x80 | opCode, 0);
+}
+
+function calcPacketLen(payloadLen){
+	if(payloadLen < 126)
+		return 2 + payloadLen;
+	if(payloadLen < 0x10000)
+		return 4 + payloadLen;
+	return 10 + payloadLen;
+}
+
+function writePayloadLen(packet, payloadLen){
 	if(payloadLen < 126){
 		packet.writeUInt8(payloadLen, 1);
 	}else if(payloadLen < 0x10000){
@@ -165,6 +165,22 @@ function createPacket(data){
 		packet.writeUInt32BE(0, 2);
 		packet.writeUInt32BE(payloadLen, 6);
 	}
+}
+
+function createPacket(data){
+	const isBuffer = Buffer.isBuffer(data);
+	var opCode, payloadLen;
+	if(isBuffer){
+		opCode = 2;
+		payloadLen = data.length;
+	}else{
+		opCode = 1;
+		payloadLen = Buffer.byteLength(data);
+	}
+	const packetLen = calcPacketLen(payloadLen);
+	const packet = new Buffer(packetLen);
+	packet.writeUInt8(0x80 | opCode, 0);
+	writePayloadLen(packet, payloadLen);
 	if(isBuffer){
 		data.copy(packet, packetLen - payloadLen);
 	}else{
