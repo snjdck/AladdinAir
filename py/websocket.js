@@ -4,12 +4,14 @@ const EventEmitter = require('events');
 const http = require("http");
 const crypto = require('crypto');
 
+const mask = new Array(4);
+
 class WebSocketClient extends EventEmitter
 {
 	constructor(socket){
 		super();
 		this.socket = socket;
-		handleSockRecv.call(this, socket);
+		handleSockRecv.call(this);
 	}
 
 	write(data){
@@ -52,11 +54,10 @@ function onUpgrade(request, socket, head){
 	this.emit("connection", new WebSocketClient(socket));
 }
 
-function handleSockRecv(socket){
-	const mask = new Array(4);
+function handleSockRecv(){
 	var buffer = new Buffer(0);
 	var begin = 0;
-	socket.on("data", chunk => {
+	this.socket.on("data", chunk => {
 		console.log(chunk);
 		const end = buffer.length + chunk.length;
 		buffer = Buffer.concat([buffer, chunk], end);
@@ -98,7 +99,7 @@ function handleSockRecv(socket){
 					break;
 				begin += offset;
 			}
-			parsePayload.call(this, socket, opCode, buffer, begin, payloadLen);
+			parsePayload.call(this, opCode, buffer, begin, payloadLen);
 			begin += payloadLen;
 		}
 		if(begin > 0){
@@ -108,28 +109,29 @@ function handleSockRecv(socket){
 	});
 }
 
-function parsePayload(socket, opCode, buffer, begin, payloadLen){
-	var payload = null;
+function parsePayload(opCode, buffer, begin, payloadLen){
 	switch(opCode){
 		case 0:
 			break;
 		case 1://text
-			payload = buffer.toString("utf8", begin, begin+payloadLen);
+			var payload = buffer.toString("utf8", begin, begin+payloadLen);
+			this.emit("data", payload);
 			break;
 		case 2://binary
-			payload = buffer.slice(begin, begin+payloadLen);
+			var payload = buffer.slice(begin, begin+payloadLen);
+			this.emit("data", payload);
 			break;
 		case 8://close
 			this.emit("close", buffer.readUInt16BE(begin));
-			return;
+			break;
 		case 9://ping
 			break;
 		case 10://pong
 			break;
 		default:
-			return;
+			break;
 	}
-	this.emit("data", payload);
+	
 }
 
 function createPacket(data){
