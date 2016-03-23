@@ -1,11 +1,14 @@
 "use strict";
 
+const assert = require("assert");
 const basename = require("path").basename;
+const net = require("net");
+require("Socket");
+const PacketDispatcher = require("PacketDispatcher");
+const Packet = require("Packet");
+const serverPort = require("./serverPort");
 const serverNameDict = require("./serverId").nameDict;
 const config = require("./protocol");
-const Socket = require("net").Socket;
-const Packet = require("Packet");
-const assert = require("assert");
 
 const notifyDict = [];
 const idDict = [];
@@ -30,8 +33,22 @@ exports.idDict = idDict;
 exports.nameDict = nameDict;
 exports.clientMsgIdList = clientMsgIdList;
 
-exports.registerHandlers = function(dispatcher, module){
-	var svrName = basename(module.filename, ".js");
+function getSvrName(module){
+	return basename(module.filename, ".js");
+}
+
+exports.connectCenterServer = function(module){
+	var dispatcher = new PacketDispatcher();
+	registerHandlers(dispatcher, module);
+	var socket = net.connect(serverPort.center_port, serverPort.center_host, function(){
+		socket.write(Packet.CreateNamePacket(getSvrName(module)));
+		socket.readForever(dispatcher.dispatch.bind(dispatcher));
+	});
+	global.createPacket = socket.createPacket.bind(socket);
+}
+
+function registerHandlers(dispatcher, module){
+	var svrName = getSvrName(module);
 	for(var key in config){
 		var info = config[key];
 		if(info == null || info.dest != svrName)
@@ -42,7 +59,6 @@ exports.registerHandlers = function(dispatcher, module){
 		dispatcher.addHandler(info.id, handler);
 	}
 }
-
 
 function castMsgId(msgId){
 	if(typeof msgId == "string"){
@@ -60,6 +76,6 @@ function castSvrId(svrId){
 	return svrId;
 }
 
-Socket.prototype.sendPacket = function(msgId, usrId, svrId, msgData){
+net.Socket.prototype.sendPacket = function(msgId, usrId, svrId, msgData){
 	this.write(Packet.CreatePacket(castMsgId(msgId), usrId, castSvrId(svrId), msgData));
 };

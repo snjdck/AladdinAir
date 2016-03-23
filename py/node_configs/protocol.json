@@ -14,5 +14,6 @@
 	"test1_reply"						:{"id":102,		"type":"s2c",	"dest":"gate"},
 	"test2"								:{"id":1001,	"type":"c2s",	"dest":"logic",		"handler":"./node_handlers/logic_handlers.onTest2"},
 	"test2_reply"						:{"id":1002,	"type":"s2c",	"dest":"gate"},
+	"db_test"							:{"id":2001,	"type":"s2s",	"dest":"db",		"handler":"./node_handlers/db_handlers.onTest"},
 	"null":null
 }

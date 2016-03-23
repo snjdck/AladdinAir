@@ -4,5 +4,6 @@
 	"center_host":"127.0.0.1",
 	"center_port":7410,
 	"db_host":"127.0.0.1",
-	"db_port":7000
+	"db_port":7000,
+	"db_url":"mongodb://127.0.0.1:27017/test"
 }

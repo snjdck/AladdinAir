@@ -19,21 +19,22 @@ function onSocketClose(socket){
 }
 
 function onRecvPacket(packet){
-	if(socketList.indexOf(this) < 0){
-		this.setTimeout(0);
-		var name = packet.toString("utf8", 2);
-		this.id = nameDict[name];
-		console.log(`${name}\t\t${this.id}`);
-		assert(this.id > 0 && socketList[this.id] == null);
-		socketList[this.id] = this;
-		return;
-	}
-	var svrId = Packet.ReadSvrId(packet);
-	var socket = socketList[svrId];
-	if(socket != null){
+	if(this.loginFlag){
+		var svrId = Packet.ReadSvrId(packet);
+		var socket = socketList[svrId];
+		if(socket == null || socket == this){
+			console.error(this.id, "dispatch failed!");
+			return;
+		}
 		Packet.WriteSvrId(packet, this.id);
 		socket.write(packet);
 	}else{
-		console.log(this.id, "dispatch failed!");
+		var name = packet.toString("utf8", 2);
+		var id = nameDict[name];
+		assert(id > 0 && socketList[id] == null);
+		socketList[id] = this;
+		this.setTimeout(0);
+		this.id = id;
+		this.loginFlag = true;
 	}
 }
