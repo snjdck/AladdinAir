@@ -58,7 +58,6 @@ function handleSockRecv(){
 	var buffer = new Buffer(0);
 	var begin = 0;
 	this.socket.on("data", chunk => {
-		console.log(chunk);
 		const end = buffer.length + chunk.length;
 		buffer = Buffer.concat([buffer, chunk], end);
 		for(;;){
@@ -67,8 +66,8 @@ function handleSockRecv(){
 			const byte1 = buffer.readUInt8(begin);
 			const byte2 = buffer.readUInt8(begin+1);
 
-			const finFlag	= byte1 >> 7 == 1;
-			const opCode	= byte1 & 0xF;
+			this.finFlag	= byte1 >> 7 == 1;
+			this.opCode		= byte1 & 0xF;
 			const hasMask	= byte2 >> 7 == 1;
 			var payloadLen	= byte2 & 0x7F;
 
@@ -84,7 +83,7 @@ function handleSockRecv(){
 				readMask(buffer, begin - 4);
 				decodePayload(buffer, begin, payloadLen);
 			}
-			parsePayload.call(this, opCode, buffer, begin, payloadLen);
+			parsePayload.call(this, buffer, begin, payloadLen);
 			begin += payloadLen;
 		}
 		if(begin > 0){
@@ -94,8 +93,8 @@ function handleSockRecv(){
 	});
 }
 
-function parsePayload(opCode, buffer, begin, payloadLen){
-	switch(opCode){
+function parsePayload(buffer, begin, payloadLen){
+	switch(this.opCode){
 		case 0:
 			break;
 		case 1://text
@@ -114,9 +113,8 @@ function parsePayload(opCode, buffer, begin, payloadLen){
 		case 10://pong
 			break;
 		default:
-			break;
+			console.error(`opCode "${opCode}" not accept!`);
 	}
-	
 }
 
 function readMask(packet, offset){
