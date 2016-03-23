@@ -1,12 +1,12 @@
 "use strict";
 
+const basename = require("path").basename;
 const serverNameDict = require("./serverId").nameDict;
 const config = require("./protocol");
 const Socket = require("net").Socket;
 const Packet = require("Packet");
 const assert = require("assert");
 
-const handlerDict = [];
 const notifyDict = [];
 const idDict = [];
 const nameDict = {};
@@ -23,15 +23,25 @@ for(var key in config){
 		clientMsgIdList[id] = serverNameDict[info.dest];
 	}
 	notifyDict[id] = [info.dest];
-	if(info.handler != null)
-		handlerDict[id] = info.handler;
 }
 
-exports.handlerDict = handlerDict;
 exports.notifyDict = notifyDict;
 exports.idDict = idDict;
 exports.nameDict = nameDict;
 exports.clientMsgIdList = clientMsgIdList;
+
+exports.registerHandlers = function(dispatcher, module){
+	var svrName = basename(module.filename, ".js");
+	for(var key in config){
+		var info = config[key];
+		if(info == null || info.dest != svrName)
+			continue;
+		var path = info.handler;
+		var index = path.lastIndexOf(".");
+		var handler = module.require(path.slice(0, index))[path.slice(index+1)];
+		dispatcher.addHandler(info.id, handler);
+	}
+}
 
 
 function castMsgId(msgId){

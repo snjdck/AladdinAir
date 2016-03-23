@@ -9,5 +9,9 @@ const nameDict = {
 	gate		: 5
 };
 
+for(var name in nameDict){
+	idDict[nameDict[name]] = name;
+}
+
 exports.idDict = idDict;
 exports.nameDict = nameDict;

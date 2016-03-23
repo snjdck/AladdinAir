@@ -18,7 +18,7 @@ exports.onClientLogin = function(packet){
 };
 
 exports.onTest = function(packet){
-	global.createPacket("test1_reply").forward(packet);
+	createPacket("test1_reply").forward(packet);
 	/*
 	setTimeout(() => {
 		this.write(Packet.CreatePacket(nameDict["force_client_off"], usrId));
