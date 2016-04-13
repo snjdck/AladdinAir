@@ -72,7 +72,11 @@ package blockly.runtime
 						break;
 					}
 					if(thread.execNextCode(instructionExector)){
-						hasActiveThread = true;
+						if(thread.needRedraw()){
+							thread.suspendUntilNextFrame();
+						}else{
+							hasActiveThread = true;
+						}
 						break;
 					}
 				}

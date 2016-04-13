@@ -34,6 +34,7 @@ package blockly.runtime
 		private var _finishFlag:Boolean;
 		private var _interruptFlag:Boolean;
 		private var _resumeOnNextFrameFlag:Boolean;
+		private var _redrawFlag:Boolean;
 		
 		public var userData:*;
 		
@@ -156,12 +157,23 @@ package blockly.runtime
 				_isSuspend = false;
 				_resumeOnNextFrameFlag = false;
 			}
+			_redrawFlag = false;
 		}
 		
 		public function suspendUntilNextFrame():void
 		{
 			_isSuspend = true;
 			_resumeOnNextFrameFlag = true;
+		}
+		
+		public function requestRedraw():void
+		{
+			_redrawFlag = true;
+		}
+		
+		public function needRedraw():Boolean
+		{
+			return _redrawFlag;
 		}
 		
 		internal function getContext():IScriptContext
