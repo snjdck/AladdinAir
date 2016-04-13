@@ -55,10 +55,8 @@ package blockly.runtime
 		private function __onJump(thread:Thread, count:int):*
 		{
 			thread.ip += count;
-			if(count < 0)
-				return true;
-			if(count == 0)
-				thread.suspendUntilNextFrame();
+			if(count <  0) return true;
+			if(count == 0) thread.suspend();
 		}
 		
 		private function __onJumpIfTrue(thread:Thread, count:int):*
