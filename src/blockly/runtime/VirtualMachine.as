@@ -59,13 +59,17 @@ package blockly.runtime
 		private function updateThreads():Boolean
 		{
 			var hasActiveThread:Boolean = false;
-			out:for(var index:int=0; index<threadList.length;){
+			var needRedraw:Boolean = false;
+			var threadCount:int = threadList.length;
+			for(var index:int=0; index<threadCount; ++index){
 				var thread:Thread = threadList[index];
 				for(;;){
 					if(thread.isFinish()){
 						threadList.splice(index, 1);
 						thread.notifyFinish();
-						continue out;
+						--threadCount;
+						--index;
+						break;
 					}
 					if(thread.isSuspend()){
 						thread.updateSuspendState();
@@ -73,16 +77,15 @@ package blockly.runtime
 					}
 					if(thread.execNextCode(instructionExector)){
 						if(thread.needRedraw()){
-							thread.suspendUntilNextFrame();
+							needRedraw = true;
 						}else{
 							hasActiveThread = true;
 						}
 						break;
 					}
 				}
-				++index;
 			}
-			return hasActiveThread;
+			return !needRedraw && hasActiveThread;
 		}
 	}
 }
