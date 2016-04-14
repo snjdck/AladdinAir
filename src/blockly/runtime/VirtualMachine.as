@@ -35,9 +35,15 @@ package blockly.runtime
 		
 		public function stopAllThreads():void
 		{
-			while(threadList.length > 0){
-				var thread:Thread = threadList.pop();
+			for each(var thread:Thread in threadList){
 				thread.interrupt();
+			}
+		}
+		
+		private function notifyFrameBeginEvent():void
+		{
+			for each(var thread:Thread in threadList){
+				thread.onFrameBegin();
 			}
 		}
 		
@@ -46,14 +52,6 @@ package blockly.runtime
 			notifyFrameBeginEvent();
 			var endTime:int = getTimer() + Thread.EXEC_TIME;
 			while(updateThreads() && getTimer() < endTime);
-		}
-		
-		private function notifyFrameBeginEvent():void
-		{
-			for(var i:int=threadList.length-1; i >= 0; --i){
-				var thread:Thread = threadList[i];
-				thread.onFrameBegin();
-			}
 		}
 		
 		private function updateThreads():Boolean
