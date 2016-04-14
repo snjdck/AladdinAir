@@ -12,6 +12,7 @@ package blockly.runtime
 	final public class Thread
 	{
 		static public var EXEC_TIME:int = 0;
+		static public var REDRAW_FLAG:Boolean = true;
 		
 		private const scopeStack:Array = [];
 		private var context:IScriptContext;
@@ -168,7 +169,9 @@ package blockly.runtime
 		
 		public function requestRedraw():void
 		{
-			_redrawFlag = true;
+			if(REDRAW_FLAG){
+				_redrawFlag = true;
+			}
 		}
 		
 		public function needRedraw():Boolean
