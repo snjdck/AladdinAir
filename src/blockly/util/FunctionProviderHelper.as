@@ -26,7 +26,6 @@ package blockly.util
 			
 			provider.register("trace", onTrace);
 			provider.register("sleep", onSleep);
-			provider.register("suspendUntilNextFrame", onSuspendUntilNextFrame);
 			provider.register("getProp", onGetProp);
 			provider.register("setProp", onSetProp);
 		}
@@ -36,7 +35,7 @@ package blockly.util
 			trace.apply(null, argList);
 		}
 		
-		static private function onSleep(thread:Thread, argList:Array):void
+		static public function onSleep(thread:Thread, argList:Array):void
 		{
 			thread.suspend();
 			thread.suspendUpdater = [_onSleep, argList[0] * 1000];
@@ -47,11 +46,6 @@ package blockly.util
 			if(thread.timeElapsedSinceSuspend >= timeout){
 				thread.resume();
 			}
-		}
-		
-		static private function onSuspendUntilNextFrame(thread:Thread, argList:Array):void
-		{
-			thread.suspendUntilNextFrame();
 		}
 		
 		static private function onGetProp(thread:Thread, argList:Array):void
