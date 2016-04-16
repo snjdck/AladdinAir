@@ -201,6 +201,16 @@ package blockly.design
 			return null == prevBlock;
 		}
 		
+		public function isFinalBlock():Boolean
+		{
+			switch(type){
+				case BLOCK_TYPE_BREAK:
+				case BLOCK_TYPE_CONTINUE:
+					return true;
+			}
+			return false;
+		}
+		
 		public function addBlockToLast(value:BlockBase):void
 		{
 			lastBlock.nextBlock = value;
@@ -345,13 +355,6 @@ package blockly.design
 				case BLOCK_TYPE_EXPRESSION:
 					drawer.drawExpression(w, h);
 					break;
-				case BLOCK_TYPE_STATEMENT:
-					drawer.drawStatement(w, h);
-					break;
-				case BLOCK_TYPE_BREAK:
-				case BLOCK_TYPE_CONTINUE:
-					drawer.drawStatement(w, h, false);
-					break;
 				case BLOCK_TYPE_FOR:
 				case BLOCK_TYPE_IF:
 				case BLOCK_TYPE_ELSE_IF:
@@ -361,6 +364,8 @@ package blockly.design
 				case BLOCK_TYPE_ARDUINO:
 					drawer.drawIfElse(w, h, getSub1Height(), getSub2Height());
 					break;
+				default:
+					drawer.drawStatement(w, h, !isFinalBlock());
 			}
 			g.endFill();
 		}

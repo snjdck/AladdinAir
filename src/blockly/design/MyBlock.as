@@ -108,7 +108,7 @@ package blockly.design
 		public function tryLink(dragTarget:BlockBase):InsertPtInfo
 		{
 			if(!isElseBlock()){
-				if(dragTarget.isNearTo(x, y - dragTarget.getTotalBlockHeight())){
+				if(!dragTarget.isFinalBlock() && dragTarget.isNearTo(x, y - dragTarget.getTotalBlockHeight())){
 					return new InsertPtInfo(this, INSERT_PT_ABOVE);
 				}
 				if(dragTarget.isControlBlock()){
