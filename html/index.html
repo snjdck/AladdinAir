@@ -1,0 +1,108 @@
+<html>
+<head>
+<style type="text/css">
+body {
+	font-size:14px;
+}
+#top_view {
+	overflow:auto;
+	position:absolute;
+	width:100%;
+	top:0px;
+	bottom:250px;
+}
+#line_number {
+	background:#ecf0f5;
+}
+#code_view {
+	width:100%;
+}
+#content {
+	overflow:auto;
+	position:absolute;
+	width:100%;
+	height:200px;
+	bottom:0px;
+	background-color:#c8c8c8;
+}
+#config {
+	background-color:#c8c8c8;
+	font-size:12px;
+	position:absolute;
+	width:100%;
+	bottom:200px;
+}
+</style>
+<script type="text/javascript">
+function _replace(input, index){
+	switch(input){
+		case "<": return "&lt;";
+		case ">": return "&gt;";
+		case "&": return "&amp;";
+	}
+	return null;
+}
+function escapeHtmlChar(input){
+	return input.replace(/[<>&]/g, _replace);
+}
+function renderColor(code){
+	code = replaceColor(code, /(setup|loop)(?=\(\))/g, 0x996600);
+	code = replaceColor(code, /for|if|else|while/g, 0x996600);
+	code = replaceColor(code, /(?=^|\s)(void|String|int|char|double|boolean|true|false|#include)(?= )/gm, 0x990000);
+	code = replaceColor(code, /(PORT|SLOT)_\d/g, 0x996600);
+	return code;
+}
+function replaceColor(code, pattern, color){
+	return code.replace(pattern, '<font color="#' + color.toString(16) + '">$&</font>');
+}
+function setCode(code){
+	code = renderColor(code.replace(/^\s+|\s+$/g, ""));
+	document.getElementById("code_view").innerHTML = "<pre>" + code + "</pre>";
+	var lineList = code.split("\n");
+	var lineCount = lineList.length;
+	var lineText = "";
+	for(var i=0; i<lineCount; ++i){
+		lineText += (i + 1) + "\n";
+	}
+	document.getElementById("line_number").innerHTML = "<pre>" + lineText + "</pre>";
+}
+var contentText = "";
+function appendInfo(info){
+	contentText += info;
+	var div = document.getElementById("content");
+	div.innerHTML = "<pre>" + escapeHtmlChar(contentText) + "</pre>";
+	div.scrollTop = div.scrollHeight;
+}
+function clearInfo(){
+	contentText = "";
+	document.getElementById("content").innerHTML = "";
+}
+</script>
+</head>
+<body>
+<div id="top_view">
+	<table>
+		<tr>
+			<td vAlign="top" align="right">
+				<div id="line_number"></div>
+			</td>
+			<td vAlign="top">
+				<div id="code_view"></div>
+			</td>
+		</tr>
+	</table>
+</div>
+<table id="config"><tr><td>
+<fieldset><legend>send encode type</legend>
+<input type="radio" name="send" id="send_binary" /><label for="send_binary">binary</label>
+<input type="radio" name="send" id="send_ascii" checked="checked" /><label for="send_ascii">ascii</label>
+</fieldset>
+</td><td>
+<fieldset><legend>recv encode type</legend>
+<input type="radio" name="recv" id="recv_binary" checked="checked" /><label for="recv_binary">binary</label>
+<input type="radio" name="recv" id="recv_ascii" /><label for="recv_ascii">ascii</label>
+</fieldset>
+</td></tr></table>
+<div id="content" style=""></div>
+</body>
+</html>
