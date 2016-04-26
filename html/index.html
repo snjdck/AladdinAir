@@ -91,7 +91,11 @@ function checkInput(){
 	if(!isSendBinaryMode()){
 		return;
 	}
-	input_data.value = input_data.value.replace(/[^\s0-9a-fA-F]|/g, "");
+	var oldStr = input_data.value;
+	var newStr = oldStr.replace(/[^\s0-9a-fA-F]|/g, "");
+	if(newStr != oldStr){
+		input_data.value = newStr;
+	}
 }
 function updateTranslation(){
 	var Translator = runtime.translation.Translator;
@@ -151,7 +155,7 @@ function updateTranslation(){
 		<tr><td width="100%">
 		<input style="width:100%;" type="text" id="input_data" onkeyup="checkInput()" />
 		</td><td>
-		<input type="button" name="Send" value="Send" onclick="onSendSerial(input_data.value);input_data.value='';" />
+		<input type="button" name="Send" value="Send" onclick="onSendSerial(input_data.value);" />
 		</td></tr>
 	</table>
 </div>
