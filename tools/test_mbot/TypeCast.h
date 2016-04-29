@@ -2,16 +2,6 @@
 
 #include <Arduino.h>
 
-#define send_float(index, value) \
-  send_value<float>(index, 2, value)
-
-#define send_uint8(index, value) \
-  send_value<uint8_t>(index, 1, value)
-
-#define send_uint16(index, value) \
-  send_value<uint16_t>(index, 3, value)
-
-
 template<typename T>
 T cast_bytes(byte *buffer, int offset)
 {
@@ -34,4 +24,3 @@ void send_value(byte index, byte valueType, T value)
     Serial.write(p[i]);
   Serial.println();
 }
-

@@ -2,7 +2,6 @@
 #include <MeMCore.h>
 
 #include "Router.h"
-#include "TypeCast.h"
 
 #define VERSION 0
 #define ULTRASONIC_SENSOR 1
@@ -40,7 +39,9 @@
 #define TIMER 50
 #define TOUCH_SENSOR 51
 
-Router router;
+const byte handlerCount = 52;
+const byte bufferSize = 64; 
+Router<handlerCount, bufferSize> router;
 
 void setup()
 {
@@ -143,7 +144,7 @@ void on_DIGITAL(byte *buffer)
     digitalWrite(pin, buffer[7]);
   }else{
     pinMode(pin, INPUT);
-    send_uint8(buffer[3], digitalRead(pin));
+    router.send_uint8(digitalRead(pin));
   }
 }
 
@@ -152,11 +153,11 @@ void on_ULTRASONIC(byte *buffer)
   MeUltrasonicSensor us(buffer[6]);
   float value = (float)us.distanceCm(50000);
   delayMicroseconds(100);
-  send_float(buffer[3], value);
+  router.send_float(value);
 }
 
 void on_TEMPERATURE(byte *buffer)
 {
   MeTemperature ts(buffer[6], buffer[7]);
-  send_float(buffer[3], ts.temperature());
+  router.send_float(ts.temperature());
 }
