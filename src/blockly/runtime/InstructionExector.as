@@ -15,8 +15,10 @@ package blockly.runtime
 			regOpHandler(OpCode.JUMP_IF_TRUE, __onJumpIfTrue);
 			regOpHandler(OpCode.INVOKE, __onInvoke);
 			regOpHandler(OpCode.RETURN, __onReturn);
-			regOpHandler(OpCode.LOAD_SLOT, __onLoadSlot);
-			regOpHandler(OpCode.SAVE_SLOT, __onSaveSlot);
+//			regOpHandler(OpCode.LOAD_SLOT, __onLoadSlot);
+//			regOpHandler(OpCode.SAVE_SLOT, __onSaveSlot);
+			regOpHandler(OpCode.DUPLICATE, __onDuplicate);
+			regOpHandler(OpCode.POP, __onPop);
 			regOpHandler(OpCode.NEW_VAR, __onNewVar);
 			regOpHandler(OpCode.GET_VAR, __onGetVar);
 			regOpHandler(OpCode.SET_VAR, __onSetVar);
@@ -52,6 +54,20 @@ package blockly.runtime
 			++thread.ip;
 		}
 		
+		private function __onPop(thread:Thread):void
+		{
+			thread.pop();
+			++thread.ip;
+		}
+		
+		private function __onDuplicate(thread:Thread):void
+		{
+			var value:Object = thread.pop();
+			thread.push(value);
+			thread.push(value);
+			++thread.ip;
+		}
+		
 		private function __onJump(thread:Thread, count:int):*
 		{
 			thread.ip += count;
@@ -66,7 +82,7 @@ package blockly.runtime
 			if(condition && count < 0)
 				return true;
 		}
-		
+		/*
 		private function __onLoadSlot(thread:Thread, index:int):void
 		{
 			__onPush(thread, thread.getSlot(index));
@@ -77,12 +93,12 @@ package blockly.runtime
 			thread.setSlot(index, thread.pop());
 			++thread.ip;
 		}
-		
-		private function __onInvoke(thread:Thread, argCount:int, retCount:int, regCount:int):Boolean
+		*/
+		private function __onInvoke(thread:Thread, argCount:int, retCount:int):Boolean
 		{
 			var argList:Array = getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
-			thread.pushScope(funcRef.createScope(thread, regCount));
+			thread.pushScope(funcRef.createScope(thread));
 			funcRef.initArgs(thread, argList);
 			return funcRef.isRecursiveInvoke();
 		}

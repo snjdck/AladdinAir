@@ -8,13 +8,14 @@ package blockly.runtime
 	internal class JsonCodeToAssembly
 	{
 		private var loopLayer:int;
-		private var slotIndex:int;
+//		private var slotIndex:int;
 		
 		public function JsonCodeToAssembly(){}
 		
 		public function translate(blockList:Array):Array
 		{
-			assert(loopLayer == 0 && slotIndex == 0);
+//			assert(loopLayer == 0 && slotIndex == 0);
+			assert(loopLayer == 0);
 			return genStatementCode(blockList);
 		}
 		
@@ -201,23 +202,13 @@ package blockly.runtime
 		
 		private function genLoopTimesCode(block:Object):Array
 		{
-			var conditionCode:Array = [
-				OpFactory.LoadSlot(slotIndex),
-				OpFactory.Push(0),
-				OpFactory.Call(">", 2, 1)
-			];
-			var iterCode:Array = [
-				OpFactory.LoadSlot(slotIndex),
-				OpFactory.Push(1),
-				OpFactory.Call("-", 2, 1),
-				OpFactory.SaveSlot(slotIndex)
-			];
-			var initCode:Array = genExpressionCode(block["count"]);
-			initCode.push(OpFactory.SaveSlot(slotIndex));
-			
-			++slotIndex;
-			var result:Array = genForCodeImpl(initCode, conditionCode, iterCode, block["code"]);
-			--slotIndex;
+			var result:Array = genForCodeImpl(
+				genExpressionCode(block["count"]),
+				[[OpCode.DUPLICATE], OpFactory.Push(0), OpFactory.Call(">", 2, 1)],
+				[ OpFactory.Push(1), OpFactory.Call("-", 2, 1)],
+				block["code"]
+			);
+			result.push([OpCode.POP]);
 			return result;
 		}
 		
@@ -226,7 +217,7 @@ package blockly.runtime
 			var argList:Array = block["argList"];
 			var result:Array = genExpressionCode(block["target"]);
 			append(result, genArgListCode(argList));
-			result.push(OpFactory.Invoke(argList.length, block["retCount"], slotIndex));
+			result.push(OpFactory.Invoke(argList.length, block["retCount"]));
 			return result;
 		}
 		

@@ -8,7 +8,7 @@ package blockly.runtime
 		internal var nextContext:IScriptContext;
 		internal var defineAddress:int;
 		internal var returnAddress:int;
-		internal var regCount:int;
+//		internal var regCount:int;
 		internal var funcRef:FunctionObject;
 		
 		public function FunctionScope(funcRef:FunctionObject)

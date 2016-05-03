@@ -23,14 +23,14 @@ package blockly.runtime
 				thread.newVar(argList[i], valueList[i]);
 		}
 		
-		internal function createScope(thread:Thread, regCount:int):FunctionScope
+		internal function createScope(thread:Thread):FunctionScope
 		{
 			var scope:FunctionScope = new FunctionScope(this);
 			scope.prevContext = thread.getContext();
 			scope.nextContext = context.createChildContext();
 			scope.defineAddress = address;
 			scope.returnAddress = thread.ip;
-			scope.regCount = regCount;
+//			scope.regCount = regCount;
 			return scope;
 		}
 		
