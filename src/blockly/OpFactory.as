@@ -21,17 +21,7 @@ package blockly
 		{
 			return [OpCode.CALL, funcName, argCount, retCount];
 		}
-		/*
-		static public function LoadSlot(index:int):Array
-		{
-			return [OpCode.LOAD_SLOT, index];
-		}
 		
-		static public function SaveSlot(index:int):Array
-		{
-			return [OpCode.SAVE_SLOT, index];
-		}
-		*/
 		static public function Invoke(argCount:int, retCount:int):Array
 		{
 			return [OpCode.INVOKE, argCount, retCount];

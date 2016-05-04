@@ -30,7 +30,6 @@ package blockly.runtime
 			scope.nextContext = context.createChildContext();
 			scope.defineAddress = address;
 			scope.returnAddress = thread.ip;
-//			scope.regCount = regCount;
 			return scope;
 		}
 		

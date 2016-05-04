@@ -24,8 +24,6 @@ package blockly.runtime
 		private var sc:int;
 		private const valueStack:Array = [];
 		private var sp:int;
-//		private const register:Array = [];
-//		private var regOffset:int;
 		
 		private var _isSuspend:Boolean;
 		private var _suspendTimestamp:int;
@@ -111,21 +109,7 @@ package blockly.runtime
 			assert(sp > 0);
 			return valueStack[--sp];
 		}
-		/*
-		internal function getSlot(index:int):*
-		{
-			if(index < 0)
-				return null;
-			return register[regOffset+index];
-		}
 		
-		internal function setSlot(index:int, value:Object):void
-		{
-			if(index < 0)
-				return;
-			register[regOffset+index] = value;
-		}
-		*/
 		internal function updateSuspendState():void
 		{
 			if(_resumeOnNextFrameFlag || suspendUpdater == null)
@@ -189,7 +173,6 @@ package blockly.runtime
 			scopeStack.push(scope);
 			++scope.funcRef.invokeCount;
 			context = scope.nextContext;
-//			regOffset += scope.regCount;
 			ip = scope.defineAddress + 1;
 		}
 		
@@ -198,7 +181,6 @@ package blockly.runtime
 			var scope:FunctionScope = scopeStack.pop();
 			--scope.funcRef.invokeCount;
 			context = scope.prevContext;
-//			regOffset -= scope.regCount;
 			ip = scope.returnAddress + 1;
 		}
 		
