@@ -24,5 +24,9 @@ package blockly
 		
 		static public const DECREASE:String = "decrease";
 		static public const IS_POSITIVE:String = "isPositive";
+		
+		static public const YIELD:String = "yield";
+		static public const COROUTINE_NEW:String = "coroutineNew";
+		static public const COROUTINE_RESUME:String = "coroutineResume";
 	}
 }

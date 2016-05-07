@@ -88,13 +88,13 @@ package blockly.runtime
 		{
 			var argList:Array = getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
-			thread.pushScope(funcRef.createScope(thread, argList));
+			thread.pushScope(funcRef.createScope(argList));
 			return funcRef.isRecursiveInvoke();
 		}
 		
 		private function __onReturn(thread:Thread):void
 		{
-			thread.popScope();
+			thread.popScope(false);
 		}
 		
 		private function __onNewVar(thread:Thread, varName:String):void
@@ -117,8 +117,9 @@ package blockly.runtime
 		
 		private function __onNewFunction(thread:Thread, offset:int, argList:Array):void
 		{
-			thread.push(new FunctionObject(thread.getContext(), argList, thread.ip));
-			thread.ip += offset;
+			var addressEnd:int = thread.ip + offset;
+			thread.push(new FunctionObject(thread.context, argList, thread.ip, addressEnd));
+			thread.ip = addressEnd;
 		}
 		
 		private function getArgList(thread:Thread, argCount:int):Array
@@ -139,6 +140,28 @@ package blockly.runtime
 		{
 			thread.push(thread.pop() > 0);
 			++thread.ip;
+		}
+		
+		private function __onYield(thread:Thread):void
+		{
+			thread.popScope(true);
+		}
+		
+		private function __onCoroutineNew(thread:Thread, argCount:int):void
+		{
+			var argList:Array = getArgList(thread, argCount);
+			var funcRef:FunctionObject = thread.pop();
+			thread.push(funcRef.createScope(argList));
+		}
+		
+		private function __onCoroutineResume(thread:Thread):void
+		{
+			var scope:FunctionScope = thread.pop();
+			if(scope.isExecuting(thread)){
+				thread.interrupt();
+				return;
+			}
+			thread.pushScope(scope, scope.ip);
 		}
 	}
 }

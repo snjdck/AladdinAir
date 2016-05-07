@@ -14,8 +14,7 @@ package blockly.runtime
 		static public var EXEC_TIME:int = 0;
 		static public var REDRAW_FLAG:Boolean = true;
 		
-		private const scopeStack:Array = [];
-		private var context:IScriptContext;
+		internal var context:IScriptContext;
 		
 		private var codeList:Array;
 		
@@ -163,23 +162,21 @@ package blockly.runtime
 			return _redrawFlag;
 		}
 		
-		internal function getContext():IScriptContext
+		internal function pushScope(scope:FunctionScope, offset:int=0):void
 		{
-			return context;
-		}
-		
-		internal function pushScope(scope:FunctionScope):void
-		{
-			scopeStack.push(scope);
+			push(scope);
 			++scope.funcRef.invokeCount;
+			scope.prevContext = context;
+			scope.returnAddress = ip;
 			context = scope.nextContext;
-			ip = scope.defineAddress + 1;
+			ip = scope.defineAddress + 1 + offset;
 		}
 		
-		internal function popScope():void
+		internal function popScope(needResume:Boolean):void
 		{
-			var scope:FunctionScope = scopeStack.pop();
+			var scope:FunctionScope = pop();
 			--scope.funcRef.invokeCount;
+			scope.ip = (needResume ? ip : scope.finishAddress) - scope.defineAddress;
 			context = scope.prevContext;
 			ip = scope.returnAddress + 1;
 		}
