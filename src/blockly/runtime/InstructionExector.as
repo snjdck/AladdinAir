@@ -22,6 +22,9 @@ package blockly.runtime
 			regOpHandler(OpCode.SET_VAR, __onSetVar);
 			regOpHandler(OpCode.NEW_FUNCTION, __onNewFunction);
 			
+			regOpHandler(OpCode.DECREASE, __onDecrease);
+			regOpHandler(OpCode.IS_POSITIVE, __onIsPositive);
+			
 			this.functionProvider = functionProvider;
 		}
 		
@@ -85,8 +88,7 @@ package blockly.runtime
 		{
 			var argList:Array = getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
-			thread.pushScope(funcRef.createScope(thread));
-			funcRef.initArgs(thread, argList);
+			thread.pushScope(funcRef.createScope(thread, argList));
 			return funcRef.isRecursiveInvoke();
 		}
 		
@@ -103,7 +105,8 @@ package blockly.runtime
 		
 		private function __onGetVar(thread:Thread, varName:String):void
 		{
-			__onPush(thread, thread.getVar(varName));
+			thread.push(thread.getVar(varName));
+			++thread.ip;
 		}
 		
 		private function __onSetVar(thread:Thread, varName:String):void
@@ -124,6 +127,18 @@ package blockly.runtime
 			while(argCount-- > 0)
 				argList[argCount] = thread.pop();
 			return argList;
+		}
+		
+		private function __onDecrease(thread:Thread):void
+		{
+			thread.push(thread.pop() - 1);
+			++thread.ip;
+		}
+		
+		private function __onIsPositive(thread:Thread):void
+		{
+			thread.push(thread.pop() > 0);
+			++thread.ip;
 		}
 	}
 }

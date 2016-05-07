@@ -17,17 +17,14 @@ package blockly.runtime
 			this.address = address;
 		}
 		
-		internal function initArgs(thread:Thread, valueList:Array):void
+		internal function createScope(thread:Thread, valueList:Array):FunctionScope
 		{
+			var newContext:IScriptContext = context.createChildContext();
 			for(var i:int=argList.length-1; i>=0; --i)
-				thread.newVar(argList[i], valueList[i]);
-		}
-		
-		internal function createScope(thread:Thread):FunctionScope
-		{
+				newContext.newKey(argList[i], valueList[i]);
 			var scope:FunctionScope = new FunctionScope(this);
 			scope.prevContext = thread.getContext();
-			scope.nextContext = context.createChildContext();
+			scope.nextContext = newContext;
 			scope.defineAddress = address;
 			scope.returnAddress = thread.ip;
 			return scope;

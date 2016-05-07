@@ -209,8 +209,8 @@ package blockly.runtime
 		{
 			var result:Array = genForCodeImpl(
 				genExpressionCode(block["count"]),
-				[[OpCode.DUPLICATE], OpFactory.Push(0), OpFactory.Call(">", 2, 1)],
-				[ OpFactory.Push(1), OpFactory.Call("-", 2, 1)],
+				[[OpCode.DUPLICATE], [OpCode.IS_POSITIVE]],
+				[[OpCode.DECREASE]],
 				block["code"]
 			);
 			result.push([OpCode.POP]);
