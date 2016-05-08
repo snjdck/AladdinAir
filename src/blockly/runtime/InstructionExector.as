@@ -152,6 +152,7 @@ package blockly.runtime
 			var argList:Array = getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
 			thread.push(funcRef.createScope(argList));
+			++thread.ip;
 		}
 		
 		private function __onCoroutineResume(thread:Thread):void
@@ -159,9 +160,9 @@ package blockly.runtime
 			var scope:FunctionScope = thread.pop();
 			if(scope.isExecuting(thread)){
 				thread.interrupt();
-				return;
+			}else{
+				thread.pushScope(scope, true);
 			}
-			thread.pushScope(scope, scope.ip);
 		}
 	}
 }

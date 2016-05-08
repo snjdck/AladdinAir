@@ -162,14 +162,16 @@ package blockly.runtime
 			return _redrawFlag;
 		}
 		
-		internal function pushScope(scope:FunctionScope, offset:int=0):void
+		internal function pushScope(scope:FunctionScope, needResume:Boolean=false):void
 		{
 			push(scope);
 			++scope.funcRef.invokeCount;
 			scope.prevContext = context;
 			scope.returnAddress = ip;
 			context = scope.nextContext;
-			ip = scope.defineAddress + 1 + offset;
+			ip = scope.defineAddress + 1;
+			if(needResume)
+				ip += scope.ip;
 		}
 		
 		internal function popScope(needResume:Boolean):void
