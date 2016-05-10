@@ -11,8 +11,6 @@ package blockly.runtime
 		internal var returnAddress:int;
 		internal var funcRef:FunctionObject;
 		
-		internal var ip:int;
-		
 		public function FunctionScope(funcRef:FunctionObject)
 		{
 			this.funcRef = funcRef;
@@ -21,6 +19,11 @@ package blockly.runtime
 		internal function isExecuting(thread:Thread):Boolean
 		{
 			return defineAddress < thread.ip && thread.ip < finishAddress;
+		}
+		
+		internal function isFinish():Boolean
+		{
+			return defineAddress >= finishAddress;
 		}
 	}
 }

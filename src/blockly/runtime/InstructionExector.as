@@ -160,8 +160,10 @@ package blockly.runtime
 			var scope:FunctionScope = thread.pop();
 			if(scope.isExecuting(thread)){
 				thread.interrupt();
+			}else if(scope.isFinish()){
+				++thread.ip;
 			}else{
-				thread.pushScope(scope, true);
+				thread.pushScope(scope);
 			}
 		}
 	}

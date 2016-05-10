@@ -162,7 +162,7 @@ package blockly.runtime
 			return _redrawFlag;
 		}
 		
-		internal function pushScope(scope:FunctionScope, needResume:Boolean=false):void
+		internal function pushScope(scope:FunctionScope):void
 		{
 			push(scope);
 			++scope.funcRef.invokeCount;
@@ -170,15 +170,13 @@ package blockly.runtime
 			scope.returnAddress = ip;
 			context = scope.nextContext;
 			ip = scope.defineAddress + 1;
-			if(needResume)
-				ip += scope.ip;
 		}
 		
 		internal function popScope(needResume:Boolean):void
 		{
 			var scope:FunctionScope = pop();
 			--scope.funcRef.invokeCount;
-			scope.ip = (needResume ? ip : scope.finishAddress) - scope.defineAddress;
+			scope.defineAddress = needResume ? ip : scope.finishAddress;
 			context = scope.prevContext;
 			ip = scope.returnAddress + 1;
 		}
