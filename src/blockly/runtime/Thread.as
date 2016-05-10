@@ -179,6 +179,11 @@ package blockly.runtime
 			scope.defineAddress = needResume ? ip : scope.finishAddress;
 			context = scope.prevContext;
 			ip = scope.returnAddress + 1;
+			
+			if(!needResume && scope.prevScope != null){
+				scope.prevScope.nextScope = null;
+				scope.prevScope = null;
+			}
 		}
 		
 		public function newVar(varName:String, varValue:Object):void

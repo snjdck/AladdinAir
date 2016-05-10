@@ -147,6 +147,23 @@ package blockly.runtime
 			thread.popScope(true);
 		}
 		
+		private function __onYieldFrom(thread:Thread):void
+		{
+			var subScope:FunctionScope = thread.pop();
+			var scope:FunctionScope = thread.pop();
+			
+			subScope.prevScope = scope;
+			scope.nextScope = subScope;
+			
+			thread.push(subScope);
+			
+			subScope.prevContext = scope.prevContext;
+			subScope.returnAddress = scope.returnAddress;
+			
+			thread.context = subScope.nextContext;
+			thread.ip = subScope.defineAddress + 1;
+		}
+		
 		private function __onCoroutineNew(thread:Thread, argCount:int):void
 		{
 			var argList:Array = getArgList(thread, argCount);
@@ -163,7 +180,7 @@ package blockly.runtime
 			}else if(scope.isFinish()){
 				++thread.ip;
 			}else{
-				thread.pushScope(scope);
+				thread.pushScope(scope.getFinalScope());
 			}
 		}
 	}

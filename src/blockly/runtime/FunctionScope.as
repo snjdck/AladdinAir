@@ -4,6 +4,9 @@ package blockly.runtime
 
 	internal class FunctionScope
 	{
+		internal var prevScope:FunctionScope;
+		internal var nextScope:FunctionScope;
+		
 		internal var prevContext:IScriptContext;
 		internal var nextContext:IScriptContext;
 		internal var defineAddress:int;
@@ -14,6 +17,14 @@ package blockly.runtime
 		public function FunctionScope(funcRef:FunctionObject)
 		{
 			this.funcRef = funcRef;
+		}
+		
+		internal function getFinalScope():FunctionScope
+		{
+			var scope:FunctionScope = this;
+			while(scope.nextScope != null)
+				scope = scope.nextScope;
+			return scope;
 		}
 		
 		internal function isExecuting(thread:Thread):Boolean
