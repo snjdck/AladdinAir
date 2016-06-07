@@ -4,7 +4,7 @@ package blockly.runtime
 	import flash.signals.Signal;
 	import flash.utils.getTimer;
 	
-	import lambda.call;
+	import lambda.apply;
 	
 	import snjdck.arithmetic.IScriptContext;
 	import snjdck.arithmetic.impl.ScriptContext;
@@ -13,6 +13,7 @@ package blockly.runtime
 	{
 		static public var EXEC_TIME:int = 0;
 		static public var REDRAW_FLAG:Boolean = true;
+		static public var Current:Thread;
 		
 		internal var context:IScriptContext;
 		
@@ -73,8 +74,7 @@ package blockly.runtime
 				_finishFlag = true;
 				return false;
 			}
-			var code:Array = codeList[ip];
-			return instructionExcetor.execute(this, code[0], code.slice(1));
+			return instructionExcetor.execute(codeList[ip]);
 		}
 		
 		public function suspend():void
@@ -113,7 +113,7 @@ package blockly.runtime
 		{
 			if(_resumeOnNextFrameFlag || suspendUpdater == null)
 				return;
-			call(suspendUpdater, this);
+			lambda.apply(suspendUpdater);
 		}
 		
 		public function get timeElapsedSinceSuspend():int

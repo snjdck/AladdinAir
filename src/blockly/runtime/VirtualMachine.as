@@ -61,6 +61,7 @@ package blockly.runtime
 			var threadCount:int = threadList.length;
 			for(var index:int=0; index<threadCount; ++index){
 				var thread:Thread = threadList[index];
+				Thread.Current = thread;
 				for(;;){
 					if(thread.isFinish()){
 						threadList.splice(index, 1);
@@ -83,6 +84,7 @@ package blockly.runtime
 					}
 				}
 			}
+			Thread.Current = null;
 			return !needRedraw && hasActiveThread;
 		}
 	}
