@@ -30,102 +30,119 @@ package blockly.util
 			provider.register("setProp", onSetProp);
 		}
 		
-		static private function onTrace(thread:Thread, argList:Array):void
+		static private function onTrace(...argList):void
 		{
 			trace.apply(null, argList);
 		}
 		
-		static public function onSleep(thread:Thread, argList:Array):void
+		static public function onSleep(seconds:Number):void
 		{
+			var thread:Thread = Thread.Current;
 			thread.suspend();
-			thread.suspendUpdater = [_onSleep, argList[0] * 1000];
+			thread.suspendUpdater = [_onSleep, seconds * 1000];
 		}
 		
-		static private function _onSleep(thread:Thread, timeout:int):void
+		static private function _onSleep(timeout:int):void
 		{
+			var thread:Thread = Thread.Current;
 			if(thread.timeElapsedSinceSuspend >= timeout){
 				thread.resume();
 			}
 		}
 		
-		static private function onGetProp(thread:Thread, argList:Array):void
+		static private function onGetProp(target:Object, key:Object):void
 		{
-			thread.push(argList[0][argList[1]]);
+			var thread:Thread = Thread.Current;
+			thread.push(target[key]);
 		}
 		
-		static private function onSetProp(thread:Thread, argList:Array):void
+		static private function onSetProp(target:Object, key:Object, value:Object):void
 		{
-			argList[0][argList[1]] = argList[2];
+			target[key] = value;
 		}
 		
-		static private function onAdd(thread:Thread, argList:Array):void
+		static private function onAdd(a:*, b:*):void
 		{
-			thread.push(argList[0] + argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a + b);
 		}
 		
-		static private function onSub(thread:Thread, argList:Array):void
+		static private function onSub(a:*, b:*):void
 		{
-			thread.push(argList[0] - argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a - b);
 		}
 		
-		static private function onMul(thread:Thread, argList:Array):void
+		static private function onMul(a:*, b:*):void
 		{
-			thread.push(argList[0] * argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a * b);
 		}
 		
-		static private function onDiv(thread:Thread, argList:Array):void
+		static private function onDiv(a:*, b:*):void
 		{
-			thread.push(argList[0] / argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a / b);
 		}
 		
-		static private function onMod(thread:Thread, argList:Array):void
+		static private function onMod(a:*, b:*):void
 		{
-			thread.push(argList[0] % argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a % b);
 		}
 		
-		static private function onNot(thread:Thread, argList:Array):void
+		static private function onNot(value:*):void
 		{
-			thread.push(!argList[0]);
+			var thread:Thread = Thread.Current;
+			thread.push(!value);
 		}
 		
-		static private function onAnd(thread:Thread, argList:Array):void
+		static private function onAnd(a:*, b:*):void
 		{
-			thread.push(argList[0] && argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a && b);
 		}
 		
-		static private function onOr(thread:Thread, argList:Array):void
+		static private function onOr(a:*, b:*):void
 		{
-			thread.push(argList[0] || argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a || b);
 		}
 		
-		static private function onLess(thread:Thread, argList:Array):void
+		static private function onLess(a:*, b:*):void
 		{
-			thread.push(argList[0] < argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a < b);
 		}
 		
-		static private function onLessEqual(thread:Thread, argList:Array):void
+		static private function onLessEqual(a:*, b:*):void
 		{
-			thread.push(argList[0] <= argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a <= b);
 		}
 		
-		static private function onGreater(thread:Thread, argList:Array):void
+		static private function onGreater(a:*, b:*):void
 		{
-			thread.push(argList[0] > argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a > b);
 		}
 		
-		static private function onGreaterEqual(thread:Thread, argList:Array):void
+		static private function onGreaterEqual(a:*, b:*):void
 		{
-			thread.push(argList[0] >= argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a >= b);
 		}
 		
-		static private function onEqual(thread:Thread, argList:Array):void
+		static private function onEqual(a:*, b:*):void
 		{
-			thread.push(argList[0] == argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a == b);
 		}
 		
-		static private function onNotEqual(thread:Thread, argList:Array):void
+		static private function onNotEqual(a:*, b:*):void
 		{
-			thread.push(argList[0] != argList[1]);
+			var thread:Thread = Thread.Current;
+			thread.push(a != b);
 		}
 	}
 }
