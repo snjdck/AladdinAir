@@ -1,5 +1,7 @@
 package blockly.util
 {
+	import flash.support.Operator;
+	
 	import blockly.runtime.FunctionProvider;
 	import blockly.runtime.Thread;
 
@@ -7,25 +9,25 @@ package blockly.util
 	{
 		static public function InitMath(provider:FunctionProvider):void
 		{
-			provider.register("+", onAdd);
-			provider.register("-", onSub);
-			provider.register("*", onMul);
-			provider.register("/", onDiv);
-			provider.register("%", onMod);
+			provider.register("+", Operator.Add);
+			provider.register("-", Operator.Subtract);
+			provider.register("*", Operator.Multiply);
+			provider.register("/", Operator.Divide);
+			provider.register("%", Operator.Modulus);
 			
-			provider.register("!", onNot);
-			provider.register("&&", onAnd);
-			provider.register("||", onOr);
+			provider.register("!", Operator.Not);
+			provider.register("&&", Operator.And);
+			provider.register("||", Operator.Or);
 			
-			provider.register("<", onLess);
-			provider.register("<=", onLessEqual);
-			provider.register(">", onGreater);
-			provider.register(">=", onGreaterEqual);
-			provider.register("==", onEqual);
-			provider.register("!=", onNotEqual);
+			provider.register("<", Operator.LessThan);
+			provider.register("<=", Operator.LessEqual);
+			provider.register(">", Operator.GreaterThan);
+			provider.register(">=", Operator.GreaterEqual);
+			provider.register("==", Operator.Equal);
+			provider.register("!=", Operator.NotEqual);
 			
 			provider.register("trace", onTrace);
-			provider.register("sleep", onSleep);
+			provider.register("sleep", onSleep, true);
 			provider.register("getProp", onGetProp);
 			provider.register("setProp", onSetProp);
 		}
@@ -37,9 +39,7 @@ package blockly.util
 		
 		static public function onSleep(seconds:Number):void
 		{
-			var thread:Thread = Thread.Current;
-			thread.suspend();
-			thread.suspendUpdater = [_onSleep, seconds * 1000];
+			Thread.Current.suspendUpdater = [_onSleep, seconds * 1000];
 		}
 		
 		static private function _onSleep(timeout:int):void
@@ -50,99 +50,14 @@ package blockly.util
 			}
 		}
 		
-		static private function onGetProp(target:Object, key:Object):void
+		static private function onGetProp(target:Object, key:Object):*
 		{
-			var thread:Thread = Thread.Current;
-			thread.push(target[key]);
+			return target[key];
 		}
 		
 		static private function onSetProp(target:Object, key:Object, value:Object):void
 		{
 			target[key] = value;
-		}
-		
-		static private function onAdd(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a + b);
-		}
-		
-		static private function onSub(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a - b);
-		}
-		
-		static private function onMul(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a * b);
-		}
-		
-		static private function onDiv(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a / b);
-		}
-		
-		static private function onMod(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a % b);
-		}
-		
-		static private function onNot(value:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(!value);
-		}
-		
-		static private function onAnd(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a && b);
-		}
-		
-		static private function onOr(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a || b);
-		}
-		
-		static private function onLess(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a < b);
-		}
-		
-		static private function onLessEqual(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a <= b);
-		}
-		
-		static private function onGreater(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a > b);
-		}
-		
-		static private function onGreaterEqual(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a >= b);
-		}
-		
-		static private function onEqual(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a == b);
-		}
-		
-		static private function onNotEqual(a:*, b:*):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(a != b);
 		}
 	}
 }
