@@ -3,15 +3,25 @@ package blockly.runtime
 	internal class FunctionObjectNative
 	{
 		private var handler:Function;
+		private var hasValue:Boolean;
+		private var isAsync:Boolean;
 		
-		public function FunctionObjectNative(handler:Function)
+		public function FunctionObjectNative(handler:Function, hasValue:Boolean, isAsync:Boolean)
 		{
 			this.handler = handler;
+			this.hasValue = hasValue;
+			this.isAsync = isAsync;
 		}
 		
 		internal function invoke(valueList:Array):void
 		{
-			handler.apply(null, valueList);
+			var thread:Thread = Thread.Current;
+			var value:* = handler.apply(null, valueList);
+			if(isAsync){
+				thread.suspend();
+			}else if(hasValue){
+				thread.push(value);
+			}
 		}
 	}
 }

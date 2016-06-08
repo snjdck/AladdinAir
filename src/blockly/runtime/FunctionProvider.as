@@ -9,9 +9,9 @@ package blockly.runtime
 		
 		public function FunctionProvider(){}
 		
-		public function register(name:String, handler:Function):void
+		public function register(name:String, handler:Function, hasValue:Boolean=false, isAsync:Boolean=false):void
 		{
-			context.newKey(name, new FunctionObjectNative(handler));
+			context.newKey(name, new FunctionObjectNative(handler, hasValue, isAsync));
 		}
 		
 		public function alias(name:String, newName:String):void
