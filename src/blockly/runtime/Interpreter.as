@@ -35,7 +35,7 @@ package blockly.runtime
 		
 		public function executeAssembly(codeList:Array):Thread
 		{
-			var thread:Thread = new Thread(codeList);
+			var thread:Thread = new Thread(virtualMachine, codeList);
 			virtualMachine.startThread(thread);
 			return thread;
 		}

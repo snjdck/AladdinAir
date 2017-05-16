@@ -10,6 +10,12 @@ package blockly.runtime
 		private const threadList:Vector.<Thread> = new Vector.<Thread>();
 		private const timer:Shape = new Shape();
 		
+		internal var redrawFlag:Boolean;
+		internal var yieldFlag:Boolean;
+		internal var waitFlag:Boolean;
+		
+		private var activeFlag:Boolean;
+		
 		public function VirtualMachine(functionProvider:FunctionProvider)
 		{
 			instructionExector = new InstructionExector(functionProvider);
@@ -40,52 +46,57 @@ package blockly.runtime
 			}
 		}
 		
-		private function notifyFrameBeginEvent():void
-		{
-			for each(var thread:Thread in threadList){
-				thread.onFrameBegin();
-			}
-		}
-		
 		private function onUpdateThreads(evt:Event):void
 		{
-			notifyFrameBeginEvent();
+			redrawFlag = false;
 			var endTime:int = getTimer() + Thread.EXEC_TIME;
 			while(updateThreads() && getTimer() < endTime);
 		}
 		
 		private function updateThreads():Boolean
 		{
-			var hasActiveThread:Boolean = false;
-			var needRedraw:Boolean = false;
-			var threadCount:int = threadList.length;
-			for(var index:int=0; index<threadCount; ++index){
-				var thread:Thread = threadList[index];
-				Thread.Current = thread;
-				for(;;){
-					if(thread.isFinish()){
-						threadList.splice(index, 1);
-						thread.notifyFinish();
-						--threadCount;
-						--index;
-						break;
-					}
-					if(thread.isSuspend()){
-						thread.updateSuspendState();
-						break;
-					}
-					if(thread.execNextCode(instructionExector)){
-						if(thread.needRedraw()){
-							needRedraw = true;
-						}else{
-							hasActiveThread = true;
-						}
-						break;
-					}
+			activeFlag = false;
+			for each(var thread:Thread in threadList)
+				updateThread(thread);
+			Thread.Current = null;
+			removeFinishedThreads();
+			return !redrawFlag && activeFlag;
+		}
+		
+		private function updateThread(thread:Thread):void
+		{
+			Thread.Current = thread;
+			yieldFlag = waitFlag = false;
+			for(;;){
+				if(thread.isFinish()){
+					return;
+				}
+				if(thread.isSuspend()){
+					thread.updateSuspendState();
+					return;
+				}
+				thread.execNextCode(instructionExector);
+				if(yieldFlag){
+					break;
 				}
 			}
-			Thread.Current = null;
-			return !needRedraw && hasActiveThread;
+			if(!waitFlag){
+				activeFlag = true;
+			}
+		}
+		
+		private function removeFinishedThreads():void
+		{
+			var index:int = 0;
+			while(index < threadList.length){
+				var thread:Thread = threadList[index];
+				if(thread.isFinish()){
+					threadList.removeAt(index);
+					thread.notifyFinish();
+				}else{
+					++index;
+				}
+			}
 		}
 	}
 }

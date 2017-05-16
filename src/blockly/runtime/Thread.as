@@ -18,6 +18,7 @@ package blockly.runtime
 		internal var context:IScriptContext;
 		
 		private var codeList:Array;
+		private var virtualMachine:VirtualMachine;
 		
 		internal var ip:int;
 		private var needCheckStack:Boolean;
@@ -32,13 +33,12 @@ package blockly.runtime
 		private const _finishSignal:Signal = new Signal(Boolean);
 		private var _finishFlag:Boolean;
 		private var _interruptFlag:Boolean;
-		private var _resumeOnNextFrameFlag:Boolean;
-		private var _redrawFlag:Boolean;
 		
 		public var userData:*;
 		
-		public function Thread(codeList:Array)
+		public function Thread(virtualMachine:VirtualMachine, codeList:Array)
 		{
+			this.virtualMachine = virtualMachine;
 			this.codeList = codeList;
 			this.context = new ScriptContext();
 		}
@@ -64,7 +64,7 @@ package blockly.runtime
 			return _finishFlag;
 		}
 		
-		internal function execNextCode(instructionExcetor:InstructionExector):Boolean
+		internal function execNextCode(instructionExcetor:InstructionExector):void
 		{
 			if(needCheckStack){
 				assert(sp == sc, "function return count mismatch!");
@@ -72,9 +72,15 @@ package blockly.runtime
 			}
 			if(ip >= codeList.length){
 				_finishFlag = true;
-				return false;
+				return;
 			}
-			return instructionExcetor.execute(codeList[ip]);
+			instructionExcetor.execute(codeList[ip]);
+		}
+		
+		public function yield(waitFlag:Boolean=true):void
+		{
+			virtualMachine.yieldFlag = true;
+			virtualMachine.waitFlag ||= waitFlag;
 		}
 		
 		public function suspend():void
@@ -111,9 +117,8 @@ package blockly.runtime
 		
 		internal function updateSuspendState():void
 		{
-			if(_resumeOnNextFrameFlag || suspendUpdater == null)
-				return;
-			lambda.apply(suspendUpdater);
+			if(suspendUpdater != null)
+				lambda.apply(suspendUpdater);
 		}
 		
 		public function get timeElapsedSinceSuspend():int
@@ -135,31 +140,11 @@ package blockly.runtime
 				return valueStack[0];
 		}
 		
-		internal function onFrameBegin():void
-		{
-			if(_resumeOnNextFrameFlag){
-				_isSuspend = false;
-				_resumeOnNextFrameFlag = false;
-			}
-			_redrawFlag = false;
-		}
-		
-		public function suspendUntilNextFrame():void
-		{
-			_isSuspend = true;
-			_resumeOnNextFrameFlag = true;
-		}
-		
 		public function requestRedraw():void
 		{
 			if(REDRAW_FLAG){
-				_redrawFlag = true;
+				virtualMachine.redrawFlag = true;
 			}
-		}
-		
-		public function needRedraw():Boolean
-		{
-			return _redrawFlag;
 		}
 		
 		internal function pushScope(scope:FunctionScope):void

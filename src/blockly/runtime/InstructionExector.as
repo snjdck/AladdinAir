@@ -33,10 +33,10 @@ package blockly.runtime
 			opDict[op] = handler;
 		}
 		
-		public function execute(instruction:Array):Boolean
+		public function execute(instruction:Array):void
 		{
 			var handler:Function = opDict[instruction[0]];
-			return handler.apply(null, instruction);
+			handler.apply(null, instruction);
 		}
 		
 		private function __onCall(op:Object, methodName:String, argCount:int, retCount:int):void
@@ -71,30 +71,33 @@ package blockly.runtime
 			++thread.ip;
 		}
 		
-		private function __onJump(op:Object, count:int):*
+		private function __onJump(op:Object, count:int):void
 		{
 			var thread:Thread = Thread.Current;
 			thread.ip += count;
-			if(count <  0) return true;
+			if(count <  0) thread.yield(false);
 			if(count == 0) thread.suspend();
 		}
 		
-		private function __onJumpIfTrue(op:Object, count:int):*
+		private function __onJumpIfTrue(op:Object, count:int):void
 		{
 			var thread:Thread = Thread.Current;
 			var condition:Boolean = thread.pop();
 			thread.ip += condition ? count : 1;
-			if(condition && count < 0)
-				return true;
+			if(condition && count < 0){
+				thread.yield(false);
+			}
 		}
 		
-		private function __onInvoke(op:Object, argCount:int, retCount:int):Boolean
+		private function __onInvoke(op:Object, argCount:int, retCount:int):void
 		{
 			var thread:Thread = Thread.Current;
 			var argList:Array = getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
 			thread.pushScope(funcRef.createScope(argList));
-			return funcRef.isRecursiveInvoke();
+			if(funcRef.isRecursiveInvoke()){
+				thread.yield(false);
+			}
 		}
 		
 		private function __onReturn(op:Object):void
