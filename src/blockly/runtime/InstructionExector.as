@@ -75,8 +75,8 @@ package blockly.runtime
 		{
 			var thread:Thread = Thread.Current;
 			thread.ip += count;
-			if(count <  0) thread.yield(false);
-			if(count == 0) thread.suspend();
+			if(count < 0) thread.yield(false);
+			else if(count == 0) thread.suspend();
 		}
 		
 		private function __onJumpIfTrue(op:Object, count:int):void
