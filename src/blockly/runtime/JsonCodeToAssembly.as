@@ -143,6 +143,15 @@ package blockly.runtime
 			var loopCount:int = loopCode.length + iterCode.length;
 			var totalCount:int = loopCount + conditionCode.length;
 			
+			replaceBreakContinue(loopCode, loopCount + 1);
+			
+			append(result, conditionCode);
+			result.push(OpFactory.JumpIfTrue(2));
+			result.push(OpFactory.Jump(loopCount + 2));
+			append(result, loopCode);
+			append(result, iterCode);
+			result.push(OpFactory.Jump(-(totalCount + 2)));
+			/*
 			replaceBreakContinue(loopCode, totalCount + 1);
 			
 			result.push(OpFactory.Jump(loopCount + 1));
@@ -150,7 +159,7 @@ package blockly.runtime
 			append(result, iterCode);
 			append(result, conditionCode);
 			result.push(OpFactory.JumpIfTrue(-totalCount));
-			
+			//*/
 			return result;
 		}
 		

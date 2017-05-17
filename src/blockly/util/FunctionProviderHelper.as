@@ -1,6 +1,7 @@
 package blockly.util
 {
 	import flash.support.Operator;
+	import flash.utils.getTimer;
 	
 	import blockly.runtime.FunctionProvider;
 	import blockly.runtime.Thread;
@@ -39,14 +40,13 @@ package blockly.util
 		
 		static public function onSleep(seconds:Number):void
 		{
-			Thread.Current.suspendUpdater = [_onSleep, seconds * 1000];
+			Thread.Current.suspendUpdater = [_onSleep, getTimer() + seconds * 1000];
 		}
 		
 		static private function _onSleep(timeout:int):void
 		{
-			var thread:Thread = Thread.Current;
-			if(thread.timeElapsedSinceSuspend >= timeout){
-				thread.resume();
+			if(getTimer() >= timeout){
+				Thread.Current.resume();
 			}
 		}
 		
