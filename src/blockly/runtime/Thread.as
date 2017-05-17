@@ -62,6 +62,20 @@ package blockly.runtime
 			return _finishFlag;
 		}
 		
+		public function start():void
+		{
+			virtualMachine.startThread(this);
+		}
+		
+		public function restart():void
+		{
+			_finishFlag = _interruptFlag = needCheckStack = false;
+			valueStack.length = ip = sp = 0;
+			context = new ScriptContext();
+			resume();
+			start();
+		}
+		
 		internal function execNextCode(instructionExcetor:InstructionExector):void
 		{
 			if(needCheckStack){
@@ -161,6 +175,11 @@ package blockly.runtime
 				scope.prevScope.nextScope = null;
 				scope.prevScope = null;
 			}
+		}
+		
+		public function clone():Thread
+		{
+			return new Thread(virtualMachine, codeList);
 		}
 		
 		public function newVar(varName:String, varValue:Object):void

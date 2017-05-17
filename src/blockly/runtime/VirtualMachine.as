@@ -48,6 +48,8 @@ package blockly.runtime
 		
 		private function onUpdateThreads(evt:Event):void
 		{
+			if (threadList.length <= 0) return;
+//			trace("== event loop begin");
 			redrawFlag = false;
 			var endTime:int = getTimer() + Thread.EXEC_TIME;
 			while(updateThreads() && getTimer() < endTime);
@@ -55,9 +57,11 @@ package blockly.runtime
 		
 		private function updateThreads():Boolean
 		{
+//			trace("-- thread loop begin");
 			activeFlag = false;
-			for each(var thread:Thread in threadList)
-				updateThread(thread);
+			//let new threads create in exec run in next loop
+			for(var i:int=0, n:int=threadList.length; i<n; ++i)
+				updateThread(threadList[i]);
 			Thread.Current = null;
 			removeFinishedThreads();
 			return !redrawFlag && activeFlag;
@@ -65,6 +69,7 @@ package blockly.runtime
 		
 		private function updateThread(thread:Thread):void
 		{
+//			trace("** step thread");
 			Thread.Current = thread;
 			yieldFlag = waitFlag = false;
 			for(;;){
