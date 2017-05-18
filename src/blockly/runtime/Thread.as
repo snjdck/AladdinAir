@@ -33,6 +33,8 @@ package blockly.runtime
 		private var _finishFlag:Boolean;
 		private var _interruptFlag:Boolean;
 		
+		private var invokeCount:int;
+		
 		public var userData:*;
 		
 		public function Thread(virtualMachine:VirtualMachine, codeList:Array, globalContext:IScriptContext)
@@ -77,7 +79,7 @@ package blockly.runtime
 		public function restart():void
 		{
 			_finishFlag = _interruptFlag = needCheckStack = false;
-			valueStack.length = ip = sp = 0;
+			valueStack.length = invokeCount = ip = sp = 0;
 			context = createContext();
 			resume();
 			start();
@@ -164,6 +166,7 @@ package blockly.runtime
 		{
 			push(scope);
 			++scope.funcRef.invokeCount;
+			++invokeCount;
 			scope.prevCodeList = codeList;
 			scope.prevContext = context;
 			scope.returnAddress = ip;
@@ -176,6 +179,7 @@ package blockly.runtime
 		{
 			var scope:FunctionScope = pop();
 			--scope.funcRef.invokeCount;
+			--invokeCount;
 			scope.defineAddress = needResume ? ip : scope.finishAddress;
 			codeList = scope.prevCodeList;
 			context = scope.prevContext;
@@ -209,7 +213,7 @@ package blockly.runtime
 		
 		internal function isInvoking():Boolean
 		{
-			return context.hasParent();
+			return invokeCount > 0;
 		}
 		
 		internal function newFunction(argList:Array, addressEnd:int):FunctionObject
