@@ -196,5 +196,10 @@ package blockly.runtime
 		{
 			context.setValue(varName, value);
 		}
+		
+		internal function isInvoking():Boolean
+		{
+			return context.hasParent();
+		}
 	}
 }

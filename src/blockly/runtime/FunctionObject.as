@@ -21,7 +21,7 @@ package blockly.runtime
 		
 		internal function createScope(valueList:Array):FunctionScope
 		{
-			var newContext:IScriptContext = context.createChildContext();
+			var newContext:IScriptContext = context.createChild();
 			for(var i:int=argList.length-1; i>=0; --i)
 				newContext.newKey(argList[i], valueList[i]);
 			var scope:FunctionScope = new FunctionScope(this);

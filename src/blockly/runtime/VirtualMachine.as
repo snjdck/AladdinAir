@@ -51,17 +51,16 @@ package blockly.runtime
 			if (threadList.length <= 0) return;
 //			trace("== event loop begin");
 			redrawFlag = false;
-			var endTime:int = getTimer() + Thread.EXEC_TIME;
-			while(updateThreads() && getTimer() < endTime);
+			var timeEnd:int = getTimer() + Thread.EXEC_TIME;
+			while(updateThreads() && getTimer() < timeEnd);
 		}
 		
 		private function updateThreads():Boolean
 		{
 //			trace("-- thread loop begin");
 			activeFlag = false;
-			//let new threads create in exec run in next loop
-			for(var i:int=0, n:int=threadList.length; i<n; ++i)
-				updateThread(threadList[i]);
+			for each(var thread:Thread in threadList)
+				updateThread(thread);
 			Thread.Current = null;
 			removeFinishedThreads();
 			return !redrawFlag && activeFlag;
@@ -72,6 +71,7 @@ package blockly.runtime
 //			trace("** step thread");
 			Thread.Current = thread;
 			yieldFlag = waitFlag = false;
+			var timeEnd:int = getTimer() + 500;
 			for(;;){
 				if(thread.isFinish()){
 					return;
@@ -81,7 +81,12 @@ package blockly.runtime
 					return;
 				}
 				thread.execNextCode(instructionExector);
-				if(yieldFlag){
+				if(!yieldFlag){
+					continue;
+				}
+				if(thread.isInvoking() && getTimer() < timeEnd){
+					yieldFlag = false;
+				}else{
 					break;
 				}
 			}
