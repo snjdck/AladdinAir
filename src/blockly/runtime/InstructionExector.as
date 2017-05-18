@@ -131,7 +131,7 @@ package blockly.runtime
 		{
 			var thread:Thread = Thread.Current;
 			var addressEnd:int = thread.ip + offset;
-			thread.push(new FunctionObject(thread.context, argList, thread.ip, addressEnd));
+			thread.push(thread.newFunction(argList, addressEnd));
 			thread.ip = addressEnd;
 		}
 		

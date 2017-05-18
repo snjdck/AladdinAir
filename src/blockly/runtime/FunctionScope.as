@@ -7,6 +7,8 @@ package blockly.runtime
 		internal var prevScope:FunctionScope;
 		internal var nextScope:FunctionScope;
 		
+		internal var prevCodeList:Array;
+		internal var nextCodeList:Array;
 		internal var prevContext:IScriptContext;
 		internal var nextContext:IScriptContext;
 		internal var defineAddress:int;

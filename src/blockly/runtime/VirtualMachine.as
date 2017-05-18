@@ -108,5 +108,15 @@ package blockly.runtime
 				}
 			}
 		}
+		
+		public function execute(thread:Thread):void
+		{
+			var prevThread:Thread = Thread.Current;
+			Thread.Current = thread;
+			while(!thread.isFinish()){
+				thread.execNextCode(instructionExector);
+			}
+			Thread.Current = prevThread;
+		}
 	}
 }

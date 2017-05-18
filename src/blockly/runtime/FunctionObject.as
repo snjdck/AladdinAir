@@ -4,6 +4,7 @@ package blockly.runtime
 
 	internal class FunctionObject
 	{
+		private var codeList:Array;
 		private var context:IScriptContext;
 		private var argList:Array;
 		private var addressBegin:int;
@@ -11,8 +12,9 @@ package blockly.runtime
 		
 		internal var invokeCount:int;
 		
-		public function FunctionObject(context:IScriptContext, argList:Array, addressBegin:int, addressEnd:int)
+		public function FunctionObject(codeList:Array, context:IScriptContext, argList:Array, addressBegin:int, addressEnd:int)
 		{
+			this.codeList = codeList;
 			this.context = context;
 			this.argList = argList;
 			this.addressBegin = addressBegin;
@@ -25,6 +27,7 @@ package blockly.runtime
 			for(var i:int=argList.length-1; i>=0; --i)
 				newContext.newKey(argList[i], valueList[i]);
 			var scope:FunctionScope = new FunctionScope(this);
+			scope.nextCodeList = codeList;
 			scope.nextContext = newContext;
 			scope.defineAddress = addressBegin;
 			scope.finishAddress = addressEnd;

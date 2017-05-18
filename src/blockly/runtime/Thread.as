@@ -14,6 +14,7 @@ package blockly.runtime
 		static public var REDRAW_FLAG:Boolean = true;
 		static public var Current:Thread;
 		
+		private var globalContext:IScriptContext;
 		internal var context:IScriptContext;
 		
 		private var codeList:Array;
@@ -34,11 +35,17 @@ package blockly.runtime
 		
 		public var userData:*;
 		
-		public function Thread(virtualMachine:VirtualMachine, codeList:Array)
+		public function Thread(virtualMachine:VirtualMachine, codeList:Array, globalContext:IScriptContext)
 		{
 			this.virtualMachine = virtualMachine;
 			this.codeList = codeList;
-			this.context = new ScriptContext();
+			this.globalContext = globalContext;
+			this.context = createContext();
+		}
+		
+		private function createContext():IScriptContext
+		{
+			return globalContext != null ? globalContext.createChild() : new ScriptContext();
 		}
 		
 		public function get finishSignal():ISignal
@@ -71,7 +78,7 @@ package blockly.runtime
 		{
 			_finishFlag = _interruptFlag = needCheckStack = false;
 			valueStack.length = ip = sp = 0;
-			context = new ScriptContext();
+			context = createContext();
 			resume();
 			start();
 		}
@@ -157,8 +164,10 @@ package blockly.runtime
 		{
 			push(scope);
 			++scope.funcRef.invokeCount;
+			scope.prevCodeList = codeList;
 			scope.prevContext = context;
 			scope.returnAddress = ip;
+			codeList = scope.nextCodeList;
 			context = scope.nextContext;
 			ip = scope.defineAddress + 1;
 		}
@@ -168,6 +177,7 @@ package blockly.runtime
 			var scope:FunctionScope = pop();
 			--scope.funcRef.invokeCount;
 			scope.defineAddress = needResume ? ip : scope.finishAddress;
+			codeList = scope.prevCodeList;
 			context = scope.prevContext;
 			ip = scope.returnAddress + 1;
 			
@@ -179,7 +189,7 @@ package blockly.runtime
 		
 		public function clone():Thread
 		{
-			return new Thread(virtualMachine, codeList);
+			return new Thread(virtualMachine, codeList, globalContext);
 		}
 		
 		public function newVar(varName:String, varValue:Object):void
@@ -200,6 +210,11 @@ package blockly.runtime
 		internal function isInvoking():Boolean
 		{
 			return context.hasParent();
+		}
+		
+		internal function newFunction(argList:Array, addressEnd:int):FunctionObject
+		{
+			return new FunctionObject(codeList, context, argList, ip, addressEnd);
 		}
 	}
 }
