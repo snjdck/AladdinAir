@@ -65,9 +65,7 @@ package blockly.runtime
 		private function __onDuplicate(op:Object):void
 		{
 			var thread:Thread = Thread.Current;
-			var value:Object = thread.pop();
-			thread.push(value);
-			thread.push(value);
+			thread.push(thread.peek());
 			++thread.ip;
 		}
 		
@@ -146,14 +144,14 @@ package blockly.runtime
 		private function __onDecrease(op:Object):void
 		{
 			var thread:Thread = Thread.Current;
-			thread.push(thread.pop() - 1);
+			thread.put(thread.peek() - 1);
 			++thread.ip;
 		}
 		
 		private function __onIsPositive(op:Object):void
 		{
 			var thread:Thread = Thread.Current;
-			thread.push(thread.pop() > 0);
+			thread.put(thread.peek() > 0);
 			++thread.ip;
 		}
 		

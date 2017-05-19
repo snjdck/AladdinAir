@@ -23,8 +23,8 @@ package blockly.runtime
 		internal var ip:int;
 		private var needCheckStack:Boolean;
 		private var sc:int;
-		private const valueStack:Array = [];
-		private var sp:int;
+		private const valueStack:Vector.<Object> = new Vector.<Object>();
+		private var sp:int = -1;
 		
 		private var _isSuspend:Boolean;
 		public var suspendUpdater:Object;
@@ -79,7 +79,8 @@ package blockly.runtime
 		public function restart():void
 		{
 			_finishFlag = _interruptFlag = needCheckStack = false;
-			valueStack.length = invokeCount = ip = sp = 0;
+			valueStack.length = invokeCount = ip = 0;
+			sp = -1;
 			context = createContext();
 			resume();
 			start();
@@ -124,15 +125,24 @@ package blockly.runtime
 		
 		public function push(value:Object):void
 		{
-			if(needCheckStack && sp >= sc)
-				return;
-			valueStack[sp++] = value;
+			if(needCheckStack)
+				assert(sp < sc);
+			valueStack[++sp] = value;
 		}
 		
 		internal function pop():*
 		{
-			assert(sp > 0);
-			return valueStack[--sp];
+			return valueStack[sp--];
+		}
+		
+		internal function peek():*
+		{
+			return valueStack[sp];
+		}
+		
+		internal function put(value:Object):void
+		{
+			valueStack[sp] = value;
 		}
 		
 		internal function updateSuspendState():void
@@ -151,7 +161,7 @@ package blockly.runtime
 		{
 			if(_interruptFlag)
 				return;
-			if(_finishFlag && sp == 1)
+			if(_finishFlag && sp == 0)
 				return valueStack[0];
 		}
 		
