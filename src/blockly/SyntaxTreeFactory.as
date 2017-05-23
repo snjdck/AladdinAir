@@ -145,11 +145,12 @@ package blockly
 			};
 		}
 		
-		static public function NewFunction(argNameList:Array, code:Array):Object
+		static public function NewFunction(argNameList:Array, code:Array, userData:Array=null):Object
 		{
 			return {
 				"type":OpCode.NEW_FUNCTION,
 				"argList":argNameList,
+				"userData":userData,
 				"code":code
 			};
 		}

@@ -11,6 +11,8 @@ package blockly.runtime
 		internal var nextCodeList:Array;
 		internal var prevContext:IScriptContext;
 		internal var nextContext:IScriptContext;
+		internal var prevFuncUserData:Array;
+		internal var nextFuncUserData:Array;
 		internal var defineAddress:int;
 		internal var finishAddress:int;
 		internal var returnAddress:int;

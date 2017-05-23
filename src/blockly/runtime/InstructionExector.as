@@ -125,11 +125,11 @@ package blockly.runtime
 			++thread.ip;
 		}
 		
-		private function __onNewFunction(op:Object, offset:int, argList:Array):void
+		private function __onNewFunction(op:Object, offset:int, argList:Array, userData:Array):void
 		{
 			var thread:Thread = Thread.Current;
 			var addressEnd:int = thread.ip + offset;
-			thread.push(thread.newFunction(argList, addressEnd));
+			thread.push(thread.newFunction(argList, addressEnd, userData));
 			thread.ip = addressEnd;
 		}
 		

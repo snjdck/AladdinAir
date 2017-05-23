@@ -84,7 +84,8 @@ package blockly.runtime
 				if(!yieldFlag){
 					continue;
 				}
-				if(thread.isInvoking() && getTimer() < timeEnd){
+				var funcUserData:Array = thread.funcUserData;
+				if(funcUserData && funcUserData[0] && getTimer() < timeEnd){
 					yieldFlag = false;
 				}else{
 					break;

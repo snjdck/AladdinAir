@@ -33,7 +33,7 @@ package blockly.runtime
 		private var _finishFlag:Boolean;
 		private var _interruptFlag:Boolean;
 		
-		private var invokeCount:int;
+		internal var funcUserData:Array;
 		
 		public var userData:*;
 		
@@ -79,7 +79,7 @@ package blockly.runtime
 		public function restart():void
 		{
 			_finishFlag = _interruptFlag = needCheckStack = false;
-			valueStack.length = invokeCount = ip = 0;
+			valueStack.length = ip = 0;
 			sp = -1;
 			context = createContext();
 			resume();
@@ -176,12 +176,13 @@ package blockly.runtime
 		{
 			push(scope);
 			++scope.funcRef.invokeCount;
-			++invokeCount;
 			scope.prevCodeList = codeList;
 			scope.prevContext = context;
+			scope.prevFuncUserData = funcUserData;
 			scope.returnAddress = ip;
 			codeList = scope.nextCodeList;
 			context = scope.nextContext;
+			funcUserData = scope.nextFuncUserData;
 			ip = scope.defineAddress + 1;
 		}
 		
@@ -189,10 +190,10 @@ package blockly.runtime
 		{
 			var scope:FunctionScope = pop();
 			--scope.funcRef.invokeCount;
-			--invokeCount;
 			scope.defineAddress = needResume ? ip : scope.finishAddress;
 			codeList = scope.prevCodeList;
 			context = scope.prevContext;
+			funcUserData = scope.prevFuncUserData;
 			ip = scope.returnAddress + 1;
 			
 			if(!needResume && scope.prevScope != null){
@@ -221,14 +222,9 @@ package blockly.runtime
 			context.setValue(varName, value);
 		}
 		
-		internal function isInvoking():Boolean
+		internal function newFunction(argList:Array, addressEnd:int, userData:Array):FunctionObject
 		{
-			return invokeCount > 0;
-		}
-		
-		internal function newFunction(argList:Array, addressEnd:int):FunctionObject
-		{
-			return new FunctionObject(codeList, context, argList, ip, addressEnd);
+			return new FunctionObject(codeList, context, argList, ip, addressEnd, userData);
 		}
 	}
 }

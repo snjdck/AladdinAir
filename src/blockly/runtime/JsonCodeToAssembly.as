@@ -239,7 +239,7 @@ package blockly.runtime
 		{
 			var result:Array = genStatementCode(block["code"]);
 			result.push([OpCode.RETURN]);
-			result.unshift(OpFactory.NewFunction(result.length+1, block["argList"]));
+			result.unshift(OpFactory.NewFunction(result.length+1, block["argList"], block["userData"]));
 			return result;
 		}
 	}

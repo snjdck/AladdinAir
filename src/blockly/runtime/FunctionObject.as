@@ -9,16 +9,18 @@ package blockly.runtime
 		private var argList:Array;
 		private var addressBegin:int;
 		private var addressEnd:int;
+		private var userData:Array;
 		
 		internal var invokeCount:int;
 		
-		public function FunctionObject(codeList:Array, context:IScriptContext, argList:Array, addressBegin:int, addressEnd:int)
+		public function FunctionObject(codeList:Array, context:IScriptContext, argList:Array, addressBegin:int, addressEnd:int, userData:Array)
 		{
 			this.codeList = codeList;
 			this.context = context;
 			this.argList = argList;
 			this.addressBegin = addressBegin;
 			this.addressEnd = addressEnd;
+			this.userData = userData;
 		}
 		
 		internal function createScope(valueList:Array):FunctionScope
@@ -29,6 +31,7 @@ package blockly.runtime
 			var scope:FunctionScope = new FunctionScope(this);
 			scope.nextCodeList = codeList;
 			scope.nextContext = newContext;
+			scope.nextFuncUserData = userData;
 			scope.defineAddress = addressBegin;
 			scope.finishAddress = addressEnd;
 			return scope;
