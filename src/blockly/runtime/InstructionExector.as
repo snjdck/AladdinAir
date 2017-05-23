@@ -6,6 +6,7 @@ package blockly.runtime
 	{
 		private var functionProvider:FunctionProvider;
 		private const opDict:Object = {};
+		private const argList:Array = [];
 		
 		public function InstructionExector(functionProvider:FunctionProvider)
 		{
@@ -42,9 +43,8 @@ package blockly.runtime
 		private function __onCall(op:Object, methodName:String, argCount:int, retCount:int):void
 		{
 			var thread:Thread = Thread.Current;
-			var argList:Array = getArgList(thread, argCount);
-			thread.requestCheckStack(retCount);
-			functionProvider.execute(methodName, argList, retCount);
+			getArgList(thread, argCount);
+			functionProvider.execute(thread, methodName, argList, retCount);
 			++thread.ip;
 		}
 		
@@ -90,7 +90,7 @@ package blockly.runtime
 		private function __onInvoke(op:Object, argCount:int, retCount:int):void
 		{
 			var thread:Thread = Thread.Current;
-			var argList:Array = getArgList(thread, argCount);
+			getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
 			thread.pushScope(funcRef.createScope(argList));
 			if(funcRef.isRecursiveInvoke()){
@@ -133,12 +133,11 @@ package blockly.runtime
 			thread.ip = addressEnd;
 		}
 		
-		private function getArgList(thread:Thread, argCount:int):Array
+		private function getArgList(thread:Thread, argCount:int):void
 		{
-			var argList:Array = [];
+			argList.length = argCount;
 			while(argCount-- > 0)
 				argList[argCount] = thread.pop();
-			return argList;
 		}
 		
 		private function __onDecrease(op:Object):void
@@ -182,7 +181,7 @@ package blockly.runtime
 		private function __onCoroutineNew(op:Object, argCount:int):void
 		{
 			var thread:Thread = Thread.Current;
-			var argList:Array = getArgList(thread, argCount);
+			getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
 			thread.push(funcRef.createScope(argList));
 			++thread.ip;

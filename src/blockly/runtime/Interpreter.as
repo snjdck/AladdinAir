@@ -1,15 +1,22 @@
 package blockly.runtime
 {
+	import flash.display.Shape;
+	import flash.events.Event;
+	
 	import snjdck.arithmetic.IScriptContext;
 
 	public class Interpreter
 	{
+		private const timer:Shape = new Shape();
+		
 		private var virtualMachine:VirtualMachine;
 		private var compiler:JsonCodeToAssembly;
 		private var deadCodeCleaner:DeadCodeCleaner;
 		private var optimizer:AssemblyOptimizer;
 		private var conditionCalculater:ConditionCalculater;
 		private var printer:CodeListPrinter;
+		private var functionProvider:FunctionProvider;
+		private var profiler:CodeProfiler;
 		
 		public function Interpreter(functionProvider:FunctionProvider)
 		{
@@ -19,6 +26,23 @@ package blockly.runtime
 			optimizer = new AssemblyOptimizer();
 			deadCodeCleaner = new DeadCodeCleaner();
 			printer = new CodeListPrinter();
+			profiler = new CodeProfiler();
+			this.functionProvider = functionProvider;
+			timer.addEventListener(Event.ENTER_FRAME, __onEnterFrame);
+		}
+		
+		private function __onEnterFrame(evt:Event):void
+		{
+			if(virtualMachine.getThreadCount() <= 0){
+				return;
+			}
+			if(functionProvider.profiler != null){
+				profiler.reset();
+				virtualMachine.onTick();
+				profiler.print();
+			}else{
+				virtualMachine.onTick();
+			}
 		}
 		
 		public function compile(blockList:Array):Array
@@ -72,6 +96,11 @@ package blockly.runtime
 		public function castCodeListToString(codeList:Array):String
 		{
 			return printer.castCodeListToString(codeList);
+		}
+		
+		public function enableProfiler():void
+		{
+			functionProvider.profiler = profiler;
 		}
 	}
 }

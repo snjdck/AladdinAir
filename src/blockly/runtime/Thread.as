@@ -21,7 +21,6 @@ package blockly.runtime
 		private var virtualMachine:VirtualMachine;
 		
 		internal var ip:int;
-		private var needCheckStack:Boolean;
 		private var sc:int;
 		private const valueStack:Vector.<Object> = new Vector.<Object>();
 		private var sp:int = -1;
@@ -78,7 +77,7 @@ package blockly.runtime
 		
 		public function restart():void
 		{
-			_finishFlag = _interruptFlag = needCheckStack = false;
+			_finishFlag = _interruptFlag = false;
 			valueStack.length = ip = 0;
 			sp = -1;
 			context = createContext();
@@ -88,15 +87,11 @@ package blockly.runtime
 		
 		internal function execNextCode(instructionExcetor:InstructionExector):void
 		{
-			if(needCheckStack){
-				assert(sp == sc, "function return count mismatch!");
-				needCheckStack = false;
-			}
-			if(ip >= codeList.length){
+			if(ip < codeList.length){
+				instructionExcetor.execute(codeList[ip]);
+			}else{
 				_finishFlag = true;
-				return;
 			}
-			instructionExcetor.execute(codeList[ip]);
 		}
 		
 		public function yield(waitFlag:Boolean=true):void
@@ -112,8 +107,7 @@ package blockly.runtime
 		
 		public function resume():void
 		{
-			if(needCheckStack)
-				assert(sp == sc);
+			checkStack();
 			_isSuspend = false;
 			suspendUpdater = null;
 		}
@@ -125,8 +119,6 @@ package blockly.runtime
 		
 		public function push(value:Object):void
 		{
-			if(needCheckStack)
-				assert(sp < sc);
 			valueStack[++sp] = value;
 		}
 		
@@ -153,8 +145,12 @@ package blockly.runtime
 		
 		internal function requestCheckStack(count:int):void
 		{
-			needCheckStack = true;
 			sc = sp + count;
+		}
+		
+		internal function checkStack():void
+		{
+			assert(sp == sc, "function return count mismatch!");
 		}
 		
 		public function get resultValue():*

@@ -1,14 +1,11 @@
 package blockly.runtime
 {
-	import flash.display.Shape;
-	import flash.events.Event;
 	import flash.utils.getTimer;
 
 	internal class VirtualMachine
 	{
 		private var instructionExector:InstructionExector;
 		private const threadList:Vector.<Thread> = new Vector.<Thread>();
-		private const timer:Shape = new Shape();
 		
 		internal var redrawFlag:Boolean;
 		internal var yieldFlag:Boolean;
@@ -19,7 +16,6 @@ package blockly.runtime
 		public function VirtualMachine(functionProvider:FunctionProvider)
 		{
 			instructionExector = new InstructionExector(functionProvider);
-			timer.addEventListener(Event.ENTER_FRAME, onUpdateThreads);
 		}
 		
 		public function getThreadCount():uint
@@ -46,10 +42,11 @@ package blockly.runtime
 			}
 		}
 		
-		private function onUpdateThreads(evt:Event):void
+		public function onTick():void
 		{
-			if (threadList.length <= 0) return;
-//			trace("== event loop begin");
+			if(threadList.length <= 0){
+				return;
+			}
 			redrawFlag = false;
 			var timeEnd:int = getTimer() + Thread.EXEC_TIME;
 			while(updateThreads() && getTimer() < timeEnd);
@@ -57,7 +54,6 @@ package blockly.runtime
 		
 		private function updateThreads():Boolean
 		{
-//			trace("-- thread loop begin");
 			activeFlag = false;
 			for each(var thread:Thread in threadList)
 				updateThread(thread);
@@ -68,10 +64,8 @@ package blockly.runtime
 		
 		private function updateThread(thread:Thread):void
 		{
-//			trace("** step thread");
 			Thread.Current = thread;
 			yieldFlag = waitFlag = false;
-			var timeEnd:int = getTimer() + 500;
 			for(;;){
 				if(thread.isFinish()){
 					return;
@@ -84,8 +78,7 @@ package blockly.runtime
 				if(!yieldFlag){
 					continue;
 				}
-				var funcUserData:Array = thread.funcUserData;
-				if(funcUserData && funcUserData[0] && getTimer() < timeEnd){
+				if(thread.funcUserData && thread.funcUserData[0]){
 					yieldFlag = false;
 				}else{
 					break;

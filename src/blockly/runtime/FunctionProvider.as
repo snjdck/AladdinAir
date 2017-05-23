@@ -5,6 +5,8 @@ package blockly.runtime
 
 	public class FunctionProvider
 	{
+		internal var profiler:CodeProfiler;
+		
 		private const context:IScriptContext = new ScriptContext();
 		
 		public function FunctionProvider(){}
@@ -25,13 +27,23 @@ package blockly.runtime
 			return context;
 		}
 		
-		internal function execute(name:String, argList:Array, retCount:int):void
+		internal function execute(thread:Thread, name:String, argList:Array, retCount:int):void
 		{
+			if(profiler != null){
+				profiler.begin(name);
+			}
 			if(context.hasKey(name, false)){
 				var handler:FunctionObjectNative = context.getValue(name);
-				handler.invoke(argList, retCount > 0);
+				handler.invoke(thread, argList, retCount > 0);
 			}else{
+				thread.requestCheckStack(retCount);
 				onCallUnregisteredFunction(name, argList, retCount);
+				if(!thread.isSuspend()){
+					thread.checkStack();
+				}
+			}
+			if(profiler != null){
+				profiler.end(name);
 			}
 		}
 		

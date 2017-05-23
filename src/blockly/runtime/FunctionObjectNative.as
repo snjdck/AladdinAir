@@ -11,12 +11,12 @@ package blockly.runtime
 			this.isAsync = isAsync;
 		}
 		
-		internal function invoke(valueList:Array, hasValue:Boolean):void
+		internal function invoke(thread:Thread, valueList:Array, hasValue:Boolean):void
 		{
-			var thread:Thread = Thread.Current;
 			var value:* = handler.apply(null, valueList);
 			if(isAsync){
 				thread.suspend();
+				thread.requestCheckStack(hasValue ? 1 : 0);
 			}else if(hasValue){
 				thread.push(value);
 			}
