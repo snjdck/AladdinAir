@@ -78,7 +78,7 @@ package blockly.runtime
 				if(!yieldFlag){
 					continue;
 				}
-				if(thread.funcUserData && thread.funcUserData[0]){
+				if(thread.runFlag > 0){
 					yieldFlag = false;
 				}else{
 					break;

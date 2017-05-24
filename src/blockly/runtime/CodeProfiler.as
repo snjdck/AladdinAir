@@ -11,37 +11,57 @@ package blockly.runtime
 		
 		public function reset():void
 		{
-			for(var key:String in infoDict){
-				infoDict[key] = 0;
+			for each(var info:Array in infoDict){
+				info[0] = info[1] = 0;
 			}
 		}
 		
 		public function begin(key:String):void
 		{
 			if(!(key in infoDict)){
-				infoDict[key] = 0;
+				infoDict[key] = [0, 0];
 			}
 			timestamp = getTimer();
 		}
 		
 		public function end(key:String):void
 		{
-			infoDict[key] += getTimer() - timestamp;
+			var info:Array = infoDict[key];
+			info[0] += getTimer() - timestamp;
+			info[1] += 1;
 		}
 		
 		public function print():void
 		{
+			var infoList:Array = [];
+			var info:Array;
 			var total:int = 0;
-			for each(var time:int in infoDict){
-				total += time;
-			}
-			trace("/**Profile**/", total);
 			for(var key:String in infoDict){
-				if(infoDict[key] <= 0){
+				info = infoDict[key];
+				if(info[0] <= 0){
 					continue;
 				}
-				trace(Math.round(infoDict[key] * 100 / total) + "%\t\t" + key);
+				total += info[0];
+				var value:Number = info[0] * 100;
+				infoList.push([key, value, value / info[1]]);
 			}
+			if(total <= 0){
+				return;
+			}
+			trace("/**Profile**/", total);
+			infoList.sort(_sortInfo);
+			for each(info in infoList){
+				trace(Math.round(info[1] / total) + "%\t\t" + Math.round(info[2] / total) + "%\t\t" + info[0]);
+			}
+		}
+		
+		private function _sortInfo(a:Array, b:Array):int
+		{
+			if (a[1] > b[1]) return -1;
+			if (a[1] < b[1]) return  1;
+			if (a[2] > b[2]) return -1;
+			if (a[2] < b[2]) return  1;
+			return 0;
 		}
 	}
 }

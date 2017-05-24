@@ -32,7 +32,8 @@ package blockly.runtime
 		private var _finishFlag:Boolean;
 		private var _interruptFlag:Boolean;
 		
-		internal var funcUserData:Array;
+		private var funcUserData:Array;
+		internal var runFlag:int;
 		
 		public var userData:*;
 		
@@ -77,6 +78,8 @@ package blockly.runtime
 		
 		public function restart():void
 		{
+			funcUserData = null;
+			runFlag = 0;
 			_finishFlag = _interruptFlag = false;
 			valueStack.length = ip = 0;
 			sp = -1;
@@ -179,6 +182,7 @@ package blockly.runtime
 			codeList = scope.nextCodeList;
 			context = scope.nextContext;
 			funcUserData = scope.nextFuncUserData;
+			runFlag += funcUserData[0];
 			ip = scope.defineAddress + 1;
 		}
 		
@@ -189,6 +193,7 @@ package blockly.runtime
 			scope.defineAddress = needResume ? ip : scope.finishAddress;
 			codeList = scope.prevCodeList;
 			context = scope.prevContext;
+			runFlag -= funcUserData[0];
 			funcUserData = scope.prevFuncUserData;
 			ip = scope.returnAddress + 1;
 			
