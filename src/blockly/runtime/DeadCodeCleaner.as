@@ -29,6 +29,7 @@ package blockly.runtime
 				switch(code[0]){
 					case OpCode.NEW_FUNCTION:
 					case OpCode.JUMP_IF_TRUE:
+					case OpCode.JUMP_IF_NOT_POSITIVE:
 						calcCodeUsage(codeList, codeUsage, index+1);
 						//fallthrough
 					case OpCode.JUMP:
@@ -114,6 +115,7 @@ package blockly.runtime
 				switch(code[0]){
 					case OpCode.JUMP:
 					case OpCode.JUMP_IF_TRUE:
+					case OpCode.JUMP_IF_NOT_POSITIVE:
 					case OpCode.NEW_FUNCTION:
 						break;
 					default:

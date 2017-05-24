@@ -4,7 +4,10 @@ package blockly.runtime
 
 	internal class InstructionExector
 	{
+		internal var profiler:CodeProfiler;
+		
 		private var functionProvider:FunctionProvider;
+		
 		private const opDict:Object = {};
 		private const argList:Array = [];
 		
@@ -16,7 +19,8 @@ package blockly.runtime
 			regOpHandler(OpCode.JUMP_IF_TRUE, __onJumpIfTrue);
 			regOpHandler(OpCode.INVOKE, __onInvoke);
 			regOpHandler(OpCode.RETURN, __onReturn);
-			regOpHandler(OpCode.DUPLICATE, __onDuplicate);
+//			regOpHandler(OpCode.DUPLICATE, __onDuplicate);
+			regOpHandler(OpCode.JUMP_IF_NOT_POSITIVE, __onJumpIfNotPositive);
 			regOpHandler(OpCode.POP, __onPop);
 			regOpHandler(OpCode.NEW_VAR, __onNewVar);
 			regOpHandler(OpCode.GET_VAR, __onGetVar);
@@ -24,7 +28,7 @@ package blockly.runtime
 			regOpHandler(OpCode.NEW_FUNCTION, __onNewFunction);
 			
 			regOpHandler(OpCode.DECREASE, __onDecrease);
-			regOpHandler(OpCode.IS_POSITIVE, __onIsPositive);
+//			regOpHandler(OpCode.IS_POSITIVE, __onIsPositive);
 			
 			this.functionProvider = functionProvider;
 		}
@@ -34,17 +38,30 @@ package blockly.runtime
 			opDict[op] = handler;
 		}
 		
+		public function optimize(codeList:Array):void
+		{
+			for each(var code:Array in codeList){
+				code[0] = opDict[code[0]];
+			}
+		}
+		
 		public function execute(instruction:Array):void
 		{
-			var handler:Function = opDict[instruction[0]];
+			var handler:Function = instruction[0];
 			handler.apply(null, instruction);
 		}
 		
-		private function __onCall(op:Object, methodName:String, argCount:int, retCount:int):void
+		private function __onCall(op:Object, method:String, argCount:int, retCount:int, params:FunctionParams=null):void
 		{
 			var thread:Thread = Thread.Current;
 			getArgList(thread, argCount);
-			functionProvider.execute(thread, methodName, argList, retCount);
+			if(profiler != null){
+				profiler.begin(method);
+			}
+			functionProvider.execute(thread, method, (params ? params.getArgs(argList) : argList), retCount);
+			if(profiler != null){
+				profiler.end(method);
+			}
 			++thread.ip;
 		}
 		
@@ -61,14 +78,14 @@ package blockly.runtime
 			thread.pop();
 			++thread.ip;
 		}
-		
+		/*
 		private function __onDuplicate(op:Object):void
 		{
 			var thread:Thread = Thread.Current;
 			thread.push(thread.peek());
 			++thread.ip;
 		}
-		
+		*/
 		private function __onJump(op:Object, count:int):void
 		{
 			var thread:Thread = Thread.Current;
@@ -87,12 +104,18 @@ package blockly.runtime
 			}
 		}
 		
-		private function __onInvoke(op:Object, argCount:int, retCount:int):void
+		private function __onJumpIfNotPositive(op:Object, count:int):void
+		{
+			var thread:Thread = Thread.Current;
+			thread.ip += thread.peek() <= 0 ? count : 1;
+		}
+		
+		private function __onInvoke(op:Object, argCount:int, retCount:int, params:FunctionParams=null):void
 		{
 			var thread:Thread = Thread.Current;
 			getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
-			thread.pushScope(funcRef.createScope(argList));
+			thread.pushScope(funcRef.createScope(params ? params.getArgs(argList) : argList));
 			if(funcRef.isRecursiveInvoke()){
 				thread.yield(false);
 			}
@@ -146,14 +169,14 @@ package blockly.runtime
 			thread.put(thread.peek() - 1);
 			++thread.ip;
 		}
-		
+		/*
 		private function __onIsPositive(op:Object):void
 		{
 			var thread:Thread = Thread.Current;
-			thread.put(thread.peek() > 0);
+			thread.push(thread.peek() > 0);
 			++thread.ip;
 		}
-		
+		*/
 		private function __onYield(op:Object):void
 		{
 			var thread:Thread = Thread.Current;

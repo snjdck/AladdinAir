@@ -1,7 +1,5 @@
 package blockly.runtime
 {
-	import blockly.OpCode;
-
 	internal class CodeListPrinter
 	{
 		public function CodeListPrinter(){}
@@ -16,14 +14,7 @@ package blockly.runtime
 		
 		private function castCodeToString(code:Array):String
 		{
-			var op:String = code[0];
-			if(op == OpCode.PUSH){
-				var value:* = code[1];
-				if(value is String)
-					value = '"' + value + '"';
-				return op + "," + value;
-			}
-			return code.join(",");
+			return JSON.stringify(code);
 		}
 	}
 }

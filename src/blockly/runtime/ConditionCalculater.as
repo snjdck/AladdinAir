@@ -16,6 +16,11 @@ package blockly.runtime
 				}
 				var prevIndex:int = i - 1;
 				var prevCode:Array = codeList[prevIndex];
+				if(prevCode[0] == OpCode.IS_POSITIVE){
+					codeList[prevIndex] = OpFactory.Jump(2);
+					codeList[i+1][0] = OpCode.JUMP_IF_NOT_POSITIVE;
+					continue;
+				}
 				if(prevCode[0] != OpCode.PUSH){
 					continue;
 				}

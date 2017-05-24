@@ -13,9 +13,9 @@ package blockly.runtime
 		
 		private var activeFlag:Boolean;
 		
-		public function VirtualMachine(functionProvider:FunctionProvider)
+		public function VirtualMachine(instructionExector:InstructionExector)
 		{
-			instructionExector = new InstructionExector(functionProvider);
+			this.instructionExector = instructionExector;
 		}
 		
 		public function getThreadCount():uint
