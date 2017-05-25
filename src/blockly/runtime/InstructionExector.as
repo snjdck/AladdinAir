@@ -17,9 +17,9 @@ package blockly.runtime
 			regOpHandler(OpCode.PUSH, __onPush);
 			regOpHandler(OpCode.JUMP, __onJump);
 			regOpHandler(OpCode.JUMP_IF_TRUE, __onJumpIfTrue);
+			regOpHandler(OpCode.JUMP_IF_FALSE, __onJumpIfFalse);
 			regOpHandler(OpCode.INVOKE, __onInvoke);
 			regOpHandler(OpCode.RETURN, __onReturn);
-//			regOpHandler(OpCode.DUPLICATE, __onDuplicate);
 			regOpHandler(OpCode.JUMP_IF_NOT_POSITIVE, __onJumpIfNotPositive);
 			regOpHandler(OpCode.POP, __onPop);
 			regOpHandler(OpCode.NEW_VAR, __onNewVar);
@@ -28,7 +28,6 @@ package blockly.runtime
 			regOpHandler(OpCode.NEW_FUNCTION, __onNewFunction);
 			
 			regOpHandler(OpCode.DECREASE, __onDecrease);
-//			regOpHandler(OpCode.IS_POSITIVE, __onIsPositive);
 			
 			this.functionProvider = functionProvider;
 		}
@@ -78,14 +77,7 @@ package blockly.runtime
 			thread.pop();
 			++thread.ip;
 		}
-		/*
-		private function __onDuplicate(op:Object):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(thread.peek());
-			++thread.ip;
-		}
-		*/
+		
 		private function __onJump(op:Object, count:int):void
 		{
 			var thread:Thread = Thread.Current;
@@ -99,7 +91,17 @@ package blockly.runtime
 			var thread:Thread = Thread.Current;
 			var condition:Boolean = thread.pop();
 			thread.ip += condition ? count : 1;
-			if(condition && count < 0){
+			if(count < 0 && condition){
+				thread.yield(false);
+			}
+		}
+		
+		private function __onJumpIfFalse(op:Object, count:int):void
+		{
+			var thread:Thread = Thread.Current;
+			var condition:Boolean = thread.pop();
+			thread.ip += condition ? 1 : count;
+			if(count < 0 && !condition){
 				thread.yield(false);
 			}
 		}
@@ -169,14 +171,7 @@ package blockly.runtime
 			thread.put(thread.peek() - 1);
 			++thread.ip;
 		}
-		/*
-		private function __onIsPositive(op:Object):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.push(thread.peek() > 0);
-			++thread.ip;
-		}
-		*/
+		
 		private function __onYield(op:Object):void
 		{
 			var thread:Thread = Thread.Current;

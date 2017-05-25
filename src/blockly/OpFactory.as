@@ -7,6 +7,11 @@ package blockly
 			return [OpCode.JUMP_IF_TRUE, offset];
 		}
 		
+		static public function JumpIfFalse(offset:int):Array
+		{
+			return [OpCode.JUMP_IF_FALSE, offset];
+		}
+		
 		static public function Jump(offset:int):Array
 		{
 			return [OpCode.JUMP, offset];

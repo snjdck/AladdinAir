@@ -15,6 +15,8 @@ package blockly.runtime
 			runPass(codeList, OpCode.JUMP, calcNewJumpIndex);
 			runPass(codeList, OpCode.JUMP, optimizeJump);
 			runPass(codeList, OpCode.JUMP_IF_TRUE, optimizeJumpIfTrue);
+			runPass(codeList, OpCode.JUMP_IF_FALSE, optimizeJumpIfTrue);
+			runPass(codeList, OpCode.JUMP_IF_NOT_POSITIVE, optimizeJumpIfTrue);
 		}
 		
 		private function runPass(codeList:Array, op:String, handler:Function):void

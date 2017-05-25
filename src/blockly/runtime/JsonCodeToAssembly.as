@@ -146,11 +146,10 @@ package blockly.runtime
 			replaceBreakContinue(loopCode, loopCount + 1);
 			
 			append(result, conditionCode);
-			result.push(OpFactory.JumpIfTrue(2));
-			result.push(OpFactory.Jump(loopCount + 2));
+			result.push(OpFactory.JumpIfFalse(loopCount + 2));
 			append(result, loopCode);
 			append(result, iterCode);
-			result.push(OpFactory.Jump(-(totalCount + 2)));
+			result.push(OpFactory.Jump(-(totalCount + 1)));
 			/*
 			replaceBreakContinue(loopCode, totalCount + 1);
 			

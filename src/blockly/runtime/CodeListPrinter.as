@@ -14,7 +14,10 @@ package blockly.runtime
 		
 		private function castCodeToString(code:Array):String
 		{
-			return JSON.stringify(code);
+			if(code.length <= 1){
+				return code[0];
+			}
+			return code[0] + "," + JSON.stringify(code.slice(1)).slice(1, -1);
 		}
 	}
 }

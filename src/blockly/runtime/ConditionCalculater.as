@@ -9,24 +9,36 @@ package blockly.runtime
 		
 		public function calculate(codeList:Array):void
 		{
-			for(var i:int=0, n:int=codeList.length; i<n; ++i){
-				var code:Array = codeList[i];
-				if(code[0] != OpCode.JUMP_IF_TRUE){
-					continue;
-				}
+			for(var i:int=1, n:int=codeList.length; i<n; ++i){
 				var prevIndex:int = i - 1;
 				var prevCode:Array = codeList[prevIndex];
-				if(prevCode[0] == OpCode.IS_POSITIVE){
-					codeList[prevIndex] = OpFactory.Jump(2);
-					codeList[i+1][0] = OpCode.JUMP_IF_NOT_POSITIVE;
-					continue;
+				var code:Array = codeList[i];
+				
+				if(code[0] == OpCode.JUMP_IF_FALSE){
+					if(prevCode[0] == OpCode.PUSH){
+						codeList[prevIndex] = OpFactory.Jump(1);
+						code[0] = OpCode.JUMP;
+						if(prevCode[1]){
+							code[1] = 1;
+						}
+					}else if(prevCode[0] == OpCode.IS_POSITIVE){
+						codeList[prevIndex] = OpFactory.Jump(1);
+						code[0] = OpCode.JUMP_IF_NOT_POSITIVE;
+					}
+				}else if(code[0] == OpCode.JUMP_IF_TRUE){
+					if(prevCode[0] == OpCode.PUSH){
+						codeList[prevIndex] = OpFactory.Jump(1);
+						code[0] = OpCode.JUMP;
+						if(!prevCode[1]){
+							code[1] = 1;
+						}
+					}
+				}else if(code[0] == OpCode.JUMP){
+					if(prevCode[0] == OpCode.JUMP_IF_TRUE && prevCode[1] == 2){
+						codeList[prevIndex] = OpFactory.Jump(1);
+						code[0] = OpCode.JUMP_IF_FALSE;
+					}
 				}
-				if(prevCode[0] != OpCode.PUSH){
-					continue;
-				}
-				var jumpCount:int = 1 + (Boolean(prevCode[1]) ? code[1] : 1);
-				codeList[prevIndex] = OpFactory.Jump(jumpCount);
-				codeList[i] = null;
 			}
 		}
 	}
