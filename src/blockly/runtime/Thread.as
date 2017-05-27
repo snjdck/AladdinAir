@@ -3,8 +3,6 @@ package blockly.runtime
 	import flash.signals.ISignal;
 	import flash.signals.Signal;
 	
-	import lambda.apply;
-	
 	import snjdck.arithmetic.IScriptContext;
 	import snjdck.arithmetic.impl.ScriptContext;
 
@@ -143,7 +141,7 @@ package blockly.runtime
 		internal function updateSuspendState():void
 		{
 			if(suspendUpdater != null)
-				lambda.apply(suspendUpdater);
+				$lambda.apply(suspendUpdater);
 		}
 		
 		internal function requestCheckStack(count:int):void

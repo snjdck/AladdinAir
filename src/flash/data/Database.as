@@ -5,8 +5,6 @@ package flash.data
 	import flash.filesystem.File;
 	import flash.net.Responder;
 	
-	import lambda.call;
-	
 	import stdlib.common.copyProps;
 
 	final public class Database
@@ -49,9 +47,9 @@ package flash.data
 			function onResponse(result:Object):void
 			{
 				if(result is SQLError){
-					lambda.call(handler, false, result);
+					$lambda.call(handler, false, result);
 				}else{
-					lambda.call(handler, true, result.data);
+					$lambda.call(handler, true, result.data);
 				}
 			}
 			statement.execute(-1, new Responder(onResponse, onResponse));
