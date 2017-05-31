@@ -12,7 +12,7 @@ package blockly
 		static public const CONTINUE:String = "continue";
 		
 //		static public const DUPLICATE:String = "duplicate";
-		static public const POP:String = "pop";
+//		static public const POP:String = "pop";
 		
 		static public const RETURN:String = "return";
 		static public const INVOKE:String = "invoke";
@@ -23,7 +23,7 @@ package blockly
 		
 		static public const NEW_FUNCTION:String = "newFunction";
 		
-		static public const DECREASE:String = "decrease";
+//		static public const DECREASE:String = "decrease";
 		static public const IS_POSITIVE:String = "isPositive";
 		static public const JUMP_IF_NOT_POSITIVE:String = "jumpIfNotPositive";
 		

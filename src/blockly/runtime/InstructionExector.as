@@ -21,13 +21,10 @@ package blockly.runtime
 			regOpHandler(OpCode.INVOKE, __onInvoke);
 			regOpHandler(OpCode.RETURN, __onReturn);
 			regOpHandler(OpCode.JUMP_IF_NOT_POSITIVE, __onJumpIfNotPositive);
-			regOpHandler(OpCode.POP, __onPop);
 			regOpHandler(OpCode.NEW_VAR, __onNewVar);
 			regOpHandler(OpCode.GET_VAR, __onGetVar);
 			regOpHandler(OpCode.SET_VAR, __onSetVar);
 			regOpHandler(OpCode.NEW_FUNCTION, __onNewFunction);
-			
-			regOpHandler(OpCode.DECREASE, __onDecrease);
 			
 			this.functionProvider = functionProvider;
 		}
@@ -71,13 +68,6 @@ package blockly.runtime
 			++thread.ip;
 		}
 		
-		private function __onPop(op:Object):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.pop();
-			++thread.ip;
-		}
-		
 		private function __onJump(op:Object, count:int):void
 		{
 			var thread:Thread = Thread.Current;
@@ -109,7 +99,14 @@ package blockly.runtime
 		private function __onJumpIfNotPositive(op:Object, count:int):void
 		{
 			var thread:Thread = Thread.Current;
-			thread.ip += thread.peek() <= 0 ? count : 1;
+			var value:int = thread.peek();
+			if(value <= 0){
+				thread.pop();
+				thread.ip += count;
+			}else{
+				thread.put(value - 1);
+				++thread.ip;
+			}
 		}
 		
 		private function __onInvoke(op:Object, argCount:int, retCount:int, params:FunctionParams=null):void
@@ -163,13 +160,6 @@ package blockly.runtime
 			argList.length = argCount;
 			while(argCount-- > 0)
 				argList[argCount] = thread.pop();
-		}
-		
-		private function __onDecrease(op:Object):void
-		{
-			var thread:Thread = Thread.Current;
-			thread.put(thread.peek() - 1);
-			++thread.ip;
 		}
 		
 		private function __onYield(op:Object):void

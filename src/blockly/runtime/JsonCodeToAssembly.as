@@ -218,11 +218,12 @@ package blockly.runtime
 			var result:Array = genForCodeImpl(
 				genExpressionCode(block["count"]),
 				[[OpCode.IS_POSITIVE]],
+				[],
 //				[[OpCode.DUPLICATE], [OpCode.IS_POSITIVE]],
-				[[OpCode.DECREASE]],
+//				[[OpCode.DECREASE]],
 				block["code"]
 			);
-			result.push([OpCode.POP]);
+//			result.push([OpCode.POP]);
 			return result;
 		}
 		
