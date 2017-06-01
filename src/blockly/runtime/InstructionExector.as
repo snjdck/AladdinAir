@@ -79,20 +79,24 @@ package blockly.runtime
 		private function __onJumpIfTrue(op:Object, count:int):void
 		{
 			var thread:Thread = Thread.Current;
-			var condition:Boolean = thread.pop();
-			thread.ip += condition ? count : 1;
-			if(count < 0 && condition){
-				thread.yield(false);
-			}
+			onJumpIfFalseImpl(thread, count, !thread.pop());
 		}
 		
 		private function __onJumpIfFalse(op:Object, count:int):void
 		{
 			var thread:Thread = Thread.Current;
-			var condition:Boolean = thread.pop();
-			thread.ip += condition ? 1 : count;
-			if(count < 0 && !condition){
-				thread.yield(false);
+			onJumpIfFalseImpl(thread, count, thread.pop());
+		}
+		
+		private function onJumpIfFalseImpl(thread:Thread, count:int, condition:Boolean):void
+		{
+			if(condition){
+				++thread.ip;
+			}else{
+				thread.ip += count;
+				if(count < 0){
+					thread.yield(false);
+				}
 			}
 		}
 		
