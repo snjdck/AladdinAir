@@ -9,9 +9,8 @@ package blockly.runtime
 		private var argList:Array;
 		private var addressBegin:int;
 		private var addressEnd:int;
-		private var userData:Array;
-		
-		internal var invokeCount:int;
+		private var ignoreYieldFlag:Boolean;
+		private var invokeCount:int;
 		
 		public function FunctionObject(codeList:Array, context:IScriptContext, argList:Array, addressBegin:int, addressEnd:int, userData:Array)
 		{
@@ -20,7 +19,7 @@ package blockly.runtime
 			this.argList = argList;
 			this.addressBegin = addressBegin;
 			this.addressEnd = addressEnd;
-			this.userData = userData;
+			this.ignoreYieldFlag = userData[0];
 		}
 		
 		internal function createScope(valueList:Array):FunctionScope
@@ -31,10 +30,23 @@ package blockly.runtime
 			var scope:FunctionScope = new FunctionScope(this);
 			scope.nextCodeList = codeList;
 			scope.nextContext = newContext;
-			scope.nextFuncUserData = userData;
 			scope.defineAddress = addressBegin;
 			scope.finishAddress = addressEnd;
 			return scope;
+		}
+		
+		internal function invokeBegin(thread:Thread):void
+		{
+			++invokeCount;
+			if(ignoreYieldFlag)
+				++thread.runFlag;
+		}
+		
+		internal function invokeEnd(thread:Thread):void
+		{
+			--invokeCount;
+			if(ignoreYieldFlag)
+				--thread.runFlag;
 		}
 		
 		internal function isRecursiveInvoke():Boolean
