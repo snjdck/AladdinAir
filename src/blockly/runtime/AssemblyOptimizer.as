@@ -5,7 +5,7 @@ package blockly.runtime
 	internal class AssemblyOptimizer
 	{
 		static private const jumpOpList:Array = [OpCode.JUMP];
-		static private const conditionJumpOpList:Array = [OpCode.JUMP_IF_TRUE, OpCode.JUMP_IF_FALSE, OpCode.JUMP_IF_NOT_POSITIVE];
+		static private const conditionJumpOpList:Array = [OpCode.JUMP_IF_FALSE, OpCode.JUMP_IF_NOT_POSITIVE];
 		static private const stack:Vector.<int> = new Vector.<int>();
 		
 		public function AssemblyOptimizer(){}

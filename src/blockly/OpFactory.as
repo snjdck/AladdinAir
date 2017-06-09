@@ -2,11 +2,6 @@ package blockly
 {
 	public class OpFactory
 	{
-		static public function JumpIfTrue(offset:int):Array
-		{
-			return [OpCode.JUMP_IF_TRUE, offset];
-		}
-		
 		static public function JumpIfFalse(offset:int):Array
 		{
 			return [OpCode.JUMP_IF_FALSE, offset];

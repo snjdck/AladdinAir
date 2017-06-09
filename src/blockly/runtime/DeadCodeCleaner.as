@@ -28,7 +28,6 @@ package blockly.runtime
 				var code:Array = codeList[index];
 				switch(code[0]){
 					case OpCode.NEW_FUNCTION:
-					case OpCode.JUMP_IF_TRUE:
 					case OpCode.JUMP_IF_FALSE:
 					case OpCode.JUMP_IF_NOT_POSITIVE:
 						calcCodeUsage(codeList, codeUsage, index+1);
@@ -115,7 +114,6 @@ package blockly.runtime
 				var code:Array = codeList[i];
 				switch(code[0]){
 					case OpCode.JUMP:
-					case OpCode.JUMP_IF_TRUE:
 					case OpCode.JUMP_IF_FALSE:
 					case OpCode.JUMP_IF_NOT_POSITIVE:
 					case OpCode.NEW_FUNCTION:

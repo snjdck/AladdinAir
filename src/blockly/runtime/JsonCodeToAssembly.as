@@ -126,7 +126,8 @@ package blockly.runtime
 			replaceBreakContinue(loopCode, loopCode.length + 1);
 			
 			var result:Array = genExpressionCode(block["condition"]);
-			result.push(OpFactory.JumpIfTrue(loopCode.length + 2));
+			result.push(OpFactory.JumpIfFalse(2));
+			result.push(OpFactory.Jump(loopCode.length + 2));
 			append(result, loopCode);
 			result.push(OpFactory.Jump(-result.length));
 			return result;
@@ -180,10 +181,10 @@ package blockly.runtime
 		{
 			var result:Array = genExpressionCode(condition);
 			
-			result.push(OpFactory.JumpIfTrue(caseFalse.length + 2));
-			append(result, caseFalse);
-			result.push(OpFactory.Jump(caseTrue.length + 1));
+			result.push(OpFactory.JumpIfFalse(caseTrue.length + 2));
 			append(result, caseTrue);
+			result.push(OpFactory.Jump(caseFalse.length + 1));
+			append(result, caseFalse);
 			
 			return result;
 		}

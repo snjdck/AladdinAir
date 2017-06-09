@@ -12,13 +12,13 @@ package blockly.runtime
 		private const argList:Array = [];
 		
 		private var nextOp:Object;
+		private var nextData:Array;
 		
 		public function InstructionExector(functionProvider:FunctionProvider)
 		{
 			regOpHandler(OpCode.CALL, __onCall);
 			regOpHandler(OpCode.PUSH, __onPush);
 			regOpHandler(OpCode.JUMP, __onJump);
-			regOpHandler(OpCode.JUMP_IF_TRUE, __onJumpIfTrue);
 			regOpHandler(OpCode.JUMP_IF_FALSE, __onJumpIfFalse);
 			regOpHandler(OpCode.INVOKE, __onInvoke);
 			regOpHandler(OpCode.RETURN, __onReturn);
@@ -46,6 +46,7 @@ package blockly.runtime
 		public function execute(instruction:Array, nextInstruction:Array):void
 		{
 			nextOp = nextInstruction && nextInstruction[0];
+			nextData = nextInstruction;
 			var handler:Function = instruction[0];
 			handler.apply(null, instruction);
 		}
@@ -79,22 +80,16 @@ package blockly.runtime
 			else if(count == 0) thread.suspend();
 		}
 		
-		private function __onJumpIfTrue(op:Object, count:int):void
-		{
-			var thread:Thread = Thread.Current;
-			onJumpIfFalseImpl(thread, count, !thread.pop());
-		}
-		
 		private function __onJumpIfFalse(op:Object, count:int):void
 		{
 			var thread:Thread = Thread.Current;
-			onJumpIfFalseImpl(thread, count, thread.pop());
-		}
-		
-		private function onJumpIfFalseImpl(thread:Thread, count:int, condition:Boolean):void
-		{
+			var condition:Boolean = thread.pop();
 			if(condition){
-				++thread.ip;
+				if(nextOp == __onJump){
+					thread.ip += 1 + nextData[1];
+				}else{
+					++thread.ip;
+				}
 			}else{
 				thread.ip += count;
 				if(count < 0){
