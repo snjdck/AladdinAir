@@ -80,6 +80,7 @@ package blockly.runtime
 			runFlag = 0;
 			_finishFlag = _interruptFlag = false;
 			valueStack.length = ip = 0;
+			invokeStack.length = 0;
 			sp = -1;
 			context = createContext();
 			resume();
