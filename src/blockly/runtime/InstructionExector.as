@@ -11,6 +11,8 @@ package blockly.runtime
 		private const opDict:Object = {};
 		private const argList:Array = [];
 		
+		private var nextOp:Object;
+		
 		public function InstructionExector(functionProvider:FunctionProvider)
 		{
 			regOpHandler(OpCode.CALL, __onCall);
@@ -41,20 +43,21 @@ package blockly.runtime
 			}
 		}
 		
-		public function execute(instruction:Array):void
+		public function execute(instruction:Array, nextInstruction:Array):void
 		{
+			nextOp = nextInstruction && nextInstruction[0];
 			var handler:Function = instruction[0];
 			handler.apply(null, instruction);
 		}
 		
-		private function __onCall(op:Object, method:String, argCount:int, retCount:int, params:FunctionParams=null):void
+		private function __onCall(op:Object, method:String, argCount:int, retCount:int, params:Array=null):void
 		{
 			var thread:Thread = Thread.Current;
 			getArgList(thread, argCount);
 			if(profiler != null){
 				profiler.begin(method);
 			}
-			functionProvider.execute(thread, method, (params ? params.getArgs(argList) : argList), retCount);
+			functionProvider.execute(thread, method, getParamList(params), retCount);
 			if(profiler != null){
 				profiler.end(method);
 			}
@@ -113,21 +116,33 @@ package blockly.runtime
 			}
 		}
 		
-		private function __onInvoke(op:Object, argCount:int, retCount:int, params:FunctionParams=null):void
+		private function __onInvoke(op:Object, argCount:int, retCount:int, params:Array=null):void
 		{
 			var thread:Thread = Thread.Current;
 			getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
-			thread.pushScope(funcRef.createScope(params ? params.getArgs(argList) : argList));
-			if(funcRef.isRecursiveInvoke()){
+			var scope:FunctionScope = funcRef.createScope(getParamList(params));
+			scope.apply(thread);
+			if(thread.isRecursiveInvoke(funcRef)){
 				thread.yield(false);
+			}
+			if(retCount == 0 && nextOp == __onReturn){
+				thread.overrideScope(scope);
+			}else{
+				thread.pushScope(scope);
 			}
 		}
 		
 		private function __onReturn(op:Object):void
 		{
 			var thread:Thread = Thread.Current;
-			thread.popScope(false);
+			var scope:FunctionScope = thread.popScope();
+			scope.defineAddress = scope.finishAddress;
+			scope.revert(thread);
+			if(scope.prevScope != null){
+				scope.prevScope.nextScope = null;
+				scope.prevScope = null;
+			}
 		}
 		
 		private function __onNewVar(op:Object, varName:String):void
@@ -166,10 +181,25 @@ package blockly.runtime
 				argList[argCount] = thread.pop();
 		}
 		
+		private function getParamList(info:Array):Array
+		{
+			if(info == null){
+				return argList;
+			}
+			var paramList:Array = info[0];
+			var indexList:Array = info[1];
+			for(var i:int=indexList.length-1; i>=0; --i){
+				paramList[indexList[i]] = argList[i];
+			}
+			return paramList;
+		}
+		
 		private function __onYield(op:Object):void
 		{
 			var thread:Thread = Thread.Current;
-			thread.popScope(true);
+			var scope:FunctionScope = thread.popScope();
+			scope.defineAddress = thread.ip;
+			scope.revert(thread);
 		}
 		
 		private function __onYieldFrom(op:Object):void
@@ -208,7 +238,9 @@ package blockly.runtime
 			}else if(scope.isFinish()){
 				++thread.ip;
 			}else{
-				thread.pushScope(scope.getFinalScope());
+				scope = scope.getFinalScope();
+				scope.apply(thread);
+				thread.pushScope(scope);
 			}
 		}
 	}

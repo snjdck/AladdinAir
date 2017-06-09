@@ -89,7 +89,7 @@ package blockly.runtime
 			}
 			code = codeList[fromIndex];
 			code[code.length-2] -= foundCount;
-			code[code.length] = new FunctionParams(paramList, indexList);
+			code[code.length] = [paramList, indexList];
 		}
 	}
 }

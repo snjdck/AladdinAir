@@ -15,13 +15,15 @@ package blockly.runtime
 		private var globalContext:IScriptContext;
 		internal var context:IScriptContext;
 		
-		private var codeList:Array;
+		internal var codeList:Array;
 		private var virtualMachine:VirtualMachine;
 		
 		internal var ip:int;
 		private var sc:int;
 		private const valueStack:Vector.<Object> = new Vector.<Object>();
 		private var sp:int = -1;
+		
+		private const invokeStack:Vector.<FunctionScope> = new Vector.<FunctionScope>();
 		
 		private var _isSuspend:Boolean;
 		public var suspendUpdater:Object;
@@ -87,7 +89,7 @@ package blockly.runtime
 		internal function execNextCode(instructionExcetor:InstructionExector):void
 		{
 			if(ip < codeList.length){
-				instructionExcetor.execute(codeList[ip]);
+				instructionExcetor.execute(codeList[ip], codeList[ip+1]);
 			}else{
 				_finishFlag = true;
 			}
@@ -167,31 +169,34 @@ package blockly.runtime
 			}
 		}
 		
-		internal function pushScope(scope:FunctionScope):void
+		internal function isRecursiveInvoke(funcRef:FunctionObject):Boolean
 		{
-			push(scope);
-			scope.prevCodeList = codeList;
-			scope.prevContext = context;
-			scope.returnAddress = ip;
-			codeList = scope.nextCodeList;
-			context = scope.nextContext;
-			scope.funcRef.invokeBegin(this);
-			ip = scope.defineAddress + 1;
+			for each(var scope:FunctionScope in invokeStack){
+				do{
+					if(scope.funcRef == funcRef){
+						return true;
+					}
+					scope = scope.tailRecursion;
+				}while(scope != null);
+			}
+			return false;
 		}
 		
-		internal function popScope(needResume:Boolean):void
+		internal function overrideScope(scope:FunctionScope):void
 		{
-			var scope:FunctionScope = pop();
-			scope.defineAddress = needResume ? ip : scope.finishAddress;
-			codeList = scope.prevCodeList;
-			context = scope.prevContext;
-			scope.funcRef.invokeEnd(this);
-			ip = scope.returnAddress + 1;
-			
-			if(!needResume && scope.prevScope != null){
-				scope.prevScope.nextScope = null;
-				scope.prevScope = null;
-			}
+			var index:int = invokeStack.length - 1;
+			scope.join(invokeStack[index]);
+			invokeStack[index] = scope;
+		}
+		
+		internal function pushScope(scope:FunctionScope):void
+		{
+			invokeStack.push(scope);
+		}
+		
+		internal function popScope():FunctionScope
+		{
+			return invokeStack.pop();
 		}
 		
 		public function clone():Thread
