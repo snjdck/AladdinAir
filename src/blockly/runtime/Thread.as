@@ -173,12 +173,9 @@ package blockly.runtime
 		internal function isRecursiveInvoke(funcRef:FunctionObject):Boolean
 		{
 			for each(var scope:FunctionScope in invokeStack){
-				do{
-					if(scope.funcRef == funcRef){
-						return true;
-					}
-					scope = scope.tailRecursion;
-				}while(scope != null);
+				if(scope.hasInvoked(funcRef)){
+					return true;
+				}
 			}
 			return false;
 		}

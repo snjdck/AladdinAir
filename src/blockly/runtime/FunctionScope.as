@@ -7,7 +7,7 @@ package blockly.runtime
 		internal var prevScope:FunctionScope;
 		internal var nextScope:FunctionScope;
 		
-		internal var tailRecursion:FunctionScope;
+		private var tailRecursion:FunctionScope;
 		
 		internal var prevCodeList:Array;
 		internal var nextCodeList:Array;
@@ -20,7 +20,7 @@ package blockly.runtime
 		internal var ignoreYieldFlag:Boolean;
 		internal var prevRunFlag:int;
 		
-		internal var funcRef:FunctionObject;
+		private var funcRef:FunctionObject;
 		
 		public function FunctionScope(funcRef:FunctionObject)
 		{
@@ -54,7 +54,7 @@ package blockly.runtime
 			tailRecursion = other;
 		}
 		
-		internal function apply(thread:Thread):void
+		internal function doInvoke(thread:Thread):void
 		{
 			prevCodeList = thread.codeList;
 			prevContext = thread.context;
@@ -69,12 +69,23 @@ package blockly.runtime
 			}
 		}
 		
-		internal function revert(thread:Thread):void
+		internal function doReturn(thread:Thread):void
 		{
 			thread.codeList = prevCodeList;
 			thread.context = prevContext;
 			thread.runFlag = prevRunFlag;
 			thread.ip = returnAddress + 1;
+		}
+		
+		internal function hasInvoked(funcRef:FunctionObject):Boolean
+		{
+			var scope:FunctionScope = this;
+			do{
+				if(scope.funcRef == funcRef)
+					return true;
+				scope = scope.tailRecursion;
+			}while(scope != null);
+			return false;
 		}
 	}
 }

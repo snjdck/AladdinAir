@@ -83,19 +83,13 @@ package blockly.runtime
 		private function __onJumpIfFalse(op:Object, count:int):void
 		{
 			var thread:Thread = Thread.Current;
-			var condition:Boolean = thread.pop();
-			if(condition){
-				if(nextOp == __onJump){
-					thread.ip += 1 + nextData[1];
-				}else{
-					++thread.ip;
-				}
-			}else{
-				thread.ip += count;
-				if(count < 0){
-					thread.yield(false);
-				}
+			if(thread.pop()){
+				count = (nextOp == __onJump) ? (nextData[1] + 1) : 1;
 			}
+			if(count < 0){
+				thread.yield(false);
+			}
+			thread.ip += count;
 		}
 		
 		private function __onJumpIfNotPositive(op:Object, count:int):void
@@ -117,7 +111,7 @@ package blockly.runtime
 			getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
 			var scope:FunctionScope = funcRef.createScope(getParamList(params));
-			scope.apply(thread);
+			scope.doInvoke(thread);
 			if(thread.isRecursiveInvoke(funcRef)){
 				thread.yield(false);
 			}
@@ -133,7 +127,7 @@ package blockly.runtime
 			var thread:Thread = Thread.Current;
 			var scope:FunctionScope = thread.popScope();
 			scope.defineAddress = scope.finishAddress;
-			scope.revert(thread);
+			scope.doReturn(thread);
 			if(scope.prevScope != null){
 				scope.prevScope.nextScope = null;
 				scope.prevScope = null;
@@ -194,7 +188,7 @@ package blockly.runtime
 			var thread:Thread = Thread.Current;
 			var scope:FunctionScope = thread.popScope();
 			scope.defineAddress = thread.ip;
-			scope.revert(thread);
+			scope.doReturn(thread);
 		}
 		
 		private function __onYieldFrom(op:Object):void
@@ -234,7 +228,7 @@ package blockly.runtime
 				++thread.ip;
 			}else{
 				scope = scope.getFinalScope();
-				scope.apply(thread);
+				scope.doInvoke(thread);
 				thread.pushScope(scope);
 			}
 		}
