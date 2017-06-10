@@ -38,5 +38,22 @@ package blockly.runtime
 		{
 			trace("interpreter invoke method:", name, argList, retCount);
 		}
+		
+		static public function CallFunction(thread:Thread, handler:Function, valueList:Array, hasValue:Boolean):void
+		{
+			var value:* = handler.apply(null, valueList);
+			var isAsync:Boolean = value is Function;
+			if(isAsync){
+				thread.suspend();
+				thread.requestCheckStack(hasValue ? 1 : 0);
+				value(function(result:*=null):void{
+					if(hasValue)
+						thread.push(result);
+					thread.resume();
+				});
+			}else if(hasValue){
+				thread.push(value);
+			}
+		}
 	}
 }
