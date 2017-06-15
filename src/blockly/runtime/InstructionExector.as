@@ -28,6 +28,11 @@ package blockly.runtime
 			regOpHandler(OpCode.SET_VAR, __onSetVar);
 			regOpHandler(OpCode.NEW_FUNCTION, __onNewFunction);
 			
+			regOpHandler(OpCode.COROUTINE_NEW, __onCoroutineNew);
+			regOpHandler(OpCode.COROUTINE_RESUME, __onCoroutineResume);
+			regOpHandler(OpCode.YIELD, __onYield);
+			regOpHandler(OpCode.YIELD_FROM, __onYieldFrom);
+			
 			this.functionProvider = functionProvider;
 		}
 		
@@ -38,16 +43,18 @@ package blockly.runtime
 		
 		public function optimize(codeList:Array):void
 		{
+			/*
 			for each(var code:Array in codeList){
 				code[0] = opDict[code[0]];
 			}
+			//*/
 		}
 		
 		public function execute(instruction:Array, nextInstruction:Array):void
 		{
 			nextOp = nextInstruction && nextInstruction[0];
 			nextData = nextInstruction;
-			var handler:Function = instruction[0];
+			var handler:Function = opDict[instruction[0]];
 			handler.apply(null, instruction);
 		}
 		
@@ -110,28 +117,23 @@ package blockly.runtime
 			var thread:Thread = Thread.Current;
 			getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
-			var scope:FunctionScope = funcRef.createScope(getParamList(params));
+			var scope:FunctionScope = new FunctionScope(funcRef);
+			funcRef.initScope(scope, getParamList(params));
 			scope.doInvoke(thread);
 			if(thread.isRecursiveInvoke(funcRef)){
 				thread.yield(false);
 			}
 			if(retCount == 0 && nextOp == __onReturn){
-				thread.overrideScope(scope);
-			}else{
-				thread.pushScope(scope);
+				scope.join(thread.popScope());
 			}
+			thread.pushScope(scope);
 		}
 		
 		private function __onReturn(op:Object):void
 		{
 			var thread:Thread = Thread.Current;
 			var scope:FunctionScope = thread.popScope();
-			scope.defineAddress = scope.finishAddress;
-			scope.doReturn(thread);
-			if(scope.prevScope != null){
-				scope.prevScope.nextScope = null;
-				scope.prevScope = null;
-			}
+			scope.onReturn(thread);
 		}
 		
 		private function __onNewVar(op:Object, varName:String):void
@@ -183,54 +185,45 @@ package blockly.runtime
 			return paramList;
 		}
 		
-		private function __onYield(op:Object):void
-		{
-			var thread:Thread = Thread.Current;
-			var scope:FunctionScope = thread.popScope();
-			scope.defineAddress = thread.ip;
-			scope.doReturn(thread);
-		}
-		
-		private function __onYieldFrom(op:Object):void
-		{
-			var thread:Thread = Thread.Current;
-			var subScope:FunctionScope = thread.pop();
-			var scope:FunctionScope = thread.pop();
-			
-			subScope.prevScope = scope;
-			scope.nextScope = subScope;
-			
-			thread.push(subScope);
-			
-			subScope.prevContext = scope.prevContext;
-			subScope.returnAddress = scope.returnAddress;
-			
-			thread.context = subScope.nextContext;
-			thread.ip = subScope.defineAddress + 1;
-		}
-		
 		private function __onCoroutineNew(op:Object, argCount:int):void
 		{
 			var thread:Thread = Thread.Current;
 			getArgList(thread, argCount);
 			var funcRef:FunctionObject = thread.pop();
-			thread.push(funcRef.createScope(argList));
+			var scope:Coroutine = new Coroutine(funcRef);
+			funcRef.initScope(scope, argList);
+			thread.push(scope);
 			++thread.ip;
+		}
+		
+		private function __onYield(op:Object):void
+		{
+			var thread:Thread = Thread.Current;
+			var scope:Coroutine = thread.popScope();
+			scope.onYield(thread);
 		}
 		
 		private function __onCoroutineResume(op:Object):void
 		{
 			var thread:Thread = Thread.Current;
-			var scope:FunctionScope = thread.pop();
-			if(scope.isExecuting(thread)){
-				thread.interrupt();
-			}else if(scope.isFinish()){
+			var scope:Coroutine = thread.pop();
+			if(scope.isFinish()){
 				++thread.ip;
 			}else{
-				scope = scope.getFinalScope();
+				scope = scope.getTail();
 				scope.doInvoke(thread);
 				thread.pushScope(scope);
 			}
+		}
+		
+		private function __onYieldFrom(op:Object):void
+		{
+			var thread:Thread = Thread.Current;
+			var scope:Coroutine = thread.popScope();
+			scope.yieldFrom(thread.pop());
+			scope = scope.getTail();
+			scope.doInvoke(thread);
+			thread.pushScope(scope);
 		}
 	}
 }

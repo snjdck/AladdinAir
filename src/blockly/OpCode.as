@@ -28,6 +28,7 @@ package blockly
 		static public const JUMP_IF_NOT_POSITIVE:String = "jumpIfNotPositive";
 		
 		static public const YIELD:String = "yield";
+		static public const YIELD_FROM:String = "yieldFrom";
 		static public const COROUTINE_NEW:String = "coroutineNew";
 		static public const COROUTINE_RESUME:String = "coroutineResume";
 	}

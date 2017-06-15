@@ -2,25 +2,23 @@ package blockly.runtime
 {
 	internal class Coroutine extends FunctionScope
 	{
-		internal var prev:Coroutine;
-		internal var next:Coroutine;
+		private var prev:Coroutine;
+		private var next:Coroutine;
 		
 		public function Coroutine(funcRef:FunctionObject)
 		{
 			super(funcRef);
 		}
 		
-		internal function isExecuting(thread:Thread):Boolean
+		internal function getHead():Coroutine
 		{
-			return resumeAddress < thread.ip && thread.ip < finishAddress;
+			var scope:Coroutine = this;
+			while(scope.prev != null)
+				scope = scope.prev;
+			return scope;
 		}
 		
-		internal function isFinish():Boolean
-		{
-			return resumeAddress >= finishAddress;
-		}
-		
-		internal function getFinalCoroutine():Coroutine
+		internal function getTail():Coroutine
 		{
 			var scope:Coroutine = this;
 			while(scope.next != null)
@@ -28,10 +26,21 @@ package blockly.runtime
 			return scope;
 		}
 		
+		internal function yieldFrom(other:Coroutine):void
+		{
+			other.prev = this;
+			next = other;
+		}
+		
+		internal function isFinish():Boolean
+		{
+			return resumeAddress >= finishAddress;
+		}
+		
 		internal function onYield(thread:Thread):void
 		{
 			resumeAddress = thread.ip;
-			doReturn(thread);
+			getHead().doReturn(thread);
 		}
 		
 		override internal function onReturn(thread:Thread):void
@@ -40,7 +49,6 @@ package blockly.runtime
 			doReturn(thread);
 			
 			if(prev != null){
-				thread.popScope();
 				thread.pushScope(prev);
 				prev.next = null;
 				prev = null;
