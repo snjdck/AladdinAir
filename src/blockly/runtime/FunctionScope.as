@@ -4,16 +4,13 @@ package blockly.runtime
 
 	internal class FunctionScope
 	{
-		internal var prevScope:FunctionScope;
-		internal var nextScope:FunctionScope;
-		
 		private var tailRecursion:FunctionScope;
 		
 		internal var prevCodeList:Array;
 		internal var nextCodeList:Array;
 		internal var prevContext:IScriptContext;
 		internal var nextContext:IScriptContext;
-		internal var defineAddress:int;
+		internal var resumeAddress:int;
 		internal var finishAddress:int;
 		internal var returnAddress:int;
 		
@@ -27,31 +24,13 @@ package blockly.runtime
 			this.funcRef = funcRef;
 		}
 		
-		internal function getFinalScope():FunctionScope
-		{
-			var scope:FunctionScope = this;
-			while(scope.nextScope != null)
-				scope = scope.nextScope;
-			return scope;
-		}
-		
-		internal function isExecuting(thread:Thread):Boolean
-		{
-			return defineAddress < thread.ip && thread.ip < finishAddress;
-		}
-		
-		internal function isFinish():Boolean
-		{
-			return defineAddress >= finishAddress;
-		}
-		
 		internal function join(other:FunctionScope):void
 		{
+			tailRecursion = other;
 			prevCodeList = other.prevCodeList;
 			prevContext = other.prevContext;
 			prevRunFlag = other.prevRunFlag;
 			returnAddress = other.returnAddress;
-			tailRecursion = other;
 		}
 		
 		internal function doInvoke(thread:Thread):void
@@ -63,13 +42,13 @@ package blockly.runtime
 			
 			thread.codeList = nextCodeList;
 			thread.context = nextContext;
-			thread.ip = defineAddress + 1;
+			thread.ip = resumeAddress + 1;
 			if(ignoreYieldFlag){
 				++thread.runFlag;
 			}
 		}
 		
-		internal function doReturn(thread:Thread):void
+		protected function doReturn(thread:Thread):void
 		{
 			thread.codeList = prevCodeList;
 			thread.context = prevContext;
@@ -86,6 +65,11 @@ package blockly.runtime
 				scope = scope.tailRecursion;
 			}while(scope != null);
 			return false;
+		}
+		
+		internal function onReturn(thread:Thread):void
+		{
+			doReturn(thread);
 		}
 	}
 }

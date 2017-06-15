@@ -21,18 +21,21 @@ package blockly.runtime
 			this.ignoreYieldFlag = userData[0];
 		}
 		
-		internal function createScope(valueList:Array):FunctionScope
+		internal function createContext(valueList:Array):IScriptContext
 		{
 			var newContext:IScriptContext = context.createChild();
 			for(var i:int=argList.length-1; i>=0; --i)
 				newContext.newKey(argList[i], valueList[i]);
-			var scope:FunctionScope = new FunctionScope(this);
+			return newContext;
+		}
+		
+		internal function initScope(scope:FunctionScope, valueList:Array):void
+		{
 			scope.nextCodeList = codeList;
-			scope.nextContext = newContext;
+			scope.nextContext = createContext(valueList);
 			scope.ignoreYieldFlag = ignoreYieldFlag;
-			scope.defineAddress = addressBegin;
+			scope.resumeAddress = addressBegin;
 			scope.finishAddress = addressEnd;
-			return scope;
 		}
 	}
 }

@@ -179,20 +179,20 @@ package blockly.runtime
 			}
 			return false;
 		}
-		
+		/*
 		internal function overrideScope(scope:FunctionScope):void
 		{
 			var index:int = invokeStack.length - 1;
 			scope.join(invokeStack[index]);
 			invokeStack[index] = scope;
 		}
-		
+		//*/
 		internal function pushScope(scope:FunctionScope):void
 		{
 			invokeStack.push(scope);
 		}
 		
-		internal function popScope():FunctionScope
+		internal function popScope():*
 		{
 			return invokeStack.pop();
 		}
