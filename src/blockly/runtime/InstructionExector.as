@@ -210,9 +210,9 @@ package blockly.runtime
 			if(scope.isFinish()){
 				++thread.ip;
 			}else{
-				scope = scope.getTail();
-				scope.doInvoke(thread);
 				thread.pushScope(scope);
+				scope.snapshot(thread);
+				scope.innermost.doInvoke(thread, false);
 			}
 		}
 		
@@ -220,10 +220,9 @@ package blockly.runtime
 		{
 			var thread:Thread = Thread.Current;
 			var scope:Coroutine = thread.popScope();
-			scope.yieldFrom(thread.pop());
-			scope = scope.getTail();
-			scope.doInvoke(thread);
 			thread.pushScope(scope);
+			scope.innermost.yieldFrom = thread.pop();
+			scope.innermost.doInvoke(thread);
 		}
 	}
 }

@@ -33,13 +33,19 @@ package blockly.runtime
 			returnAddress = other.returnAddress;
 		}
 		
-		internal function doInvoke(thread:Thread):void
+		internal function snapshot(thread:Thread):void
 		{
 			prevCodeList = thread.codeList;
 			prevContext = thread.context;
 			prevRunFlag = thread.runFlag;
 			returnAddress = thread.ip;
-			
+		}
+		
+		internal function doInvoke(thread:Thread, snapshotFlag:Boolean=true):void
+		{
+			if(snapshotFlag){
+				snapshot(thread);
+			}
 			thread.codeList = nextCodeList;
 			thread.context = nextContext;
 			thread.ip = resumeAddress + 1;
