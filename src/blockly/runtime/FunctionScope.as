@@ -17,6 +17,8 @@ package blockly.runtime
 		internal var ignoreYieldFlag:Boolean;
 		internal var prevRunFlag:int;
 		
+		internal var retCount:int;
+		
 		private var funcRef:FunctionObject;
 		
 		public function FunctionScope(funcRef:FunctionObject)

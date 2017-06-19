@@ -27,6 +27,11 @@ package blockly
 			return [OpCode.INVOKE, argCount, retCount];
 		}
 		
+		static public function Return(retCount:int):Array
+		{
+			return [OpCode.RETURN, retCount];
+		}
+		
 		static public function GetVar(name:String):Array
 		{
 			return [OpCode.GET_VAR, name];

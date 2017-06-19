@@ -57,7 +57,7 @@ package blockly.runtime
 						append(result, genInvokeCode(block));
 						break;
 					case "return":
-						result.push([OpCode.RETURN]);
+						result.push(OpFactory.Return(0));
 						break;
 					case "newVar":
 						append(result, genExpressionCode(block["value"]));
@@ -240,7 +240,7 @@ package blockly.runtime
 		private function genNewFunctionCode(block:Object):Array
 		{
 			var result:Array = genStatementCode(block["code"]);
-			result.push([OpCode.RETURN]);
+			result.push(OpFactory.Return(0));
 			result.unshift(OpFactory.NewFunction(result.length+1, block["argList"], block["userData"]));
 			return result;
 		}

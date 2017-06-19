@@ -127,13 +127,26 @@ package blockly.runtime
 				scope.join(thread.popScope());
 			}
 			thread.pushScope(scope);
+			scope.retCount = retCount;
 		}
 		
-		private function __onReturn(op:Object):void
+		private function __onReturn(op:Object, retCount:int):void
 		{
 			var thread:Thread = Thread.Current;
 			var scope:FunctionScope = thread.popScope();
 			scope.onReturn(thread);
+			if(retCount == scope.retCount){
+				return;
+			}
+			if(retCount > scope.retCount){
+				while(retCount-- != scope.retCount){
+					thread.pop();
+				}
+			}else{
+				while(retCount++ != scope.retCount){
+					thread.push(null);
+				}
+			}
 		}
 		
 		private function __onNewVar(op:Object, varName:String):void
