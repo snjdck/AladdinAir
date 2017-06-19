@@ -4,19 +4,33 @@ package blockly.runtime
 
 	internal class DeadCodeCleaner
 	{
+		private const codeUsage:Vector.<Boolean> = new Vector.<Boolean>();
+		
 		public function DeadCodeCleaner(){}
 		
 		public function clean(codeList:Array):void
 		{
-			var codeUsage:Vector.<Boolean> = new Vector.<Boolean>(codeList.length, true);
-			calcCodeUsage(codeList, codeUsage, 0);
-			markJump1Codes(codeList, codeUsage);
-			var deadCodeInfo:Vector.<int> = calcDeadCodeInfo(codeUsage);
-			adjustJumpCode(codeList, deadCodeInfo, codeUsage);
-			removeDeadCode(codeList, deadCodeInfo);
+			initCodeUsage(codeList);
+			calcCodeUsage(codeList, 0);
+			markJump1Codes(codeList);
+			adjustJumpCode(codeList);
+			removeDeadCode(codeList);
 		}
 		
-		private function calcCodeUsage(codeList:Array, codeUsage:Vector.<Boolean>, fromIndex:int):void
+		private function initCodeUsage(codeList:Array):void
+		{
+			var n:int = Math.min(codeList.length, codeUsage.length);
+			if(codeUsage.length < codeList.length){
+				codeUsage.length = codeList.length;
+			}
+			while(n-- > 0){
+				if(codeUsage[n]){
+					codeUsage[n] = false;
+				}
+			}
+		}
+		
+		private function calcCodeUsage(codeList:Array, fromIndex:int):void
 		{
 			var index:int = fromIndex;
 			var totalCount:int = codeList.length;
@@ -30,7 +44,7 @@ package blockly.runtime
 					case OpCode.NEW_FUNCTION:
 					case OpCode.JUMP_IF_FALSE:
 					case OpCode.JUMP_IF_NOT_POSITIVE:
-						calcCodeUsage(codeList, codeUsage, index+1);
+						calcCodeUsage(codeList, index+1);
 						//fallthrough
 					case OpCode.JUMP:
 						index += code[1];
@@ -43,26 +57,10 @@ package blockly.runtime
 			}
 		}
 		
-		private function calcDeadCodeInfo(codeUsage:Vector.<Boolean>):Vector.<int>
-		{
-			var deadCodeInfo:Vector.<int> = new Vector.<int>();
-			var isInDeadCode:Boolean;
-			for(var i:int=0, n:int=codeUsage.length; i<n; ++i){
-				if(codeUsage[i] == isInDeadCode){
-					isInDeadCode = !isInDeadCode;
-					deadCodeInfo.push(i);
-				}
-			}
-			if(isInDeadCode){
-				deadCodeInfo.push(n);
-			}
-			return deadCodeInfo;
-		}
-		
-		private function markJump1Codes(codeList:Array, codeUsage:Vector.<Boolean>):void
+		private function markJump1Codes(codeList:Array):void
 		{
 			loop:
-			for(var i:int=codeUsage.length-1; i>=0; --i){
+			for(var i:int=codeList.length-1; i>=0; --i){
 				if(!codeUsage[i]){
 					continue;
 				}
@@ -80,32 +78,27 @@ package blockly.runtime
 			}
 		}
 		
-		private function removeDeadCode(codeList:Array, deadCodeInfo:Vector.<int>):void
+		private function removeDeadCode(codeList:Array):void
 		{
-			for(var i:int=deadCodeInfo.length-1; i>0; i-=2){
-				var begin:int = deadCodeInfo[i-1];
-				var end:int = deadCodeInfo[i];
-				codeList.splice(begin, end-begin);
+			var isInDeadCode:Boolean = false;
+			var index:int;
+			for(var i:int=codeList.length-1; i>=0; --i){
+				if(codeUsage[i] != isInDeadCode){
+					continue;
+				}
+				isInDeadCode = !isInDeadCode;
+				if(isInDeadCode){
+					index = i;
+				}else{
+					codeList.splice(i+1, index - i);
+				}
+			}
+			if(isInDeadCode){
+				codeList.splice(0, index + 1);
 			}
 		}
 		
-		private function calcSpace(deadCodeInfo:Vector.<int>, fromIndex:int, toIndex:int):int
-		{
-			var result:int = 0;
-			for(var i:int=deadCodeInfo.length-1; i>0; i-=2){
-				var begin:int = deadCodeInfo[i-1];
-				if(begin < fromIndex){
-					break;
-				}
-				var end:int = deadCodeInfo[i];
-				if(end <= toIndex){
-					result += end - begin;
-				}
-			}
-			return result;
-		}
-		
-		private function adjustJumpCode(codeList:Array, deadCodeInfo:Vector.<int>, codeUsage:Vector.<Boolean>):void
+		private function adjustJumpCode(codeList:Array):void
 		{
 			for(var i:int=codeList.length-1; i>=0; --i){
 				if(!codeUsage[i]){
@@ -123,11 +116,22 @@ package blockly.runtime
 				}
 				var jumpCount:int = code[1];
 				if(jumpCount > 0){
-					code[1] -= calcSpace(deadCodeInfo, i, i+jumpCount);
+					code[1] -= calcSpace(i, i+jumpCount);
 				}else if(jumpCount < 0){
-					code[1] += calcSpace(deadCodeInfo, i+jumpCount, i);
+					code[1] += calcSpace(i+jumpCount, i);
 				}
 			}
+		}
+		
+		private function calcSpace(fromIndex:int, toIndex:int):int
+		{
+			var result:int = 0;
+			for(var i:int=fromIndex+1; i<toIndex; ++i){
+				if(!codeUsage[i]){
+					++result;
+				}
+			}
+			return result;
 		}
 	}
 }
