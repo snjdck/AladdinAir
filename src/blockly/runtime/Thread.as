@@ -187,6 +187,11 @@ package blockly.runtime
 			invokeStack[index] = scope;
 		}
 		//*/
+		internal function peekScope():*
+		{
+			return invokeStack[invokeStack.length-1];
+		}
+		
 		internal function pushScope(scope:FunctionScope):void
 		{
 			invokeStack.push(scope);

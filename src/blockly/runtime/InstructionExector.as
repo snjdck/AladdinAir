@@ -43,7 +43,7 @@ package blockly.runtime
 		
 		public function optimize(codeList:Array):void
 		{
-			/*
+			//*
 			for each(var code:Array in codeList){
 				code[0] = opDict[code[0]];
 			}
@@ -54,7 +54,8 @@ package blockly.runtime
 		{
 			nextOp = nextInstruction && nextInstruction[0];
 			nextData = nextInstruction;
-			var handler:Function = opDict[instruction[0]];
+//			var handler:Function = opDict[instruction[0]];
+			var handler:Function = instruction[0];
 			handler.apply(null, instruction);
 		}
 		
@@ -123,8 +124,11 @@ package blockly.runtime
 			if(thread.isRecursiveInvoke(funcRef)){
 				thread.yield(false);
 			}
-			if(retCount == 0 && nextOp == __onReturn){
-				scope.join(thread.popScope());
+			if(nextOp == __onReturn && retCount == nextData[1]){
+				var prevScope:FunctionScope = thread.peekScope();
+				if(retCount == prevScope.retCount){
+					scope.join(thread.popScope());
+				}
 			}
 			thread.pushScope(scope);
 			scope.retCount = retCount;
@@ -232,8 +236,7 @@ package blockly.runtime
 		private function __onYieldFrom(op:Object):void
 		{
 			var thread:Thread = Thread.Current;
-			var scope:Coroutine = thread.popScope();
-			thread.pushScope(scope);
+			var scope:Coroutine = thread.peekScope();
 			scope.innermost.yieldFrom = thread.pop();
 			scope.innermost.doInvoke(thread);
 		}
