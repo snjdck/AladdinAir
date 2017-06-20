@@ -213,7 +213,7 @@ package blockly.runtime
 			++thread.ip;
 		}
 		
-		private function __onYield(op:Object):void
+		private function __onYield(op:Object, retCount:int):void
 		{
 			var thread:Thread = Thread.Current;
 			var scope:Coroutine = thread.popScope();
