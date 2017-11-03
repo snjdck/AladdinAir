@@ -6,10 +6,10 @@ function handleDataEvt(target, handler){
 	target.on("data", data => {
 		buffer += data.toString("utf8").replace("\x00", "");
 		var lines = buffer.split("\n");
-		while(lines.length > 1){
+		buffer = lines.pop();
+		while(lines.length > 0){
 			handler(lines.shift().trim());
 		}
-		buffer = lines[0];
 	});
 }
 
@@ -42,7 +42,7 @@ function reply(id, key){
 
 async function queryPortList(){
 	var list = await SerialPort.list();
-	list = list.map(item => item.comName);
+	list = list.filter(item => /^USB\\/.test(item.pnpId)).map(item => item.comName);
 	reply("query_list", list);
 }
 
