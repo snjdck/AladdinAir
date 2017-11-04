@@ -44,10 +44,7 @@ function upload(port, payload){
 			var addressInfo = Buffer.from([0x55, 0, 0, 0x20]);
 
 			while(address < payload.length){
-				var bytesSend = 0x80;
-				if(address + bytesSend >= payload.length){
-					bytesSend = payload.length - address;
-				}
+				var bytesSend = Math.min(0x80, payload.length - address);
 				addressInfo[1] = (address >> 1) & 0xFF;
 				addressInfo[2] = (address >> 9);
 				await send(this, addressInfo);
@@ -72,8 +69,7 @@ function uploadHex(port, payload){
 		var size = parseInt(line.substr(1, 2), 16);
 		return line.substr(9, 2 * size);
 	}).join("").match(/\w{2}/g).map(item => parseInt(item, 16));
-	payload = Buffer.from(payload);
-	return upload(port, payload);
+	return upload(port, Buffer.from(payload));
 }
 
 function uploadFile(port, file){
