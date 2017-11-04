@@ -4,7 +4,7 @@ const SerialPort = require("serialport");
 function handleDataEvt(target, handler){
 	var buffer = "";
 	target.on("data", data => {
-		buffer += data.toString("utf8").replace("\x00", "");
+		buffer += data.toString("ascii").replace(/\x00/g, "");
 		var lines = buffer.split("\n");
 		buffer = lines.pop();
 		while(lines.length > 0){
