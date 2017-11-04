@@ -64,12 +64,14 @@ function upload(port, payload){
 	});
 }
 
-function uploadHex(port, payload){
-	payload = payload.trim().split(/\s+/).map(line => {
-		var size = parseInt(line.substr(1, 2), 16);
-		return line.substr(9, 2 * size);
-	}).join("").match(/\w{2}/g).map(item => parseInt(item, 16));
-	return upload(port, Buffer.from(payload));
+function uploadHex(port, data){
+	return upload(port, Buffer.from(data.trim()
+		.split(/\s+/)
+		.map(line => line.slice(9, -2))
+		.join("")
+		.match(/\w{2}/g)
+		.map(item => parseInt(item, 16))
+	));
 }
 
 function uploadFile(port, file){
