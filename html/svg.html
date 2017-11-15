@@ -1,0 +1,124 @@
+
+<html>
+<head>
+<title></title>
+</head>
+<body>
+<div id="dock"></div>
+<script type="text/javascript">
+const ns = "http://www.w3.org/2000/svg";
+
+class SvgNode
+{
+	constructor(name){
+		this.element = document.createElementNS(ns, name);
+		this._style = {};
+	}
+
+	setAttribute(key, val){
+		const {element} = this;
+		if(val != null && val !== "")
+			element.setAttribute(key, val);
+		else if(element.hasAttribute(key))
+			element.removeAttribute(key);
+	}
+
+	attr(info){
+		const {element} = this;
+		if(typeof info == "string")
+			return element.getAttribute(info);
+		for(var key in info)
+			this.setAttribute(key, info[key]);
+		return this;
+	}
+
+	style(info){
+		Object.assign(this._style, info);
+		this.setAttribute("style", Object.entries(this._style)
+			.filter(v => v[1] != null)
+			.map(([k, v]) => `${k}: ${v};`)
+			.join("")
+		);
+		return this;
+	}
+
+	on(event, handler){
+		this.element[`on${event}`] = handler && (evt => handler.call(this, evt));
+	}
+
+	off(event){
+		this.on(event);
+	}
+
+	appendChild(child){
+		this.element.appendChild(child.element);
+		return child;
+	}
+
+	createChild(name, attr){
+		return this.appendChild(new SvgNode(name).attr(attr));
+	}
+
+	group(attr){
+		return this.createChild("g", attr);
+	}
+
+	rect(x, y, width, height, rx=0, ry=0){
+		return this.createChild("rect", {x, y, width, height, rx, ry});
+	}
+
+	circle(cx, cy, r){
+		return this.createChild("circle", {cx, cy, r});
+	}
+
+	ellipse(cx, cy, rx, ry){
+		return this.createChild("ellipse", {cx, cy, rx, ry});
+	}
+
+	line(x1, y1, x2, y2){
+		return this.createChild("line", {x1, y1, x2, y2});
+	}
+
+	polyline(points){
+		points = points.map(pt => pt.join(",")).join(" ");
+		return this.createChild("polyline", {points});
+	}
+
+	polygon(points){
+		points = points.map(pt => pt.join(",")).join(" ");
+		return this.createChild("polygon", {points});
+	}
+
+	text(text, x, y){
+		var node = this.createChild("text", {x, y});
+		node.element.appendChild(document.createTextNode(text));
+		return node;
+	}
+}
+
+var svg = new SvgNode("svg").attr({width:500, height:500});
+document.getElementById("dock").appendChild(svg.element);
+
+var a = svg.circle(50, 50, 50).style({fill:"yellow"});
+var b = svg.circle(150, 50, 50).attr({fill:"red"});
+var g = svg.group({transform:"translate(200,200)"})
+g.rect(0, 0, 200, 50, 25, 25);
+var text = g.text("fuck")
+svg.text("hello", 0, 20).attr({fill:"green"});
+a.on("mousedown", function(evt){
+	this.attr({stroke:"blue"});
+	text.element.innerHTML += "ss"
+	this.style({fill:null});
+	this.on("mousemove", evt => {
+		this.attr({cx:evt.x, cy:evt.y})
+	});
+	this.on("mouseup", evt => {
+		this.off("mousemove");
+		this.off("mouseup");
+		this.attr({stroke:null});
+		this.style({fill:"pink"});
+	});
+});
+</script>
+</body>
+</html>
