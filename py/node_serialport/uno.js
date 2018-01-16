@@ -1,4 +1,4 @@
-const SerialPort = require("serialport");
+const SerialPort = require("./SerialPort");
 const fs = require("fs");
 
 function sleep(seconds){
@@ -31,7 +31,7 @@ async function send(target, data){
 
 function upload(port, payload){
 	return new Promise((resolve, reject) => {
-		new SerialPort(port, {baudRate: 115200}, async function(error){
+		new SerialPort(port, {bitrate: 115200}, async function(error){
 			if(error != null){
 				reject(error);
 				return;

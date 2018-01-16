@@ -1,11 +1,13 @@
+"use strict";
 
+const EventEmitter = require("events");
+const {serial, runtime} = chrome;
 
-
-class SerialPort
+class SerialPort extends EventEmitter
 {
 	static list(){
 		return new Promise(resolve => {
-			chrome.serial.getDevices(ports => {
+			serial.getDevices(ports => {
 				resolve(ports
 					.filter(port => /^USB/.test(port.displayName))
 					.map(port => port.path)
@@ -18,29 +20,37 @@ class SerialPort
 		super();
 		this.onData = this.onData.bind(this);
 		this.connectionId = -1;
-		chrome.serial.connect(path, options, info => {
-			this.connectionId = info.connectionId;
-			callback.call(this);
+		serial.connect(path, options, info => {
+			if(info){
+				this.connectionId = info.connectionId;
+				serial.onReceive.addListener(this.onData);
+				callback.call(this);
+			}else{
+				callback.call(this, runtime.lastError.message);
+			}
 		});
-		chrome.serial.onReceive.addListener(this.onData);
 	}
 
 	onData(info){
 		if(info.connectionId != this.connectionId){
 			return;
 		}
-		info.data
+		this.emit("data", Buffer.from(info.data));
 	}
 
 	write(data){
 		if(this.connectionId < 0)
 			return;
-		chrome.serial.send(this.connectionId, data, ()=>{});
+		let offset = data.byteOffset;
+		let length = data.byteLength;
+		serial.send(this.connectionId, data.buffer.slice(offset, offset+length), ()=>{});
 	}
 
 	close(){
-		chrome.serial.disconnect(this.connectionId, () => {
+		serial.disconnect(this.connectionId, () => {
 			this.emit("close");
 		});
 	}
 }
+
+module.exports = SerialPort;
