@@ -31,7 +31,7 @@ async function send(target, data, bytesWait=0){
 	return await waitResponse(target, bytesWait);
 }
 
-function upload(port, payload, uploadProgress=emptyFn, verifyProgress=emptyFn){
+function upload(port, payload, onProgress=()=>{}){
 	return new Promise((resolve, reject) => {
 		new SerialPort(port, {bitrate: 115200}, async function(error){
 			if(error != null){
@@ -41,8 +41,8 @@ function upload(port, payload, uploadProgress=emptyFn, verifyProgress=emptyFn){
 			await sleep(0.1);
 			await send(this, Buffer.from([0x30, 0x20]));
 			await send(this, Buffer.from([0x50, 0x20]));
-			await writeData(this, payload, uploadProgress);
-			let verify = await readData(this, payload, verifyProgress);
+			await writeData(this, payload, v => onProgress(v * 0.5));
+			let verify = await readData(this, payload, v => onProgress(v * 0.5 + 0.5));
 			await send(this, Buffer.from([0x51, 0x20]));
 
 			this.close();
@@ -57,7 +57,6 @@ function upload(port, payload, uploadProgress=emptyFn, verifyProgress=emptyFn){
 }
 
 const addressInfo = Buffer.from([0x55, 0, 0, 0x20]);
-const emptyFn = ()=>{};
 
 async function writeData(target, payload, onProgress){
 	const total = payload.length;
@@ -75,7 +74,6 @@ async function writeData(target, payload, onProgress){
 		]));
 		address += bytesSend;
 	}
-	onProgress(1);
 }
 
 async function readData(target, payload, onProgress){
@@ -92,22 +90,21 @@ async function readData(target, payload, onProgress){
 		address += bytesSend;
 		buffer = Buffer.concat([buffer, data]);
 	}
-	onProgress(1);
 	return payload.compare(buffer, 0, total);
 }
 
-function uploadHex(port, data, uploadProgress, verifyProgress){
+function uploadHex(port, data, onProgress){
 	return upload(port, Buffer.from(data.trim()
 		.split(/\s+/)
 		.map(line => line.slice(9, -2))
 		.join("")
 		.match(/\w{2}/g)
 		.map(item => parseInt(item, 16))
-	), uploadProgress, verifyProgress);
+	), onProgress);
 }
 
-function uploadFile(port, file, uploadProgress, verifyProgress){
-	return uploadHex(port, fs.readFileSync(file, "ascii"), uploadProgress, verifyProgress);
+function uploadFile(port, file, onProgress){
+	return uploadHex(port, fs.readFileSync(file, "ascii"), onProgress);
 }
 
 //[Colon] [Data Size] [Start Address] [Record Type] [Data] [Checksum]
