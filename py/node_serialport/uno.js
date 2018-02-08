@@ -1,26 +1,32 @@
 "use strict";
 
 const SerialPort = require("./SerialPort");
-const fs = require("fs");
 
 function sleep(seconds){
 	return new Promise(resolve => setTimeout(resolve, seconds * 1000));
 }
 
-function waitResponse(target, bytesWait){
+function waitResponse(target, bytesWait=0){
 	return new Promise((resolve, reject) => {
-		let buffer = Buffer.alloc(0);
+		let bufferList = [];
+		let bufferSize = 0;
 		target.on("data", data => {
-			buffer = Buffer.concat([buffer, data]);
-			if(buffer.length < bytesWait + 2){
+			bufferList.push(data);
+			bufferSize += data.length;
+			if(bufferSize < bytesWait + 2){
 				return;
 			}
+			let buffer = Buffer.concat(bufferList, bufferSize);
 			if(buffer[0] != 0x14 || buffer[bytesWait+1] != 0x10){
 				target.close();
 				reject();
 			}else{
 				target.removeAllListeners();
-				resolve(buffer.slice(1, 1+bytesWait));
+				if(bytesWait > 0){
+					resolve(buffer.slice(1, 1+bytesWait));
+				}else{
+					resolve();
+				}
 			}
 		});
 	});
@@ -57,6 +63,8 @@ function upload(port, payload, onProgress=()=>{}){
 }
 
 const addressInfo = Buffer.from([0x55, 0, 0, 0x20]);
+const requestSend =[Buffer.from([0x64, 0x00, 0, 0x46]), null, Buffer.from([0x20])];
+const requestRecv = Buffer.from([0x74, 0x00, 0, 0x46, 0x20]);
 
 async function writeData(target, payload, onProgress){
 	const total = payload.length;
@@ -66,31 +74,29 @@ async function writeData(target, payload, onProgress){
 		let bytesSend = Math.min(0x80, total - address);
 		addressInfo[1] = (address >> 1) & 0xFF;
 		addressInfo[2] = (address >> 9);
+		requestSend[0][2] = bytesSend;
+		requestSend[1] = payload.slice(address, address + bytesSend);
 		await send(target, addressInfo);
-		await send(target, Buffer.concat([
-			Buffer.from([0x64, 0x00, bytesSend, 0x46]),
-			payload.slice(address, address + bytesSend),
-			Buffer.from([0x20])
-		]));
+		await send(target, Buffer.concat(requestSend));
 		address += bytesSend;
 	}
 }
 
 async function readData(target, payload, onProgress){
-	let buffer = Buffer.alloc(0);
+	let bufferList = [];
 	const total = payload.length;
 	let address = 0;
 	while(address < total){
 		onProgress(address / total);
-		let bytesSend = 0x80;
+		let bytesSend = Math.min(0x80, total - address);
 		addressInfo[1] = (address >> 1) & 0xFF;
 		addressInfo[2] = (address >> 9);
+		requestRecv[2] = bytesSend;
 		await send(target, addressInfo);
-		let data = await send(target, Buffer.from([0x74, 0x00, bytesSend, 0x46, 0x20]), bytesSend);
+		bufferList.push(await send(target, requestRecv, bytesSend));
 		address += bytesSend;
-		buffer = Buffer.concat([buffer, data]);
 	}
-	return payload.compare(buffer, 0, total);
+	return payload.compare(Buffer.concat(bufferList));
 }
 
 function uploadHex(port, data, onProgress){
@@ -104,6 +110,7 @@ function uploadHex(port, data, onProgress){
 }
 
 function uploadFile(port, file, onProgress){
+	let fs = require("fs");
 	return uploadHex(port, fs.readFileSync(file, "ascii"), onProgress);
 }
 
